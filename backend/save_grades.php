@@ -1,0 +1,136 @@
+<?php
+require 'db.php';
+header('Content-Type: application/json');
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(["success" => false, "message" => "Method not allowed"]);
+    exit();
+}
+
+$data = json_decode(file_get_contents("php://input"), true);
+
+if (!isset($data['user_id']) || !isset($data['grades']) || !is_array($data['grades'])) {
+    http_response_code(400);
+    echo json_encode(["success" => false, "message" => "Missing fields"]);
+    exit();
+}
+
+$user_id = intval($data['user_id']);
+$grades  = $data['grades']; // Array of { module_id, academic_year, semester, grade, gpv }
+
+// GPV map
+$GPV_MAP = [
+    'A+' => 4.00, 'A' => 4.00, 'A-' => 3.70,
+    'B+' => 3.30, 'B' => 3.00, 'B-' => 2.70,
+    'C+' => 2.30, 'C' => 2.00, 'C-' => 1.70,
+    'D+' => 1.30, 'D' => 1.00, 'E'  => 0.00,
+];
+
+try {
+    // Verify user exists
+    $stmt = $pdo->prepare("SELECT id FROM users WHERE id = ?");
+    $stmt->execute([$user_id]);
+    if (!$stmt->fetch()) {
+        http_response_code(404);
+        echo json_encode(["success" => false, "message" => "User not found"]);
+        exit();
+    }
+
+    $pdo->beginTransaction();
+
+    foreach ($grades as $entry) {
+        $module_id    = intval($entry['module_id']);
+        $academic_year = intval($entry['academic_year']);
+        $semester     = intval($entry['semester']);
+        $grade        = strtoupper(trim($entry['grade']));
+
+        if (!isset($GPV_MAP[$grade])) continue; // skip invalid grades
+
+        $gpv = $GPV_MAP[$grade];
+
+        // Check existing best grade
+        $stmt = $pdo->prepare("
+            SELECT id, gpv, attempt_number FROM user_grades
+            WHERE user_id = ? AND module_id = ? AND is_best_grade = 1
+        ");
+        $stmt->execute([$user_id, $module_id]);
+        $existing = $stmt->fetch();
+
+        if (!$existing) {
+            // First attempt
+            $stmt = $pdo->prepare("
+                INSERT INTO user_grades (user_id, module_id, academic_year, semester, grade, gpv, attempt_number, is_best_grade)
+                VALUES (?, ?, ?, ?, ?, ?, 1, 1)
+            ");
+            $stmt->execute([$user_id, $module_id, $academic_year, $semester, $grade, $gpv]);
+        } else {
+            // Same grade unchanged — skip
+            if ($existing['grade'] === $grade) continue;
+
+            $new_attempt = $existing['attempt_number'] + 1;
+            if ($new_attempt > 3) continue; // max 3 attempts
+
+            // Cap repeat grade at C (gpv 2.00)
+            $capped_gpv   = min($gpv, 2.00);
+            $capped_grade = $grade;
+            if ($gpv > 2.00) { $capped_gpv = $existing['gpv']; $capped_grade = $existing['grade']; } // keep old if new is better (capped)
+
+            if ($capped_gpv > $existing['gpv']) {
+                // New attempt is better — mark old as not best
+                $pdo->prepare("UPDATE user_grades SET is_best_grade = 0 WHERE user_id = ? AND module_id = ?")->execute([$user_id, $module_id]);
+                $stmt = $pdo->prepare("
+                    INSERT INTO user_grades (user_id, module_id, academic_year, semester, grade, gpv, attempt_number, is_best_grade)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, 1)
+                ");
+                $stmt->execute([$user_id, $module_id, $academic_year, $semester, $capped_grade, $capped_gpv, $new_attempt]);
+            } else {
+                // New attempt is same or worse — insert but keep old as best
+                $stmt = $pdo->prepare("
+                    INSERT INTO user_grades (user_id, module_id, academic_year, semester, grade, gpv, attempt_number, is_best_grade)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, 0)
+                ");
+                $stmt->execute([$user_id, $module_id, $academic_year, $semester, $grade, $gpv, $new_attempt]);
+            }
+        }
+    }
+
+    $pdo->commit();
+
+    // Return updated GPA
+    $stmt = $pdo->prepare("
+        SELECT ROUND(SUM(m.credits * ug.gpv) / NULLIF(SUM(m.credits), 0), 2) AS current_gpa,
+               SUM(m.credits) AS total_gpa_credits,
+               COUNT(ug.id)   AS modules_completed
+        FROM user_grades ug
+        JOIN modules m ON m.id = ug.module_id
+        WHERE ug.user_id = ? AND ug.is_best_grade = 1 AND m.is_gpa = 1
+    ");
+    $stmt->execute([$user_id]);
+    $summary = $stmt->fetch();
+
+    $gpa = (float)($summary['current_gpa'] ?? 0);
+    if ($gpa >= 3.70)     $class = 'First Class Honours';
+    elseif ($gpa >= 3.30) $class = 'Second Class Upper Division';
+    elseif ($gpa >= 3.00) $class = 'Second Class Lower Division';
+    elseif ($gpa >= 2.00) $class = 'General Pass';
+    elseif ($gpa > 0)     $class = 'Below Minimum';
+    else                   $class = 'Not Enough Data';
+
+    echo json_encode([
+        "success" => true,
+        "message" => "Grades saved successfully",
+        "gpa_summary" => [
+            "current_gpa"       => $gpa,
+            "total_gpa_credits" => (int)($summary['total_gpa_credits'] ?? 0),
+            "modules_completed" => (int)($summary['modules_completed'] ?? 0),
+            "degree_class"      => $class,
+        ]
+    ]);
+
+} catch (\PDOException $e) {
+    $pdo->rollBack();
+    http_response_code(500);
+    echo json_encode(["success" => false, "message" => "Database error: " . $e->getMessage()]);
+}
+?>

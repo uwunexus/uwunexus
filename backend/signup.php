@@ -78,7 +78,8 @@ try {
     $stmt = $pdo->prepare("INSERT INTO users (full_name, email, password_hash, enrollment_number, batch, degree, role) VALUES (?, ?, ?, ?, ?, ?, ?)");
     $stmt->execute([$fullName, $email, $hash, $enrollment_number, $batch, $degree, $role]);
 
-    echo json_encode(["success" => true, "message" => "User registered successfully"]);
+    $new_id = $pdo->lastInsertId();
+    echo json_encode(["success" => true, "message" => "User registered successfully", "user" => ["id" => $new_id, "role" => $role]]);
 } catch (\PDOException $e) {
     http_response_code(500);
     echo json_encode(["success" => false, "message" => "Database error: " . $e->getMessage()]);

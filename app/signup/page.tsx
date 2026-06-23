@@ -45,7 +45,7 @@ export default function SignUpPage() {
       }
 
       // Automatically log the user in after successful signup
-      await loginAction("student", "");
+      await loginAction(data.user.role, String(data.user.id));
     } catch (err: any) {
       setError(err.message || "An error occurred during sign up.");
     } finally {

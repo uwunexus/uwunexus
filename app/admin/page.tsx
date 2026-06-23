@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import { Shield, Users, Calendar, Search, RefreshCw, CheckCircle, XCircle, Trash2, PlusCircle, Clock, MapPin, X, Upload, ChevronDown } from "lucide-react";
+import { Shield, Users, Calendar, Search, RefreshCw, CheckCircle, XCircle, Trash2, PlusCircle, Clock, MapPin, X, Upload, ChevronDown, Ticket } from "lucide-react";
 import { uploadToCloudinary } from "../lib/cloudinary";
 
 /* ─── Types ──────────────────────────────────────────────────── */
@@ -16,6 +16,12 @@ interface Event {
   event_date: string; event_time: string; location: string;
   organized_by: string; category: string; image_url: string | null;
   status: string; created_by: number; creator_name: string;
+}
+interface TicketedEvent {
+  id: number; title: string; description: string;
+  event_date: string; event_time: string; venue: string; price: number;
+  total_tickets: number; available_tickets: number; image_url: string;
+  status: string; created_by: number; created_at: string;
 }
 
 /* ─── Constants ─────────────────────────────────────────────── */
@@ -43,7 +49,7 @@ function formatTime(t: string) {
 
 /* ─── Main Component ────────────────────────────────────────── */
 export default function AdminPage() {
-  const [tab, setTab] = useState<"users" | "events">("users");
+  const [tab, setTab] = useState<"users" | "events" | "tickets">("users");
 
   /* auth from cookie */
   const [myId, setMyId] = useState("");
@@ -143,6 +149,63 @@ export default function AdminPage() {
     admins: users.filter(u => ["superadmin", "clubadmin"].includes(u.role)).length,
   };
 
+  /* ── Tickets Tab ──────────────────────────────────────────── */
+  const [tickets, setTickets] = useState<TicketedEvent[]>([]);
+  const [ticketsLoading, setTicketsLoading] = useState(true);
+  const [ticketStatusFilter, setTicketStatusFilter] = useState("all");
+  const [showCreateTicketModal, setShowCreateTicketModal] = useState(false);
+  const [ticketSubTab, setTicketSubTab] = useState<"events" | "purchases">("events");
+  const [purchases, setPurchases] = useState<any[]>([]);
+  const [purchasesLoading, setPurchasesLoading] = useState(false);
+
+  const fetchTickets = useCallback(async () => {
+    if (!myId) return;
+    setTicketsLoading(true);
+    try {
+      const r = await fetch(`http://localhost:8000/get_ticketed_events.php?all=true`);
+      const d = await r.json();
+      if (d.success) setTickets(d.events);
+    } finally { setTicketsLoading(false); }
+  }, [myId]);
+
+  const fetchPurchases = useCallback(async () => {
+    if (!myId) return;
+    setPurchasesLoading(true);
+    try {
+      const r = await fetch(`http://localhost:8000/get_ticket_purchases.php?user_id=${myId}`);
+      const d = await r.json();
+      if (d.success) setPurchases(d.purchases);
+    } finally { setPurchasesLoading(false); }
+  }, [myId]);
+
+  useEffect(() => { if (myId && tab === "tickets" && ticketSubTab === "events") fetchTickets(); }, [myId, tab, ticketSubTab, fetchTickets]);
+  useEffect(() => { if (myId && tab === "tickets" && ticketSubTab === "purchases") fetchPurchases(); }, [myId, tab, ticketSubTab, fetchPurchases]);
+
+  const updateTicketStatus = async (ticketId: number, status: string) => {
+    await fetch("http://localhost:8000/update_ticket_status.php", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: +myId, id: ticketId, status }),
+    });
+    setTickets(prev => prev.map(t => t.id === ticketId ? { ...t, status } : t));
+  };
+
+  const deleteTicket = async (ticketId: number) => {
+    if (!confirm("Delete this ticketed event permanently?")) return;
+    await fetch("http://localhost:8000/delete_ticket_event.php", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: +myId, id: ticketId }),
+    });
+    setTickets(prev => prev.filter(t => t.id !== ticketId));
+  };
+
+  const filteredTickets = tickets.filter(t => ticketStatusFilter === "all" || t.status === ticketStatusFilter);
+
+  const ticketStats = {
+    total: tickets.length,
+    active: tickets.filter(t => t.status === "active").length,
+    closed: tickets.filter(t => t.status === "closed").length,
+  };
+
   /* ── Render ───────────────────────────────────────────────── */
   return (
     <div className="container py-8">
@@ -161,7 +224,12 @@ export default function AdminPage() {
               <PlusCircle size={18} /> Create Event
             </button>
           )}
-          <button className="btn btn-secondary" onClick={tab === "users" ? fetchUsers : fetchEvents}>
+          {tab === "tickets" && ["superadmin", "clubadmin"].includes(myRole) && (
+            <button className="btn btn-primary" onClick={() => setShowCreateTicketModal(true)}>
+              <PlusCircle size={18} /> Create Ticket
+            </button>
+          )}
+          <button className="btn btn-secondary" onClick={tab === "users" ? fetchUsers : tab === "events" ? fetchEvents : fetchTickets}>
             <RefreshCw size={16} /> Refresh
           </button>
         </div>
@@ -169,8 +237,12 @@ export default function AdminPage() {
 
       {/* Tab Switcher */}
       <div className="flex gap-1 mb-8 p-1 rounded-lg" style={{ backgroundColor: "var(--secondary)", display: "inline-flex", border: "1px solid var(--border)" }}>
-        {[{ key: "users", label: "Users", icon: <Users size={16} /> }, { key: "events", label: "Events", icon: <Calendar size={16} /> }].map(t => (
-          <button key={t.key} onClick={() => setTab(t.key as "users" | "events")}
+        {[
+          { key: "users", label: "Users", icon: <Users size={16} /> }, 
+          { key: "events", label: "Events", icon: <Calendar size={16} /> },
+          { key: "tickets", label: "Tickets", icon: <Ticket size={16} /> }
+        ].map(t => (
+          <button key={t.key} onClick={() => setTab(t.key as "users" | "events" | "tickets")}
             className="btn flex items-center gap-2"
             style={{ padding: "0.5rem 1.5rem", backgroundColor: tab === t.key ? "var(--primary)" : "transparent", color: tab === t.key ? "white" : "var(--foreground)", transition: "all 0.2s" }}>
             {t.icon}{t.label}
@@ -372,12 +444,197 @@ export default function AdminPage() {
         </>
       )}
 
+      {/* ── TICKETS TAB ── */}
+      {tab === "tickets" && (
+        <>
+          {/* Sub Navigation */}
+          <div className="flex gap-4 border-b border-border mb-6">
+            <button 
+              className={`pb-3 px-2 font-medium transition-colors ${ticketSubTab === "events" ? "text-primary border-b-2 border-primary" : "text-muted hover:text-foreground"}`}
+              onClick={() => setTicketSubTab("events")}
+            >
+              Manage Events
+            </button>
+            <button 
+              className={`pb-3 px-2 font-medium transition-colors ${ticketSubTab === "purchases" ? "text-primary border-b-2 border-primary" : "text-muted hover:text-foreground"}`}
+              onClick={() => setTicketSubTab("purchases")}
+            >
+              Purchased Tickets
+            </button>
+          </div>
+
+          {ticketSubTab === "events" && (
+            <>
+              {/* Stats */}
+              <div className="grid gap-6 mb-8" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))" }}>
+                {[
+                  { label: "Total Ticket Events", value: ticketStats.total, color: "var(--primary)" },
+                  { label: "Active", value: ticketStats.active, color: "var(--success)" },
+                  { label: "Closed", value: ticketStats.closed, color: "var(--muted)" },
+                ].map(s => (
+                  <div key={s.label} className="card text-center" style={{ borderTop: `3px solid ${s.color}` }}>
+                    <div className="text-4xl font-bold mb-1" style={{ color: s.color }}>{s.value}</div>
+                    <div className="text-muted text-sm">{s.label}</div>
+                  </div>
+                ))}
+              </div>
+
+          {/* Status filter */}
+          <div className="flex gap-2 mb-6 flex-wrap">
+            {["all", "active", "closed"].map(s => {
+              const sc = s === "active" ? { bg: "rgba(34,197,94,0.2)", color: "#22c55e" } : s === "closed" ? { bg: "rgba(148,163,184,0.2)", color: "#94a3b8" } : null;
+              return (
+                <button key={s} onClick={() => setTicketStatusFilter(s)}
+                  className="btn text-sm capitalize"
+                  style={{
+                    padding: "0.4rem 1.2rem",
+                    backgroundColor: ticketStatusFilter === s ? (sc?.bg ?? "var(--primary)") : "var(--secondary)",
+                    color: ticketStatusFilter === s ? (sc?.color ?? "white") : "var(--foreground)",
+                    border: `1px solid ${ticketStatusFilter === s ? (sc?.color ?? "var(--primary)") : "var(--border)"}`,
+                  }}>
+                  {s === "all" ? "All Tickets" : s}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Tickets list */}
+          {ticketsLoading ? <div className="p-12 text-center text-muted">Loading tickets...</div> :
+            filteredTickets.length === 0 ? (
+              <div className="card text-center py-16 text-muted">
+                <Ticket size={48} style={{ margin: "0 auto 1rem", opacity: 0.3 }} />
+                <p>No ticketed events found.</p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-4">
+                {filteredTickets.map(ticket => {
+                  const sc = ticket.status === "active" ? { bg: "rgba(34,197,94,0.2)", color: "#22c55e" } : { bg: "rgba(148,163,184,0.2)", color: "#94a3b8" };
+                  return (
+                    <div key={ticket.id} className="card flex flex-wrap gap-4 items-center" style={{ padding: "1rem 1.5rem" }}>
+                      {/* Thumbnail */}
+                      <div style={{ width: "80px", height: "60px", borderRadius: "0.5rem", overflow: "hidden", flexShrink: 0, backgroundColor: "var(--background)", position: "relative" }}>
+                        {ticket.image_url ? (
+                          <Image src={ticket.image_url} alt={ticket.title} fill sizes="80px" style={{ objectFit: "cover" }} />
+                        ) : (
+                          <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <Ticket size={28} className="text-muted" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Info */}
+                      <div style={{ flex: "1 1 200px" }}>
+                        <div className="font-bold mb-1">{ticket.title}</div>
+                        <div className="flex flex-wrap gap-3 text-xs text-muted">
+                          <span className="flex items-center gap-1"><Calendar size={11} /> {formatDate(ticket.event_date)}</span>
+                          <span className="flex items-center gap-1"><Clock size={11} /> {formatTime(ticket.event_time)}</span>
+                          <span className="flex items-center gap-1"><MapPin size={11} /> {ticket.venue}</span>
+                        </div>
+                        <div className="text-xs text-muted mt-1">Price: <strong className="text-primary">LKR {ticket.price}</strong> · {ticket.available_tickets} / {ticket.total_tickets} tickets left</div>
+                      </div>
+
+                      {/* Status badge */}
+                      <span className="badge capitalize" style={{ backgroundColor: sc.bg, color: sc.color }}>{ticket.status}</span>
+
+                      {/* Actions (superadmin only) */}
+                      {myRole === "superadmin" && (
+                        <div className="flex gap-2 flex-wrap">
+                          {ticket.status === "active" ? (
+                            <button onClick={() => updateTicketStatus(ticket.id, "closed")}
+                              className="btn text-sm" title="Close Ticket Sales"
+                              style={{ backgroundColor: "rgba(148,163,184,0.1)", color: "#94a3b8", border: "1px solid #94a3b8", padding: "0.35rem 0.75rem" }}>
+                              <XCircle size={15} /> Close Sales
+                            </button>
+                          ) : (
+                            <button onClick={() => updateTicketStatus(ticket.id, "active")}
+                              className="btn text-sm" title="Reopen Ticket Sales"
+                              style={{ backgroundColor: "rgba(34,197,94,0.1)", color: "var(--success)", border: "1px solid var(--success)", padding: "0.35rem 0.75rem" }}>
+                              <CheckCircle size={15} /> Reopen
+                            </button>
+                          )}
+                          <button onClick={() => deleteTicket(ticket.id)}
+                            className="btn text-sm" title="Delete"
+                            style={{ backgroundColor: "rgba(239,68,68,0.05)", color: "var(--danger)", border: "1px solid rgba(239,68,68,0.3)", padding: "0.35rem 0.75rem" }}>
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            </>
+          )}
+
+          {ticketSubTab === "purchases" && (
+            <div className="card">
+              <h2 className="text-xl font-bold mb-6">Purchased Tickets</h2>
+              {purchasesLoading ? (
+                <div className="text-center py-8 text-muted">Loading purchases...</div>
+              ) : purchases.length === 0 ? (
+                <div className="text-center py-8 text-muted">No purchases found.</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr style={{ borderBottom: "1px solid var(--border)" }}>
+                        <th className="p-3 text-sm font-semibold text-muted">Order ID</th>
+                        <th className="p-3 text-sm font-semibold text-muted">Event</th>
+                        <th className="p-3 text-sm font-semibold text-muted">Customer</th>
+                        <th className="p-3 text-sm font-semibold text-muted">Contact</th>
+                        <th className="p-3 text-sm font-semibold text-muted">Amount</th>
+                        <th className="p-3 text-sm font-semibold text-muted">Status</th>
+                        <th className="p-3 text-sm font-semibold text-muted">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {purchases.map(p => (
+                        <tr key={p.id} style={{ borderBottom: "1px solid var(--border)" }}>
+                          <td className="p-3 text-sm font-medium">{p.order_id}</td>
+                          <td className="p-3 text-sm">{p.event_title}</td>
+                          <td className="p-3 text-sm">{p.customer_name}</td>
+                          <td className="p-3 text-sm text-muted">
+                            <div>{p.customer_email}</div>
+                            <div>{p.customer_phone}</div>
+                          </td>
+                          <td className="p-3 text-sm font-bold">{p.currency} {p.amount}</td>
+                          <td className="p-3">
+                            <span className="badge text-xs" style={{
+                              backgroundColor: p.status === "success" ? "rgba(34,197,94,0.1)" : p.status === "pending" ? "rgba(234,179,8,0.1)" : "rgba(239,68,68,0.1)",
+                              color: p.status === "success" ? "var(--success)" : p.status === "pending" ? "var(--warning)" : "var(--danger)",
+                              padding: "0.2rem 0.5rem", borderRadius: "1rem"
+                            }}>
+                              {p.status}
+                            </span>
+                          </td>
+                          <td className="p-3 text-sm text-muted">{new Date(p.created_at).toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+        </>
+      )}
+
       {/* ── Create Event Modal ── */}
       {showCreateModal && (
         <CreateEventModal
           myId={myId}
           onClose={() => setShowCreateModal(false)}
           onCreated={(ev) => { setEvents(prev => [ev, ...prev]); setShowCreateModal(false); }}
+        />
+      )}
+
+      {/* ── Create Ticket Modal ── */}
+      {showCreateTicketModal && (
+        <CreateTicketModal
+          myId={myId}
+          onClose={() => setShowCreateTicketModal(false)}
+          onCreated={(ticket) => { setTickets(prev => [ticket, ...prev]); setShowCreateTicketModal(false); }}
         />
       )}
     </div>
@@ -502,6 +759,113 @@ function CreateEventModal({ myId, onClose, onCreated }: { myId: string; onClose:
           <button type="submit" disabled={submitting || uploading} className="btn btn-primary w-full justify-center text-lg"
             style={{ padding: "0.75rem", opacity: submitting ? 0.7 : 1 }}>
             {uploading ? "Uploading image..." : submitting ? "Creating event..." : "Create Event"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Create Ticket Modal ──────────────────────────────────────── */
+function CreateTicketModal({ myId, onClose, onCreated }: { myId: string; onClose: () => void; onCreated: (t: TicketedEvent) => void; }) {
+  const [form, setForm] = useState({ title: "", description: "", event_date: "", event_time: "", venue: "", price: "0", total_tickets: "100" });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>("");
+  const [uploading, setUploading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!imageFile) { setError("Please upload an image banner"); return; }
+    setError(""); setSubmitting(true);
+    try {
+      setUploading(true);
+      const image_url = await uploadToCloudinary(imageFile, "uwunexus/tickets");
+      setUploading(false);
+
+      const res = await fetch("http://localhost:8000/create_ticket_event.php", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, image_url, created_by: +myId }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message);
+      
+      onCreated({ ...form, id: Date.now(), image_url, status: "active", created_by: +myId, created_at: new Date().toISOString(), price: +form.price, total_tickets: +form.total_tickets, available_tickets: +form.total_tickets } as any);
+    } catch (err: any) {
+      setError(err.message || "Failed to create ticket event.");
+    } finally {
+      setSubmitting(false); setUploading(false);
+    }
+  };
+
+  const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
+
+  return (
+    <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.8)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={onClose}>
+      <div className="card" style={{ maxWidth: "600px", width: "100%", maxHeight: "92vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            <PlusCircle size={24} style={{ color: "var(--primary)" }} /> Create Ticketed Event
+          </h2>
+          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--muted)" }}><X size={22} /></button>
+        </div>
+
+        {error && <div className="mb-4 p-3 rounded text-sm" style={{ backgroundColor: "rgba(239,68,68,0.1)", color: "var(--danger)", border: "1px solid rgba(239,68,68,0.2)" }}>{error}</div>}
+
+        <form onSubmit={handleSubmit}>
+          <div className="form-group mb-4">
+            <label className="form-label text-sm">Ticket Banner Image *</label>
+            <label style={{ display: "block", cursor: "pointer" }}>
+              <div className="form-input flex items-center gap-3" style={{ cursor: "pointer", padding: "0.75rem" }}>
+                <Upload size={18} className="text-muted" />
+                <span className="text-muted text-sm">{imageFile ? imageFile.name : "Click to upload image"}</span>
+              </div>
+              <input type="file" accept="image/*" style={{ display: "none" }} onChange={handleImageChange} required />
+            </label>
+            {imagePreview && (
+              <div style={{ position: "relative", height: "160px", marginTop: "0.5rem", borderRadius: "0.5rem", overflow: "hidden" }}>
+                <img src={imagePreview} alt="preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <button type="button" onClick={() => { setImageFile(null); setImagePreview(""); }}
+                  style={{ position: "absolute", top: "0.5rem", right: "0.5rem", backgroundColor: "rgba(0,0,0,0.7)", border: "none", borderRadius: "50%", width: "28px", height: "28px", cursor: "pointer", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}><X size={14} /></button>
+              </div>
+            )}
+          </div>
+
+          <div className="form-group mb-4">
+            <label className="form-label text-sm">Event Title *</label>
+            <input type="text" className="form-input" required value={form.title} onChange={e => set("title", e.target.value)} />
+          </div>
+
+          <div className="form-group mb-4">
+            <label className="form-label text-sm">Description *</label>
+            <textarea className="form-input" required rows={3} style={{ resize: "vertical" }} value={form.description} onChange={e => set("description", e.target.value)} />
+          </div>
+
+          <div className="grid gap-4 mb-4" style={{ gridTemplateColumns: "1fr 1fr" }}>
+            <div className="form-group"><label className="form-label text-sm">Date *</label><input type="date" className="form-input" required value={form.event_date} onChange={e => set("event_date", e.target.value)} /></div>
+            <div className="form-group"><label className="form-label text-sm">Time *</label><input type="time" className="form-input" required value={form.event_time} onChange={e => set("event_time", e.target.value)} /></div>
+          </div>
+
+          <div className="form-group mb-4">
+            <label className="form-label text-sm">Venue *</label>
+            <input type="text" className="form-input" required value={form.venue} onChange={e => set("venue", e.target.value)} />
+          </div>
+
+          <div className="grid gap-4 mb-6" style={{ gridTemplateColumns: "1fr 1fr" }}>
+            <div className="form-group"><label className="form-label text-sm">Price (LKR) *</label><input type="number" step="0.01" className="form-input" required value={form.price} onChange={e => set("price", e.target.value)} /></div>
+            <div className="form-group"><label className="form-label text-sm">Total Tickets *</label><input type="number" min="1" className="form-input" required value={form.total_tickets} onChange={e => set("total_tickets", e.target.value)} /></div>
+          </div>
+
+          <button type="submit" disabled={submitting || uploading} className="btn btn-primary w-full justify-center text-lg" style={{ padding: "0.75rem", opacity: submitting ? 0.7 : 1 }}>
+            {uploading ? "Uploading image..." : submitting ? "Creating..." : "Create Ticketed Event"}
           </button>
         </form>
       </div>
