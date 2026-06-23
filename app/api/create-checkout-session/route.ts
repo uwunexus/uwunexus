@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.stripsecretekey as string, {
-  apiVersion: "2024-06-20" as any,
-});
-
 export async function POST(req: Request) {
+  const stripe = new Stripe(process.env.stripsecretekey || "dummy_key", {
+    apiVersion: "2024-06-20" as any,
+  });
+
   try {
     const body = await req.json();
     const { order_id, title, price, customer_email } = body;
