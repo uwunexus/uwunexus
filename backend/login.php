@@ -40,7 +40,7 @@ try {
         ]);
     } else {
         http_response_code(401);
-        echo json_encode(["success" => false, "message" => "Invalid email or password"]);
+        echo json_encode(["success" => false, "message" => "Invalid email or password try again"]);
     }
 } catch (\PDOException $e) {
     http_response_code(500);
