@@ -1,6 +1,16 @@
 <?php
 // Handle CORS globally for all API requests
-header('Access-Control-Allow-Origin: http://localhost:3000');
+$allowed_origin = 'http://localhost:3000';
+$host = '127.0.0.1';
+$db   = 'uwunexus';
+$user = 'nilesh';
+$pass = '12345678';
+
+if (file_exists(__DIR__ . '/config-prod.php')) {
+    include __DIR__ . '/config-prod.php';
+}
+
+header('Access-Control-Allow-Origin: ' . $allowed_origin);
 header('Access-Control-Allow-Credentials: true');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
@@ -11,10 +21,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     exit();
 }
 
-$host = '127.0.0.1';
-$db   = 'uwunexus';
-$user = 'nilesh';
-$pass = '12345678';
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
