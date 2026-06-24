@@ -170,16 +170,16 @@ export default function LostAndFoundPage() {
               <div key={report.id} className="card p-0 overflow-hidden flex flex-col relative" style={{ padding: 0, borderTop: `4px solid ${color}`, opacity: isResolved ? 0.6 : 1 }}>
                 
                 {/* Images */}
-                <div style={{ height: '200px', width: '100%', position: 'relative', backgroundColor: 'var(--background)' }}>
+                <div className="aspect-4-3 image-container-blurred" style={{ backgroundImage: report.images && report.images.length > 0 ? `url(${report.images[0]})` : 'none' }}>
                   {report.images && report.images.length > 0 ? (
-                    <Image src={report.images[0]} alt={report.title} fill style={{ objectFit: "cover" }} />
+                    <Image src={report.images[0]} alt={report.title} fill className="next-image" sizes="(max-width: 768px) 100vw, 33vw" />
                   ) : (
-                    <div className="flex justify-center items-center h-full opacity-50 text-muted">
+                    <div className="flex justify-center items-center h-full opacity-50 text-muted relative z-10">
                       <ImageIcon size={48} />
                     </div>
                   )}
                   {isResolved && (
-                    <div className="absolute inset-0 flex justify-center items-center" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="absolute inset-0 flex justify-center items-center z-10" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
                       <div className="badge text-lg font-bold shadow-lg" style={{ backgroundColor: "var(--success)", color: "white" }}>RESOLVED</div>
                     </div>
                   )}

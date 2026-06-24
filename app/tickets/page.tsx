@@ -144,11 +144,11 @@ export default function TicketsPage() {
           {events.map((event) => (
             <div key={event.id} className="card p-0 overflow-hidden flex flex-col" style={{ padding: 0 }}>
               {/* Image */}
-              <div style={{ height: '200px', width: '100%', position: 'relative', backgroundColor: 'var(--background)' }}>
+              <div className="aspect-video image-container-blurred" style={{ backgroundImage: event.image_url ? `url(${event.image_url})` : 'none', backgroundColor: 'var(--background)' }}>
                 {event.image_url ? (
-                  <Image src={event.image_url} alt={event.title} fill sizes="(max-width: 768px) 100vw, 33vw" style={{ objectFit: "cover" }} />
+                  <Image src={event.image_url} alt={event.title} fill className="next-image" sizes="(max-width: 768px) 100vw, 33vw" />
                 ) : (
-                  <div style={{ width: '100%', height: '100%', background: "linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)" }} />
+                  <div className="relative z-10" style={{ width: '100%', height: '100%', background: "linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)" }} />
                 )}
               </div>
               

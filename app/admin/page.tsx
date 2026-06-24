@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import { Shield, Users, Calendar, Search, RefreshCw, CheckCircle, XCircle, Trash2, PlusCircle, Clock, MapPin, X, Upload, ChevronDown, Ticket, Store, EyeOff, BookOpen } from "lucide-react";
+import { Shield, Users, Calendar, Search, RefreshCw, CheckCircle, XCircle, Trash2, PlusCircle, Clock, MapPin, X, Upload, ChevronDown, Ticket, Store, EyeOff, BookOpen, Edit } from "lucide-react";
 import { uploadToCloudinary } from "../lib/cloudinary";
 
 /* ─── Types ──────────────────────────────────────────────────── */
@@ -57,8 +57,10 @@ export default function AdminPage() {
   useEffect(() => {
     const parse = (n: string) =>
       document.cookie.split("; ").find(r => r.startsWith(n + "="))?.split("=")[1] ?? "";
+    const role = parse("uwu_user_role");
     setMyId(parse("uwu_user_id"));
-    setMyRole(parse("uwu_role"));
+    setMyRole(role);
+    if (role === "clubadmin") setTab("events");
   }, []);
 
   /* ── Users Tab ────────────────────────────────────────────── */
@@ -90,6 +92,24 @@ export default function AdminPage() {
     setUpdatingUserId(null);
   };
 
+  const deleteUser = async (targetId: number) => {
+    if (!confirm("Are you sure you want to permanently delete this user? This cannot be undone.")) return;
+    try {
+      const res = await fetch("http://localhost:8000/delete_user.php", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ requester_id: +myId, target_id: targetId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setUsers(prev => prev.filter(u => u.id !== targetId));
+      } else {
+        alert(data.message);
+      }
+    } catch (e) {
+      alert("Error deleting user.");
+    }
+  };
+
   const filteredUsers = users.filter(u => {
     const matchRole = roleFilter === "all" || u.role === roleFilter;
     const q = userSearch.toLowerCase();
@@ -100,7 +120,8 @@ export default function AdminPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [eventsLoading, setEventsLoading] = useState(true);
   const [eventStatusFilter, setEventStatusFilter] = useState("all");
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEventModal, setShowEventModal] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
 
   const fetchEvents = useCallback(async () => {
     if (!myId) return;
@@ -153,7 +174,8 @@ export default function AdminPage() {
   const [tickets, setTickets] = useState<TicketedEvent[]>([]);
   const [ticketsLoading, setTicketsLoading] = useState(true);
   const [ticketStatusFilter, setTicketStatusFilter] = useState("all");
-  const [showCreateTicketModal, setShowCreateTicketModal] = useState(false);
+  const [showTicketModal, setShowTicketModal] = useState(false);
+  const [editingTicket, setEditingTicket] = useState<TicketedEvent | null>(null);
   const [ticketSubTab, setTicketSubTab] = useState<"events" | "purchases">("events");
   const [purchases, setPurchases] = useState<any[]>([]);
   const [purchasesLoading, setPurchasesLoading] = useState(false);
@@ -282,7 +304,8 @@ export default function AdminPage() {
   /* ── Info Hub Tab ────────────────────────────────────────────── */
   const [infoHubItems, setInfoHubItems] = useState<any[]>([]);
   const [infoHubLoading, setInfoHubLoading] = useState(false);
-  const [showCreateInfoHub, setShowCreateInfoHub] = useState(false);
+  const [showInfoHubModal, setShowInfoHubModal] = useState(false);
+  const [editingInfoHub, setEditingInfoHub] = useState<InfoHubItem | null>(null);
 
   const fetchInfoHub = useCallback(async () => {
     setInfoHubLoading(true);
@@ -327,17 +350,17 @@ export default function AdminPage() {
         </div>
         <div className="flex gap-3">
           {tab === "events" && ["superadmin", "clubadmin"].includes(myRole) && (
-            <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
+            <button className="btn btn-primary" onClick={() => { setEditingEvent(null); setShowEventModal(true); }}>
               <PlusCircle size={18} /> Create Event
             </button>
           )}
           {tab === "tickets" && ["superadmin", "clubadmin"].includes(myRole) && (
-            <button className="btn btn-primary" onClick={() => setShowCreateTicketModal(true)}>
+            <button className="btn btn-primary" onClick={() => { setEditingTicket(null); setShowTicketModal(true); }}>
               <PlusCircle size={18} /> Create Ticket
             </button>
           )}
           {tab === "info-hub" && ["superadmin"].includes(myRole) && (
-            <button className="btn btn-primary" onClick={() => setShowCreateInfoHub(true)}>
+            <button className="btn btn-primary" onClick={() => { setEditingInfoHub(null); setShowInfoHubModal(true); }}>
               <PlusCircle size={18} /> Add Info Hub Item
             </button>
           )}
@@ -350,14 +373,14 @@ export default function AdminPage() {
       {/* Tab Switcher */}
       <div className="flex gap-1 mb-8 p-1 rounded-lg overflow-x-auto" style={{ backgroundColor: "var(--secondary)", display: "inline-flex", border: "1px solid var(--border)", maxWidth: "100%" }}>
         {[
-          { key: "users", label: "Users", icon: <Users size={16} /> }, 
+          { key: "users", label: "Users", icon: <Users size={16} />, adminOnly: true }, 
           { key: "events", label: "Events", icon: <Calendar size={16} /> },
           { key: "tickets", label: "Tickets", icon: <Ticket size={16} /> },
-          { key: "marketplace", label: "Marketplace", icon: <Store size={16} /> },
-          { key: "lost-found", label: "Lost & Found", icon: <Search size={16} /> },
-          { key: "info-hub", label: "Info Hub", icon: <BookOpen size={16} /> }
-        ].map(t => (
-          <button key={t.key} onClick={() => setTab(t.key as "users" | "events" | "tickets" | "marketplace" | "lost-found" | "info-hub")}
+          { key: "marketplace", label: "Marketplace", icon: <Store size={16} />, adminOnly: true },
+          { key: "lost-found", label: "Lost & Found", icon: <Search size={16} />, adminOnly: true },
+          { key: "info-hub", label: "Info Hub", icon: <BookOpen size={16} />, adminOnly: true }
+        ].filter(t => myRole === "superadmin" || !t.adminOnly).map(t => (
+          <button key={t.key} onClick={() => setTab(t.key as any)}
             className="btn flex items-center gap-2"
             style={{ padding: "0.5rem 1.5rem", backgroundColor: tab === t.key ? "var(--primary)" : "transparent", color: tab === t.key ? "white" : "var(--foreground)", transition: "all 0.2s" }}>
             {t.icon}{t.label}
@@ -428,16 +451,21 @@ export default function AdminPage() {
                               <span className="badge" style={{ backgroundColor: rc.bg, color: rc.color, textTransform: "capitalize" }}>{user.role}</span>
                             </td>
                             {myRole === "superadmin" && (
-                              <td className="p-4">
+                              <td className="p-4 flex gap-2">
                                 {user.id === +myId ? <span className="text-muted text-sm">You</span> : (
-                                  <select className="form-input text-sm" style={{ padding: "0.35rem 0.75rem", width: "140px" }}
-                                    value={user.role} disabled={updatingUserId === user.id}
-                                    onChange={e => updateUserRole(user.id, e.target.value)}>
-                                    <option value="student">Student</option>
-                                    <option value="staff">Staff</option>
-                                    <option value="clubadmin">Club Admin</option>
-                                    <option value="superadmin">Super Admin</option>
-                                  </select>
+                                  <>
+                                    <select className="form-input text-sm" style={{ padding: "0.35rem 0.75rem", width: "140px" }}
+                                      value={user.role} disabled={updatingUserId === user.id}
+                                      onChange={e => updateUserRole(user.id, e.target.value)}>
+                                      <option value="student">Student</option>
+                                      <option value="staff">Staff</option>
+                                      <option value="clubadmin">Club Admin</option>
+                                      <option value="superadmin">Super Admin</option>
+                                    </select>
+                                    <button onClick={() => deleteUser(user.id)} className="btn" title="Delete User" style={{ backgroundColor: "rgba(239,68,68,0.1)", color: "var(--danger)", border: "1px solid rgba(239,68,68,0.3)", padding: "0.35rem 0.75rem" }}>
+                                      <Trash2 size={16} />
+                                    </button>
+                                  </>
                                 )}
                               </td>
                             )}
@@ -544,6 +572,11 @@ export default function AdminPage() {
                               <XCircle size={15} /> Reject
                             </button>
                           )}
+                          <button onClick={() => { setEditingEvent(event); setShowEventModal(true); }}
+                            className="btn text-sm" title="Edit"
+                            style={{ backgroundColor: "rgba(59,130,246,0.1)", color: "var(--accent-light)", border: "1px solid rgba(59,130,246,0.3)", padding: "0.35rem 0.75rem" }}>
+                            <Edit size={15} /> Edit
+                          </button>
                           <button onClick={() => deleteEvent(event.id)}
                             className="btn text-sm" title="Delete"
                             style={{ backgroundColor: "rgba(239,68,68,0.05)", color: "var(--danger)", border: "1px solid rgba(239,68,68,0.3)", padding: "0.35rem 0.75rem" }}>
@@ -667,6 +700,11 @@ export default function AdminPage() {
                               <CheckCircle size={15} /> Reopen
                             </button>
                           )}
+                          <button onClick={() => { setEditingTicket(ticket); setShowTicketModal(true); }}
+                            className="btn text-sm" title="Edit"
+                            style={{ backgroundColor: "rgba(59,130,246,0.1)", color: "var(--accent-light)", border: "1px solid rgba(59,130,246,0.3)", padding: "0.35rem 0.75rem" }}>
+                            <Edit size={15} /> Edit
+                          </button>
                           <button onClick={() => deleteTicket(ticket.id)}
                             className="btn text-sm" title="Delete"
                             style={{ backgroundColor: "rgba(239,68,68,0.05)", color: "var(--danger)", border: "1px solid rgba(239,68,68,0.3)", padding: "0.35rem 0.75rem" }}>
@@ -895,9 +933,16 @@ export default function AdminPage() {
                         {item.contact_info && <div>Contact: {item.contact_info}</div>}
                       </td>
                       <td className="p-4 text-right">
-                        <button className="btn text-danger hover:bg-danger/10 p-2" onClick={() => deleteInfoHubItem(item.id)}>
-                          <Trash2 size={16} />
-                        </button>
+                        <div className="flex gap-2 justify-end">
+                          <button className="btn" style={{ backgroundColor: "rgba(59,130,246,0.1)", color: "var(--accent-light)", border: "1px solid rgba(59,130,246,0.3)", padding: "0.35rem 0.75rem" }} onClick={() => {
+                            setEditingInfoHub(item); setShowInfoHubModal(true);
+                          }}>
+                            <Edit size={16} /> Edit
+                          </button>
+                          <button className="btn" style={{ backgroundColor: "rgba(239,68,68,0.1)", color: "var(--danger)", border: "1px solid rgba(239,68,68,0.3)", padding: "0.35rem 0.75rem" }} onClick={() => deleteInfoHubItem(item.id)}>
+                            <Trash2 size={16} /> Delete
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -908,41 +953,76 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* ── Create Event Modal ── */}
-      {showCreateModal && (
-        <CreateEventModal
+      {/* ── Event Form Modal ── */}
+      {showEventModal && (
+        <EventFormModal
           myId={myId}
-          onClose={() => setShowCreateModal(false)}
-          onCreated={(ev) => { setEvents(prev => [ev, ...prev]); setShowCreateModal(false); }}
+          initialData={editingEvent}
+          onClose={() => { setShowEventModal(false); setEditingEvent(null); }}
+          onSaved={(ev) => {
+            if (editingEvent) {
+              setEvents(prev => prev.map(e => e.id === ev.id ? ev : e));
+            } else {
+              setEvents(prev => [ev, ...prev]);
+            }
+            setShowEventModal(false);
+            setEditingEvent(null);
+          }}
         />
       )}
 
-      {/* ── Create Ticket Modal ── */}
-      {showCreateTicketModal && (
-        <CreateTicketModal
+      {/* ── Ticket Form Modal ── */}
+      {showTicketModal && (
+        <TicketFormModal
           myId={myId}
-          onClose={() => setShowCreateTicketModal(false)}
-          onCreated={(ticket) => { setTickets(prev => [ticket, ...prev]); setShowCreateTicketModal(false); }}
+          initialData={editingTicket}
+          onClose={() => { setShowTicketModal(false); setEditingTicket(null); }}
+          onSaved={(ticket) => {
+            if (editingTicket) {
+              setTickets(prev => prev.map(t => t.id === ticket.id ? ticket : t));
+            } else {
+              setTickets(prev => [ticket, ...prev]);
+            }
+            setShowTicketModal(false);
+            setEditingTicket(null);
+          }}
         />
       )}
 
-      {/* ── Create Info Hub Modal ── */}
-      {showCreateInfoHub && (
-        <CreateInfoHubModal
+      {/* ── Info Hub Form Modal ── */}
+      {showInfoHubModal && (
+        <InfoHubFormModal
           myId={myId}
-          onClose={() => setShowCreateInfoHub(false)}
-          onCreated={(item) => { setInfoHubItems(prev => [item, ...prev]); setShowCreateInfoHub(false); }}
+          initialData={editingInfoHub}
+          onClose={() => { setShowInfoHubModal(false); setEditingInfoHub(null); }}
+          onSaved={(item) => {
+            if (editingInfoHub) {
+              setInfoHubItems(prev => prev.map(i => i.id === item.id ? item : i));
+            } else {
+              setInfoHubItems(prev => [item, ...prev]);
+            }
+            setShowInfoHubModal(false);
+            setEditingInfoHub(null);
+          }}
         />
       )}
     </div>
   );
 }
 
-/* ─── Create Event Modal ──────────────────────────────────────── */
-function CreateEventModal({ myId, onClose, onCreated }: { myId: string; onClose: () => void; onCreated: (e: Event) => void; }) {
-  const [form, setForm] = useState({ title: "", description: "", event_date: "", event_time: "", location: "", organized_by: "", category: "Academic" });
+/* ─── Event Form Modal ──────────────────────────────────────── */
+function EventFormModal({ myId, initialData, onClose, onSaved }: { myId: string; initialData?: Event | null; onClose: () => void; onSaved: (e: Event) => void; }) {
+  const [form, setForm] = useState({ 
+    title: initialData?.title || "", 
+    description: initialData?.description || "", 
+    event_date: initialData?.event_date || "", 
+    event_time: initialData?.event_time || "", 
+    location: initialData?.location || "", 
+    organized_by: initialData?.organized_by || "", 
+    category: initialData?.category || "Academic" 
+  });
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>("");
+  const [imagePreview, setImagePreview] = useState<string>(initialData?.image_url || "");
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -958,21 +1038,28 @@ function CreateEventModal({ myId, onClose, onCreated }: { myId: string; onClose:
     e.preventDefault();
     setError(""); setSubmitting(true);
     try {
-      let image_url = "";
+      let image_url = initialData?.image_url || "";
       if (imageFile) {
         setUploading(true);
         image_url = await uploadToCloudinary(imageFile, "uwunexus/events");
         setUploading(false);
       }
-      const res = await fetch("http://localhost:8000/create_event.php", {
+      const endpoint = initialData ? "http://localhost:8000/update_event.php" : "http://localhost:8000/create_event.php";
+      const payload = initialData ? { ...form, image_url, requester_id: +myId, id: initialData.id } : { ...form, image_url, requester_id: +myId };
+      const res = await fetch(endpoint, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, image_url, requester_id: +myId }),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.message);
-      onCreated({ ...form, id: data.id, image_url, status: data.status, created_by: +myId, creator_name: "You" } as any);
+      
+      if (initialData) {
+        onSaved({ ...initialData, ...form, image_url } as Event);
+      } else {
+        onSaved({ ...form, id: data.id, image_url, status: data.status, created_by: +myId, creator_name: "You" } as any);
+      }
     } catch (err: any) {
-      setError(err.message || "Failed to create event.");
+      setError(err.message || "Failed to save event.");
     } finally {
       setSubmitting(false); setUploading(false);
     }
@@ -981,12 +1068,12 @@ function CreateEventModal({ myId, onClose, onCreated }: { myId: string; onClose:
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
 
   return (
-    <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.8)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}
+    <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}
       onClick={onClose}>
       <div className="card" style={{ maxWidth: "600px", width: "100%", maxHeight: "92vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold flex items-center gap-2">
-            <PlusCircle size={24} style={{ color: "var(--primary)" }} /> Create New Event
+            <PlusCircle size={24} style={{ color: "var(--primary)" }} /> {initialData ? "Edit Event" : "Create New Event"}
           </h2>
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--muted)" }}><X size={22} /></button>
         </div>
@@ -1000,7 +1087,7 @@ function CreateEventModal({ myId, onClose, onCreated }: { myId: string; onClose:
             <label style={{ display: "block", cursor: "pointer" }}>
               <div className="form-input flex items-center gap-3" style={{ cursor: "pointer", padding: "0.75rem" }}>
                 <Upload size={18} className="text-muted" />
-                <span className="text-muted text-sm">{imageFile ? imageFile.name : "Click to upload image (auto-compressed)"}</span>
+                <span className="text-muted text-sm">{imageFile ? imageFile.name : (initialData?.image_url ? "Click to change image" : "Click to upload image (auto-compressed)")}</span>
               </div>
               <input type="file" accept="image/*" style={{ display: "none" }} onChange={handleImageChange} />
             </label>
@@ -1055,7 +1142,7 @@ function CreateEventModal({ myId, onClose, onCreated }: { myId: string; onClose:
 
           <button type="submit" disabled={submitting || uploading} className="btn btn-primary w-full justify-center text-lg"
             style={{ padding: "0.75rem", opacity: submitting ? 0.7 : 1 }}>
-            {uploading ? "Uploading image..." : submitting ? "Creating event..." : "Create Event"}
+            {uploading ? "Uploading image..." : submitting ? "Saving..." : (initialData ? "Save Changes" : "Create Event")}
           </button>
         </form>
       </div>
@@ -1063,11 +1150,19 @@ function CreateEventModal({ myId, onClose, onCreated }: { myId: string; onClose:
   );
 }
 
-/* ─── Create Ticket Modal ──────────────────────────────────────── */
-function CreateTicketModal({ myId, onClose, onCreated }: { myId: string; onClose: () => void; onCreated: (t: TicketedEvent) => void; }) {
-  const [form, setForm] = useState({ title: "", description: "", event_date: "", event_time: "", venue: "", price: "0", total_tickets: "100" });
+/* ─── Ticket Form Modal ──────────────────────────────────────── */
+function TicketFormModal({ myId, initialData, onClose, onSaved }: { myId: string; initialData?: TicketedEvent | null; onClose: () => void; onSaved: (t: TicketedEvent) => void; }) {
+  const [form, setForm] = useState({ 
+    title: initialData?.title || "", 
+    description: initialData?.description || "", 
+    event_date: initialData?.event_date || "", 
+    event_time: initialData?.event_time || "", 
+    venue: initialData?.venue || "", 
+    price: initialData?.price?.toString() || "0", 
+    total_tickets: initialData?.total_tickets?.toString() || "100" 
+  });
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>("");
+  const [imagePreview, setImagePreview] = useState<string>(initialData?.image_url || "");
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -1081,23 +1176,32 @@ function CreateTicketModal({ myId, onClose, onCreated }: { myId: string; onClose
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!imageFile) { setError("Please upload an image banner"); return; }
+    if (!imageFile && !initialData?.image_url) { setError("Please upload an image banner"); return; }
     setError(""); setSubmitting(true);
     try {
-      setUploading(true);
-      const image_url = await uploadToCloudinary(imageFile, "uwunexus/tickets");
-      setUploading(false);
+      let image_url = initialData?.image_url || "";
+      if (imageFile) {
+        setUploading(true);
+        image_url = await uploadToCloudinary(imageFile, "uwunexus/tickets");
+        setUploading(false);
+      }
 
-      const res = await fetch("http://localhost:8000/create_ticket_event.php", {
+      const endpoint = initialData ? "http://localhost:8000/update_ticket_event.php" : "http://localhost:8000/create_ticket_event.php";
+      const payload = initialData ? { ...form, image_url, requester_id: +myId, id: initialData.id } : { ...form, image_url, created_by: +myId };
+      const res = await fetch(endpoint, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, image_url, created_by: +myId }),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.message);
       
-      onCreated({ ...form, id: Date.now(), image_url, status: "active", created_by: +myId, created_at: new Date().toISOString(), price: +form.price, total_tickets: +form.total_tickets, available_tickets: +form.total_tickets } as any);
+      if (initialData) {
+        onSaved({ ...initialData, ...form, image_url, price: +form.price, total_tickets: +form.total_tickets } as TicketedEvent);
+      } else {
+        onSaved({ ...form, id: Date.now(), image_url, status: "active", created_by: +myId, created_at: new Date().toISOString(), price: +form.price, total_tickets: +form.total_tickets, available_tickets: +form.total_tickets } as any);
+      }
     } catch (err: any) {
-      setError(err.message || "Failed to create ticket event.");
+      setError(err.message || "Failed to save ticket event.");
     } finally {
       setSubmitting(false); setUploading(false);
     }
@@ -1106,11 +1210,11 @@ function CreateTicketModal({ myId, onClose, onCreated }: { myId: string; onClose
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
 
   return (
-    <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.8)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={onClose}>
+    <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={onClose}>
       <div className="card" style={{ maxWidth: "600px", width: "100%", maxHeight: "92vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold flex items-center gap-2">
-            <PlusCircle size={24} style={{ color: "var(--primary)" }} /> Create Ticketed Event
+            <PlusCircle size={24} style={{ color: "var(--primary)" }} /> {initialData ? "Edit Ticketed Event" : "Create Ticketed Event"}
           </h2>
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--muted)" }}><X size={22} /></button>
         </div>
@@ -1123,9 +1227,9 @@ function CreateTicketModal({ myId, onClose, onCreated }: { myId: string; onClose
             <label style={{ display: "block", cursor: "pointer" }}>
               <div className="form-input flex items-center gap-3" style={{ cursor: "pointer", padding: "0.75rem" }}>
                 <Upload size={18} className="text-muted" />
-                <span className="text-muted text-sm">{imageFile ? imageFile.name : "Click to upload image"}</span>
+                <span className="text-muted text-sm">{imageFile ? imageFile.name : (initialData?.image_url ? "Click to change image" : "Click to upload image")}</span>
               </div>
-              <input type="file" accept="image/*" style={{ display: "none" }} onChange={handleImageChange} required />
+              <input type="file" accept="image/*" style={{ display: "none" }} onChange={handleImageChange} required={!initialData?.image_url} />
             </label>
             {imagePreview && (
               <div style={{ position: "relative", height: "160px", marginTop: "0.5rem", borderRadius: "0.5rem", overflow: "hidden" }}>
@@ -1170,9 +1274,16 @@ function CreateTicketModal({ myId, onClose, onCreated }: { myId: string; onClose
   );
 }
 
-/* ─── Create Info Hub Modal ──────────────────────────────────────── */
-function CreateInfoHubModal({ myId, onClose, onCreated }: { myId: string; onClose: () => void; onCreated: (i: any) => void; }) {
-  const [form, setForm] = useState({ category: "procedure", title: "", description: "", contact_info: "", action_link: "", action_text: "" });
+/* ─── Info Hub Form Modal ──────────────────────────────────────── */
+function InfoHubFormModal({ myId, initialData, onClose, onSaved }: { myId: string; initialData?: InfoHubItem | null; onClose: () => void; onSaved: (i: InfoHubItem) => void; }) {
+  const [form, setForm] = useState({ 
+    category: initialData?.category || "procedure", 
+    title: initialData?.title || "", 
+    description: initialData?.description || "", 
+    contact_info: initialData?.contact_info || "", 
+    action_link: initialData?.action_link || "", 
+    action_text: initialData?.action_text || "" 
+  });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -1180,15 +1291,22 @@ function CreateInfoHubModal({ myId, onClose, onCreated }: { myId: string; onClos
     e.preventDefault();
     setSubmitting(true); setError("");
     try {
-      const res = await fetch("http://localhost:8000/create_info_hub.php", {
+      const endpoint = initialData ? "http://localhost:8000/update_info_hub.php" : "http://localhost:8000/create_info_hub.php";
+      const payload = initialData ? { ...form, user_id: +myId, id: initialData.id } : { ...form, user_id: +myId };
+      const res = await fetch(endpoint, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, user_id: +myId }),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.message);
-      onCreated({ ...form, id: data.id });
+      
+      if (initialData) {
+        onSaved({ ...initialData, ...form } as InfoHubItem);
+      } else {
+        onSaved({ ...form, id: data.id } as any);
+      }
     } catch (err: any) {
-      setError(err.message || "Failed to create info hub item.");
+      setError(err.message || "Failed to save info hub item.");
     } finally {
       setSubmitting(false);
     }
@@ -1197,11 +1315,11 @@ function CreateInfoHubModal({ myId, onClose, onCreated }: { myId: string; onClos
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
 
   return (
-    <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.8)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={onClose}>
+    <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={onClose}>
       <div className="card" style={{ maxWidth: "600px", width: "100%", maxHeight: "92vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold flex items-center gap-2">
-            <BookOpen size={24} style={{ color: "var(--primary)" }} /> Add Info Hub Item
+            <BookOpen size={24} style={{ color: "var(--primary)" }} /> {initialData ? "Edit Info Hub Item" : "Add Info Hub Item"}
           </h2>
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--muted)" }}><X size={22} /></button>
         </div>

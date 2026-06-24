@@ -158,26 +158,26 @@ export default function EventsPage() {
                   onClick={() => setSelectedEvent(event)}
                 >
                   {/* Image */}
-                  <div style={{ position: "relative", height: "180px", backgroundColor: "var(--secondary)", overflow: "hidden" }}>
+                  <div className="aspect-video image-container-blurred" style={{ backgroundImage: event.image_url ? `url(${event.image_url})` : 'none', backgroundColor: "var(--secondary)" }}>
                     {event.image_url ? (
                       <Image
                         src={event.image_url}
                         alt={event.title}
                         fill
+                        className="next-image"
                         sizes="(max-width: 768px) 100vw, 400px"
-                        style={{ objectFit: "cover" }}
                       />
                     ) : (
-                      <div style={{ height: "100%", background: `linear-gradient(135deg, ${catColor}33, ${catColor}11)`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <div className="relative z-10" style={{ height: "100%", background: `linear-gradient(135deg, ${catColor}33, ${catColor}11)`, display: "flex", alignItems: "center", justifyContent: "center" }}>
                         <Calendar size={48} style={{ color: catColor, opacity: 0.5 }} />
                       </div>
                     )}
                     {/* Category badge overlaid */}
-                    <span className="badge" style={{ position: "absolute", top: "0.75rem", left: "0.75rem", backgroundColor: `${catColor}cc`, color: "white" }}>
+                    <span className="badge relative z-10" style={{ position: "absolute", top: "0.75rem", left: "0.75rem", backgroundColor: `${catColor}cc`, color: "white" }}>
                       {event.category}
                     </span>
                     {/* Date badge */}
-                    <div style={{ position: "absolute", top: "0.75rem", right: "0.75rem", backgroundColor: "rgba(15,23,42,0.85)", borderRadius: "0.5rem", padding: "0.35rem 0.65rem", textAlign: "center", minWidth: "48px" }}>
+                    <div className="relative z-10" style={{ position: "absolute", top: "0.75rem", right: "0.75rem", backgroundColor: "rgba(15,23,42,0.85)", borderRadius: "0.5rem", padding: "0.35rem 0.65rem", textAlign: "center", minWidth: "48px" }}>
                       <div className="text-xs text-muted">{new Date(event.event_date + "T00:00:00").toLocaleDateString("en-US", { month: "short" })}</div>
                       <div className="font-bold" style={{ fontSize: "1.25rem", lineHeight: 1 }}>{new Date(event.event_date + "T00:00:00").getDate()}</div>
                     </div>

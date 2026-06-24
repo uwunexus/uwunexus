@@ -248,21 +248,21 @@ export default function MarketplacePage() {
           {filteredItems.map((product) => (
             <div key={product.id} className="card p-0 overflow-hidden flex flex-col" style={{ padding: 0 }}>
               {/* Image Carousel / Banner */}
-              <div style={{ height: '200px', width: '100%', position: 'relative', backgroundColor: 'var(--background)' }}>
+              <div className="aspect-4-3 image-container-blurred" style={{ backgroundImage: product.images && product.images.length > 0 ? `url(${product.images[0]})` : 'none' }}>
                 {product.images && product.images.length > 0 ? (
-                  <Image src={product.images[0]} alt={product.title} fill style={{ objectFit: "cover" }} />
+                  <Image src={product.images[0]} alt={product.title} fill className="next-image" sizes="(max-width: 768px) 100vw, 33vw" />
                 ) : (
-                  <div className="flex justify-center items-center h-full opacity-50 text-muted">
+                  <div className="flex justify-center items-center h-full opacity-50 text-muted relative z-10">
                     <ImageIcon size={48} />
                   </div>
                 )}
                 {product.images && product.images.length > 1 && (
-                  <div className="absolute bottom-2 right-2 badge text-xs" style={{ backgroundColor: "rgba(0,0,0,0.7)", color: "white" }}>
+                  <div className="absolute bottom-2 right-2 badge text-xs z-10" style={{ backgroundColor: "rgba(0,0,0,0.7)", color: "white" }}>
                     1 / {product.images.length}
                   </div>
                 )}
                 {tab === "my-items" && (
-                  <div className="absolute top-2 left-2 badge text-xs font-bold shadow" style={{ 
+                  <div className="absolute top-2 left-2 badge text-xs font-bold shadow z-10" style={{ 
                     backgroundColor: product.status === 'active' ? "var(--success)" : product.status === 'pending' ? "var(--warning)" : product.status === 'rejected' ? "var(--danger)" : "var(--muted)", 
                     color: "white" 
                   }}>

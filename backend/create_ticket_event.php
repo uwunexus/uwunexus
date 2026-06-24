@@ -41,8 +41,10 @@ try {
         exit();
     }
 
-    $stmt = $pdo->prepare("INSERT INTO ticketed_events (title, description, event_date, event_time, venue, price, total_tickets, available_tickets, image_url, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->execute([$title, $description, $event_date, $event_time, $venue, $price, $total_tickets, $total_tickets, $image_url, $created_by]);
+    $status = ($user['role'] === 'superadmin') ? 'active' : 'pending';
+
+    $stmt = $pdo->prepare("INSERT INTO ticketed_events (title, description, event_date, event_time, venue, price, total_tickets, available_tickets, image_url, created_by, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->execute([$title, $description, $event_date, $event_time, $venue, $price, $total_tickets, $total_tickets, $image_url, $created_by, $status]);
 
     echo json_encode(["success" => true, "message" => "Ticketed event created successfully!"]);
 

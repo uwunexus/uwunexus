@@ -78,13 +78,20 @@ export default function Home() {
         
         <div className="grid grid-cols-1 md-grid-cols-2 lg-grid-cols-3 gap-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
           {features.map((feature, index) => (
-            <Link href={feature.link} key={index} style={{ display: 'block' }}>
-              <div className="card h-full flex flex-col items-center text-center" style={{ height: '100%' }}>
-                <img src={feature.icon} alt={feature.title} style={{ width: '48px', height: '48px', marginBottom: '1rem', objectFit: 'contain' }} />
-                <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
-                <p className="text-muted text-sm mb-4">{feature.description}</p>
-                <div className="mt-auto pt-4 font-semibold text-sm w-full" style={{ color: feature.color, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                  Open Module &rarr;
+            <Link href={feature.link} key={index} className="group" style={{ display: 'block' }}>
+              <div className="card h-full flex flex-col items-center text-center relative overflow-hidden group-hover:border-[var(--primary)] transition-colors" style={{ height: '100%' }}>
+                {/* Subtle background glow based on feature color */}
+                <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-20 -mr-10 -mt-10 transition-opacity group-hover:opacity-40" style={{ backgroundColor: feature.color, zIndex: 0 }}></div>
+                
+                <div className="p-4 rounded-full mb-4 relative z-10" style={{ backgroundColor: `color-mix(in srgb, ${feature.color} 15%, transparent)` }}>
+                  <img src={feature.icon} alt={feature.title} style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
+                </div>
+                
+                <h3 className="text-xl font-bold mb-2 relative z-10">{feature.title}</h3>
+                <p className="text-muted text-sm mb-6 relative z-10">{feature.description}</p>
+                
+                <div className="mt-auto pt-4 font-semibold text-sm w-full relative z-10 flex items-center justify-center gap-2 group-hover:gap-3 transition-all" style={{ color: feature.color, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                  <span>Open Module</span> <span aria-hidden="true">&rarr;</span>
                 </div>
               </div>
             </Link>

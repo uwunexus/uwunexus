@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Calculator, BookOpen, TrendingUp, Save, ChevronDown, ChevronRight, AlertCircle, Award, Loader, Eye, GraduationCap } from "lucide-react";
+import { Calculator, BookOpen, TrendingUp, Save, ChevronDown, ChevronRight, AlertCircle, Award, Loader, Eye, GraduationCap, CheckCircle } from "lucide-react";
 
 /* ─── Types ─────────────────────────────────────────────────── */
 interface Module {
@@ -30,13 +30,13 @@ const GROUP_TYPE_COLORS: Record<string, string> = {
   CORE: "var(--primary)", ESD: "var(--accent)", BGE: "#ec4899",
   ELECTIVE: "var(--success)", OPTIONAL: "var(--warning)", BASKET: "#f97316",
 };
-const CLASS_COLORS: Record<string, { bg: string; color: string; border: string }> = {
-  "First Class Honours":         { bg: "rgba(139,92,246,0.15)", color: "#8b5cf6", border: "#8b5cf6" },
-  "Second Class Upper Division": { bg: "rgba(59,130,246,0.15)",  color: "#3b82f6", border: "#3b82f6" },
-  "Second Class Lower Division": { bg: "rgba(34,197,94,0.15)",   color: "#22c55e", border: "#22c55e" },
-  "General Pass":                { bg: "rgba(234,179,8,0.15)",   color: "#eab308", border: "#eab308" },
-  "Below Minimum":               { bg: "rgba(239,68,68,0.15)",   color: "#ef4444", border: "#ef4444" },
-  "Not Enough Data":             { bg: "rgba(148,163,184,0.1)",  color: "#94a3b8", border: "#334155" },
+const CLASS_COLORS: Record<string, { bg: string; color: string; border: string; shadow: string }> = {
+  "First Class Honours":         { bg: "rgba(139,92,246,0.1)", color: "#c4b5fd", border: "rgba(139,92,246,0.3)", shadow: "0 4px 30px rgba(139,92,246,0.2)" },
+  "Second Class Upper Division": { bg: "rgba(59,130,246,0.1)",  color: "#93c5fd", border: "rgba(59,130,246,0.3)", shadow: "0 4px 30px rgba(59,130,246,0.2)" },
+  "Second Class Lower Division": { bg: "rgba(34,197,94,0.1)",   color: "#86efac", border: "rgba(34,197,94,0.3)", shadow: "0 4px 30px rgba(34,197,94,0.2)" },
+  "General Pass":                { bg: "rgba(234,179,8,0.1)",   color: "#fde047", border: "rgba(234,179,8,0.3)", shadow: "0 4px 30px rgba(234,179,8,0.2)" },
+  "Below Minimum":               { bg: "rgba(239,68,68,0.1)",   color: "#fca5a5", border: "rgba(239,68,68,0.3)", shadow: "0 4px 30px rgba(239,68,68,0.2)" },
+  "Not Enough Data":             { bg: "rgba(148,163,184,0.05)",  color: "#cbd5e1", border: "rgba(148,163,184,0.2)", shadow: "none" },
 };
 
 function getGradeColor(grade: string | null): string {
@@ -110,7 +110,7 @@ export default function GPACalculatorPage() {
     const parse = (n: string) =>
       document.cookie.split("; ").find(r => r.startsWith(n + "="))?.split("=")[1] ?? "";
     const id   = parse("uwu_user_id");
-    const role = parse("uwu_role");
+    const role = parse("uwu_user_role");
     setMyId(id);
     setMyRole(role);
 
@@ -233,8 +233,8 @@ export default function GPACalculatorPage() {
 
   /* ── No user ID (session cookie missing) ── */
   if (!loading && myRole && myRole !== "superadmin" && !myId) return (
-    <div className="container py-16 flex justify-center">
-      <div className="card text-center" style={{ maxWidth: "460px", borderTop: "3px solid var(--warning)" }}>
+    <div className="container py-16 flex justify-center relative z-10">
+      <div className="card text-center" style={{ maxWidth: "460px", borderTop: "3px solid var(--warning)", background: "rgba(15,23,42,0.6)", backdropFilter: "blur(12px)" }}>
         <AlertCircle size={48} style={{ margin: "0 auto 1rem", color: "var(--warning)" }} />
         <h2 className="text-2xl font-bold mb-3">Session Expired</h2>
         <p className="text-muted mb-4">Your session is missing some details. Please log out and log back in to continue.</p>
@@ -246,50 +246,50 @@ export default function GPACalculatorPage() {
   /* ── Superadmin degree selector ── */
   if (myRole === "superadmin" && !curriculumLoaded) {
     return (
-      <div className="container py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
-            <Calculator size={36} style={{ color: "var(--danger)" }} />
+      <div className="container py-12 relative z-10">
+        <div className="mb-10 text-center">
+          <h1 className="text-5xl font-extrabold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-pink-500 inline-flex items-center gap-3">
+            <Calculator size={40} className="text-purple-500" />
             Smart GPA Calculator
           </h1>
-          <p className="text-muted">Superadmin Preview Mode — select a degree programme to inspect its curriculum.</p>
+          <p className="text-lg text-muted max-w-2xl mx-auto">Superadmin Preview Mode — select a degree programme to inspect its curriculum.</p>
         </div>
 
-        <div className="card" style={{ maxWidth: "600px", margin: "0 auto", padding: "2.5rem", borderTop: "3px solid var(--primary)" }}>
-          <div className="flex items-center gap-3 mb-6">
-            <div style={{ padding: "0.75rem", borderRadius: "50%", backgroundColor: "rgba(139,92,246,0.1)" }}>
-              <Eye size={28} style={{ color: "var(--primary)" }} />
+        <div className="card" style={{ maxWidth: "600px", margin: "0 auto", padding: "2.5rem", borderTop: "3px solid var(--primary)", background: "rgba(15,23,42,0.6)", backdropFilter: "blur(16px)", boxShadow: "0 20px 40px rgba(0,0,0,0.4)" }}>
+          <div className="flex items-center gap-4 mb-8">
+            <div style={{ padding: "1rem", borderRadius: "1rem", backgroundColor: "rgba(139,92,246,0.15)", boxShadow: "inset 0 0 10px rgba(139,92,246,0.1)" }}>
+              <Eye size={32} style={{ color: "var(--primary)" }} />
             </div>
             <div>
-              <h2 className="text-xl font-bold">Select Degree Programme</h2>
-              <p className="text-muted text-sm">Preview any degree curriculum as Superadmin</p>
+              <h2 className="text-2xl font-bold">Select Degree Programme</h2>
+              <p className="text-muted text-sm mt-1">Preview any degree curriculum as Superadmin</p>
             </div>
           </div>
 
           {degrees.length === 0 ? (
-            <div className="text-center text-muted py-8">
-              <Loader size={32} style={{ margin: "0 auto 0.5rem", animation: "spin 1s linear infinite" }} />
-              <p>Loading degrees...</p>
+            <div className="text-center text-muted py-12">
+              <Loader size={40} style={{ margin: "0 auto 1rem", animation: "spin 1s linear infinite", color: "var(--primary)" }} />
+              <p className="text-lg">Loading degrees...</p>
               <style>{`@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}`}</style>
             </div>
           ) : (
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-4">
               {degrees.map(d => (
                 <button
                   key={d.degree_code}
                   onClick={() => handleDegreeSelect(d.degree_code)}
-                  className="card text-left flex items-center gap-4"
-                  style={{ cursor: "pointer", padding: "1rem 1.25rem", transition: "all 0.2s", border: "1px solid var(--border)", background: "var(--secondary)" }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--primary)"; (e.currentTarget as HTMLElement).style.transform = "translateX(4px)"; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--border)"; (e.currentTarget as HTMLElement).style.transform = ""; }}>
-                  <div style={{ padding: "0.5rem", borderRadius: "0.5rem", backgroundColor: "rgba(139,92,246,0.1)", flexShrink: 0 }}>
-                    <GraduationCap size={22} style={{ color: "var(--primary)" }} />
+                  className="card text-left flex items-center gap-4 hover-scale"
+                  style={{ cursor: "pointer", padding: "1.25rem", transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)", border: "1px solid rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.02)" }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--primary)"; (e.currentTarget as HTMLElement).style.background = "rgba(139,92,246,0.05)"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.05)"; (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.02)"; }}>
+                  <div style={{ padding: "0.75rem", borderRadius: "0.75rem", backgroundColor: "rgba(139,92,246,0.15)", flexShrink: 0 }}>
+                    <GraduationCap size={24} style={{ color: "var(--primary)" }} />
                   </div>
                   <div>
-                    <div className="font-bold" style={{ color: "var(--primary)" }}>{d.degree_code}</div>
-                    <div className="text-sm text-muted">{d.degree_name}</div>
+                    <div className="font-bold text-lg" style={{ color: "var(--primary)" }}>{d.degree_code}</div>
+                    <div className="text-sm text-muted mt-1">{d.degree_name}</div>
                   </div>
-                  <ChevronRight size={18} className="text-muted" style={{ marginLeft: "auto" }} />
+                  <ChevronRight size={20} className="text-muted" style={{ marginLeft: "auto" }} />
                 </button>
               ))}
             </div>
@@ -301,77 +301,88 @@ export default function GPACalculatorPage() {
 
   /* ── Loading ── */
   if (loading) return (
-    <div className="container py-16 text-center">
-      <Loader size={40} style={{ margin: "0 auto 1rem", color: "var(--danger)", animation: "spin 1s linear infinite" }} />
-      <p className="text-muted">Loading curriculum...</p>
+    <div className="container py-20 text-center relative z-10">
+      <Loader size={48} style={{ margin: "0 auto 1rem", color: "var(--danger)", animation: "spin 1s linear infinite" }} />
+      <p className="text-xl text-muted font-medium mt-4">Analyzing Curriculum Data...</p>
       <style>{`@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}`}</style>
     </div>
   );
 
   /* ── Not eligible ── */
   if (notEligible) return (
-    <div className="container py-16 flex justify-center">
-      <div className="card text-center" style={{ maxWidth: "500px", borderTop: "3px solid var(--warning)" }}>
-        <AlertCircle size={48} style={{ margin: "0 auto 1rem", color: "var(--warning)" }} />
-        <h2 className="text-2xl font-bold mb-3">Feature Not Available</h2>
-        <p className="text-muted mb-4">The Smart GPA Calculator is currently available only for <strong>Faculty of Applied Sciences</strong> students:</p>
-        <div className="flex justify-center gap-2 flex-wrap mb-4">
+    <div className="container py-16 flex justify-center relative z-10">
+      <div className="card text-center shadow-2xl" style={{ maxWidth: "550px", borderTop: "3px solid var(--warning)", background: "rgba(15,23,42,0.6)", backdropFilter: "blur(16px)" }}>
+        <AlertCircle size={56} style={{ margin: "0 auto 1.5rem", color: "var(--warning)" }} />
+        <h2 className="text-3xl font-extrabold mb-4">Feature Not Available</h2>
+        <p className="text-muted mb-6 text-lg">The Smart GPA Calculator is currently available only for <strong>Faculty of Applied Sciences</strong> students:</p>
+        <div className="flex justify-center gap-3 flex-wrap mb-6">
           {["IIT", "CST", "MRT", "SCT"].map(d => (
-            <span key={d} className="badge badge-primary" style={{ fontSize: "0.85rem", padding: "0.4rem 0.8rem" }}>{d}</span>
+            <span key={d} className="badge" style={{ fontSize: "1rem", padding: "0.5rem 1rem", backgroundColor: "rgba(139,92,246,0.1)", color: "var(--primary)", border: "1px solid rgba(139,92,246,0.3)" }}>{d}</span>
           ))}
         </div>
-        <p className="text-muted text-sm">Support for other faculties will be added in a future update.</p>
+        <p className="text-muted text-sm p-3 rounded" style={{ backgroundColor: "rgba(255,255,255,0.03)" }}>Support for other faculties will be added in a future update.</p>
       </div>
     </div>
   );
 
   /* ── Error ── */
   if (error && !curriculumLoaded) return (
-    <div className="container py-8">
-      <div className="p-4 rounded text-sm" style={{ backgroundColor: "rgba(239,68,68,0.1)", color: "var(--danger)", border: "1px solid rgba(239,68,68,0.2)" }}>{error}</div>
+    <div className="container py-12 relative z-10">
+      <div className="p-4 rounded-lg flex items-center gap-3" style={{ backgroundColor: "rgba(239,68,68,0.1)", color: "var(--danger)", border: "1px solid rgba(239,68,68,0.2)" }}>
+        <AlertCircle size={20} />
+        <span className="font-medium">{error}</span>
+      </div>
     </div>
   );
 
   /* ── Main UI ── */
   return (
-    <div className="container py-8">
+    <div className="container py-10 relative z-10">
+      {/* Background Blur Elements */}
+      <div style={{ position: "fixed", top: "-10%", left: "-5%", width: "40vw", height: "40vw", background: "radial-gradient(circle, rgba(139,92,246,0.15) 0%, rgba(0,0,0,0) 70%)", zIndex: -1, pointerEvents: "none", filter: "blur(40px)" }} />
+      <div style={{ position: "fixed", bottom: "-10%", right: "-5%", width: "50vw", height: "50vw", background: "radial-gradient(circle, rgba(236,72,153,0.1) 0%, rgba(0,0,0,0) 70%)", zIndex: -1, pointerEvents: "none", filter: "blur(60px)" }} />
+
       {/* Header */}
-      <div className="flex justify-between items-center mb-8 flex-wrap gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
         <div>
-          <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
-            <Calculator size={36} style={{ color: "var(--danger)" }} />
+          <h1 className="text-5xl font-extrabold mb-3 flex items-center gap-3 bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-orange-500" style={{ letterSpacing: "-0.02em" }}>
+            <Calculator size={42} className="text-red-500" />
             Smart GPA Calculator
           </h1>
           {userInfo && (
-            <p className="text-muted">{userInfo.degree_name}</p>
+            <p className="text-lg font-medium text-foreground">{userInfo.degree_name}</p>
           )}
           {userInfo && !previewMode && (
-            <p className="text-muted text-sm">{userInfo.enrollment_number} · {userInfo.batch}</p>
+            <p className="text-muted mt-1 flex items-center gap-2">
+              <span className="badge" style={{ backgroundColor: "rgba(255,255,255,0.05)" }}>{userInfo.enrollment_number}</span>
+              <span className="badge" style={{ backgroundColor: "rgba(255,255,255,0.05)" }}>Batch {userInfo.batch}</span>
+            </p>
           )}
-        {/* MRT/SCT: show current specialization + change button */}
-        {userInfo && !previewMode && !needsSpecialization && userInfo.raw_degree && ["MRT","SCT"].includes(userInfo.raw_degree) && (
-          <div className="flex items-center gap-2 mt-1">
-            <span className="badge" style={{ backgroundColor: "rgba(234,179,8,0.15)", color: "var(--warning)", border: "1px solid rgba(234,179,8,0.3)" }}>
-              {userInfo.degree_code}
-            </span>
-            <button
-              className="btn text-xs"
-              style={{ padding: "0.25rem 0.75rem", backgroundColor: "rgba(234,179,8,0.1)", color: "var(--warning)", border: "1px solid rgba(234,179,8,0.3)" }}
-              onClick={() => setNeedsSpecialization(true)}>
-              ✎ Change Specialization
-            </button>
-          </div>
-        )}
+          {/* MRT/SCT: show current specialization + change button */}
+          {userInfo && !previewMode && !needsSpecialization && userInfo.raw_degree && ["MRT","SCT"].includes(userInfo.raw_degree) && (
+            <div className="flex items-center gap-3 mt-4">
+              <span className="badge font-bold" style={{ backgroundColor: "rgba(234,179,8,0.15)", color: "var(--warning)", border: "1px solid rgba(234,179,8,0.3)", padding: "0.4rem 0.8rem" }}>
+                Specialization: {userInfo.degree_code}
+              </span>
+              <button
+                className="btn text-xs hover-scale"
+                style={{ padding: "0.4rem 1rem", backgroundColor: "rgba(234,179,8,0.1)", color: "var(--warning)", border: "1px solid rgba(234,179,8,0.3)", transition: "all 0.2s" }}
+                onClick={() => setNeedsSpecialization(true)}>
+                ✎ Change Specialization
+              </button>
+            </div>
+          )}
         </div>
+        
         {/* Superadmin: back button to pick another degree */}
         {myRole === "superadmin" && previewMode && (
-          <div className="flex items-center gap-3">
-            <div className="badge" style={{ backgroundColor: "rgba(139,92,246,0.15)", color: "var(--primary)", border: "1px solid var(--primary)", padding: "0.4rem 1rem", fontSize: "0.8rem" }}>
-              <Eye size={14} style={{ display: "inline", marginRight: "0.4rem" }} />
+          <div className="flex flex-col items-end gap-3 bg-black/40 p-4 rounded-xl border border-white/5 backdrop-blur-md">
+            <div className="badge font-bold text-sm" style={{ backgroundColor: "rgba(139,92,246,0.2)", color: "#c4b5fd", border: "1px solid rgba(139,92,246,0.4)", padding: "0.5rem 1rem" }}>
+              <Eye size={16} style={{ display: "inline", marginRight: "0.5rem", verticalAlign: "text-bottom" }} />
               Preview Mode — {userInfo?.degree_code}
             </div>
-            <button className="btn btn-secondary text-sm" onClick={() => { setCurriculumLoaded(false); setSelectedDegree(""); setCurriculum({}); }}>
-              ← Back to Degrees
+            <button className="btn btn-secondary text-sm hover-scale" onClick={() => { setCurriculumLoaded(false); setSelectedDegree(""); setCurriculum({}); }}>
+              ← Switch Degree
             </button>
           </div>
         )}
@@ -379,167 +390,211 @@ export default function GPACalculatorPage() {
 
       {/* GPA Summary */}
       {userInfo && (
-        <div className="grid gap-4 mb-8" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}>
-          <div className="card text-center" style={{ borderTop: "3px solid var(--danger)" }}>
-            <div className="text-muted text-sm mb-1">Live GPA</div>
-            <div className="text-5xl font-bold mb-1" style={{ color: "var(--danger)" }}>{liveGPA.toFixed(2)}</div>
-            <div className="text-xs text-muted">{previewMode ? "Preview (not saved)" : "from entries below"}</div>
+        <div className="grid gap-6 mb-12" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))" }}>
+          
+          {/* Live GPA Card */}
+          <div className="card text-center relative overflow-hidden" style={{ borderTop: "none", background: "rgba(15,23,42,0.6)", backdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.05)", boxShadow: "0 10px 30px rgba(0,0,0,0.2)" }}>
+            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "4px", background: "linear-gradient(90deg, #ef4444, #f97316)" }} />
+            <div className="text-muted text-sm font-semibold uppercase tracking-wider mb-2 mt-2">Live GPA</div>
+            <div className="text-7xl font-black mb-2" style={{ background: "linear-gradient(180deg, #f87171, #ef4444)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+              {liveGPA.toFixed(2)}
+            </div>
+            <div className="text-xs text-muted bg-white/5 inline-block px-3 py-1 rounded-full">{previewMode ? "Preview (not saved)" : "Calculated from entries below"}</div>
           </div>
+
+          {/* Saved GPA Card */}
           {!previewMode && (
-            <div className="card text-center" style={{ borderTop: "3px solid var(--success)" }}>
-              <div className="text-muted text-sm mb-1">Saved GPA</div>
-              <div className="text-5xl font-bold mb-1" style={{ color: "var(--success)" }}>
+            <div className="card text-center relative overflow-hidden" style={{ borderTop: "none", background: "rgba(15,23,42,0.6)", backdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.05)", boxShadow: "0 10px 30px rgba(0,0,0,0.2)" }}>
+              <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "4px", background: "linear-gradient(90deg, #22c55e, #10b981)" }} />
+              <div className="text-muted text-sm font-semibold uppercase tracking-wider mb-2 mt-2">Saved GPA</div>
+              <div className="text-7xl font-black mb-2" style={{ background: "linear-gradient(180deg, #86efac, #22c55e)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                 {(gpaSummary?.current_gpa ?? 0).toFixed(2)}
               </div>
-              <div className="text-xs text-muted">{gpaSummary?.modules_completed ?? 0} modules · {gpaSummary?.total_gpa_credits ?? 0} GPA credits</div>
+              <div className="text-xs text-muted bg-white/5 inline-block px-3 py-1 rounded-full">{gpaSummary?.modules_completed ?? 0} modules · {gpaSummary?.total_gpa_credits ?? 0} credits</div>
             </div>
           )}
-          <div className="card text-center" style={{ borderTop: `3px solid ${classStyle.border}`, gridColumn: previewMode ? "span 2" : "span 1" }}>
-            <div className="text-muted text-sm mb-2 flex items-center justify-center gap-2">
-              <Award size={16} /> Projected Degree Class
+
+          {/* Projected Class Card */}
+          <div className="card text-center flex flex-col justify-center items-center relative overflow-hidden" style={{ borderTop: "none", gridColumn: previewMode ? "span 2" : "span 1", background: "rgba(15,23,42,0.6)", backdropFilter: "blur(16px)", border: `1px solid ${classStyle.border}`, boxShadow: classStyle.shadow }}>
+            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "4px", background: classStyle.color }} />
+            <div className="text-muted text-sm font-semibold uppercase tracking-wider mb-4 flex items-center justify-center gap-2 mt-2">
+              <Award size={18} style={{ color: classStyle.color }} /> Projected Degree Class
             </div>
-            <div className="text-2xl font-bold" style={{ color: classStyle.color }}>{liveClass}</div>
-            <div className="text-xs text-muted mt-1">Based on grades entered below</div>
+            <div className="text-3xl font-black px-4 leading-tight" style={{ color: classStyle.color, textShadow: `0 0 20px ${classStyle.bg}` }}>{liveClass}</div>
+            <div className="text-xs text-muted mt-4 bg-white/5 inline-block px-3 py-1 rounded-full">Based on Live GPA</div>
           </div>
+
         </div>
       )}
 
       {/* Errors / Messages */}
-      {error    && <div className="mb-4 p-3 rounded text-sm" style={{ backgroundColor: "rgba(239,68,68,0.1)", color: "var(--danger)", border: "1px solid rgba(239,68,68,0.2)" }}>{error}</div>}
-      {saveMsg  && <div className="mb-4 p-3 rounded text-sm" style={{ backgroundColor: "rgba(34,197,94,0.1)", color: "var(--success)", border: "1px solid rgba(34,197,94,0.3)" }}>{saveMsg}</div>}
-
-      {/* Preview mode banner */}
-      {previewMode && (
-        <div className="mb-6 p-3 rounded text-sm flex items-center gap-2" style={{ backgroundColor: "rgba(139,92,246,0.1)", color: "var(--primary)", border: "1px solid rgba(139,92,246,0.3)" }}>
-          <Eye size={16} />
-          <strong>Superadmin Preview Mode:</strong> Grade entries are for inspection only. Saving is disabled in preview mode.
+      {error && (
+        <div className="mb-6 p-4 rounded-lg flex items-center gap-3 backdrop-blur-md" style={{ backgroundColor: "rgba(239,68,68,0.1)", color: "#fca5a5", border: "1px solid rgba(239,68,68,0.3)" }}>
+          <AlertCircle size={20} className="flex-shrink-0" /> <span className="font-medium">{error}</span>
+        </div>
+      )}
+      {saveMsg && (
+        <div className="mb-6 p-4 rounded-lg flex items-center gap-3 backdrop-blur-md" style={{ backgroundColor: "rgba(34,197,94,0.1)", color: "#86efac", border: "1px solid rgba(34,197,94,0.3)" }}>
+          <CheckCircle size={20} className="flex-shrink-0" /> <span className="font-medium">{saveMsg}</span>
         </div>
       )}
 
-      {/* Save button (students only) */}
+      {/* Preview mode banner */}
+      {previewMode && (
+        <div className="mb-8 p-4 rounded-xl flex items-center gap-3 backdrop-blur-md shadow-lg" style={{ backgroundColor: "rgba(139,92,246,0.15)", color: "#c4b5fd", border: "1px solid rgba(139,92,246,0.3)" }}>
+          <Eye size={20} className="flex-shrink-0" />
+          <div>
+            <strong className="block mb-1">Superadmin Preview Mode Active</strong>
+            <span className="text-sm opacity-90">Grade entries are for inspection only. Saving is disabled in preview mode.</span>
+          </div>
+        </div>
+      )}
+
+      {/* Save button (students only) Top */}
       {!previewMode && (
-        <div className="flex justify-end mb-6">
-          <button className="btn btn-primary" onClick={handleSave} disabled={saving} style={{ backgroundColor: "var(--danger)", opacity: saving ? 0.7 : 1 }}>
-            <Save size={18} /> {saving ? "Saving..." : "Save Grades"}
+        <div className="flex justify-end mb-6 sticky top-4 z-50">
+          <button className="btn btn-primary hover-scale shadow-2xl" onClick={handleSave} disabled={saving} style={{ backgroundColor: "var(--danger)", padding: "0.85rem 2rem", opacity: saving ? 0.7 : 1, borderRadius: "2rem", border: "1px solid rgba(255,255,255,0.2)" }}>
+            <Save size={20} /> {saving ? "Saving..." : "Save All Grades"}
           </button>
         </div>
       )}
 
       {/* Specialization selector (MRT / SCT students) */}
       {needsSpecialization && specOptions.length > 0 && (
-        <div className="card mb-8 overflow-hidden" style={{ borderTop: "3px solid var(--warning)" }}>
-          <div className="p-5" style={{ backgroundColor: "rgba(234,179,8,0.07)" }}>
-            <h3 className="text-lg font-bold mb-1 flex items-center gap-2">
-              <Award size={20} style={{ color: "var(--warning)" }} />
-              Choose Your Specialization
+        <div className="card mb-10 overflow-hidden shadow-2xl" style={{ borderTop: "none", background: "rgba(15,23,42,0.7)", backdropFilter: "blur(16px)", border: "1px solid rgba(234,179,8,0.3)" }}>
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "4px", background: "var(--warning)" }} />
+          <div className="p-8">
+            <h3 className="text-2xl font-black mb-3 flex items-center gap-3" style={{ color: "var(--warning)" }}>
+              <Award size={28} /> Choose Your Specialization
             </h3>
-            <p className="text-muted text-sm mb-4">
+            <p className="text-muted mb-6 text-lg">
               <strong>{baseDegree}</strong> students select a specialization at Level 300 (Year 3). Years 1 &amp; 2 are shown below.
               Once you select your specialization, the full 4-year curriculum will load permanently.
             </p>
-            {specError && <div className="mb-3 p-2 rounded text-sm" style={{ backgroundColor: "rgba(239,68,68,0.1)", color: "var(--danger)" }}>{specError}</div>}
-            <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
+            {specError && <div className="mb-4 p-3 rounded-lg flex items-center gap-2" style={{ backgroundColor: "rgba(239,68,68,0.1)", color: "#fca5a5", border: "1px solid rgba(239,68,68,0.2)" }}><AlertCircle size={16}/>{specError}</div>}
+            
+            <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))" }}>
               {specOptions.map(opt => (
                 <button
                   key={opt.code}
                   disabled={settingSpec}
                   onClick={() => handleSelectSpec(opt.code)}
-                  className="card text-left flex items-center gap-3"
-                  style={{ cursor: "pointer", padding: "1rem 1.25rem", border: "1px solid var(--border)", background: "var(--secondary)", opacity: settingSpec ? 0.7 : 1, transition: "all 0.2s" }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--warning)"; (e.currentTarget as HTMLElement).style.transform = "translateX(4px)"; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--border)"; (e.currentTarget as HTMLElement).style.transform = ""; }}>
-                  <div style={{ padding: "0.5rem", borderRadius: "0.5rem", backgroundColor: "rgba(234,179,8,0.15)", flexShrink: 0 }}>
-                    <GraduationCap size={20} style={{ color: "var(--warning)" }} />
+                  className="card text-left flex items-center gap-4 hover-scale"
+                  style={{ cursor: "pointer", padding: "1.5rem", border: "1px solid rgba(234,179,8,0.2)", background: "rgba(255,255,255,0.03)", opacity: settingSpec ? 0.7 : 1, transition: "all 0.3s" }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--warning)"; (e.currentTarget as HTMLElement).style.background = "rgba(234,179,8,0.05)"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(234,179,8,0.2)"; (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.03)"; }}>
+                  <div style={{ padding: "0.85rem", borderRadius: "1rem", backgroundColor: "rgba(234,179,8,0.15)", flexShrink: 0, boxShadow: "inset 0 0 10px rgba(234,179,8,0.1)" }}>
+                    <GraduationCap size={28} style={{ color: "var(--warning)" }} />
                   </div>
                   <div>
-                    <div className="font-bold text-sm" style={{ color: "var(--warning)" }}>{baseDegree}-{opt.code}</div>
-                    <div className="text-xs text-muted">{opt.label}</div>
+                    <div className="font-bold text-lg mb-1" style={{ color: "var(--warning)" }}>{baseDegree}-{opt.code}</div>
+                    <div className="text-sm text-muted">{opt.label}</div>
                   </div>
-                  <ChevronRight size={16} className="text-muted" style={{ marginLeft: "auto" }} />
+                  <ChevronRight size={20} className="text-muted" style={{ marginLeft: "auto" }} />
                 </button>
               ))}
             </div>
           </div>
-          <div className="p-3 text-xs text-muted text-center" style={{ borderTop: "1px solid var(--border)", backgroundColor: "rgba(255,255,255,0.02)" }}>
+          <div className="p-4 text-sm text-muted text-center" style={{ borderTop: "1px solid rgba(255,255,255,0.05)", backgroundColor: "rgba(0,0,0,0.2)" }}>
             You can change your specialization anytime using the "Change Specialization" button in the header.
           </div>
         </div>
       )}
 
       {/* Curriculum Accordion */}
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-6">
         {Object.entries(curriculum).sort(([a], [b]) => +a - +b).map(([yr, yearData]) => (
-          <div key={yr} className="card p-0 overflow-hidden">
-            <button onClick={() => toggleYear(yr)} className="w-full flex justify-between items-center p-5"
-              style={{ width: "100%", background: "rgba(255,255,255,0.03)", borderBottom: openYears[yr] ? "1px solid var(--border)" : "none", cursor: "pointer", color: "var(--foreground)" }}>
-              <span className="text-xl font-bold flex items-center gap-3">
-                <BookOpen size={20} style={{ color: "var(--primary)" }} />
-                Level {yr}00 — Year {yr}
+          <div key={yr} className="card p-0 overflow-hidden shadow-xl" style={{ background: "rgba(15,23,42,0.5)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "1rem" }}>
+            <button onClick={() => toggleYear(yr)} className="w-full flex justify-between items-center p-6 transition-colors"
+              style={{ background: openYears[yr] ? "rgba(255,255,255,0.05)" : "transparent", borderBottom: openYears[yr] ? "1px solid rgba(255,255,255,0.05)" : "none", cursor: "pointer" }}>
+              <span className="text-2xl font-black flex items-center gap-4 text-foreground tracking-tight">
+                <div style={{ padding: "0.5rem", background: "rgba(139,92,246,0.15)", borderRadius: "0.5rem", color: "var(--primary)" }}>
+                  <BookOpen size={24} />
+                </div>
+                Level {yr}00 <span className="opacity-40 px-2 font-normal">|</span> Year {yr}
               </span>
-              {openYears[yr] ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+              <div style={{ padding: "0.5rem", borderRadius: "50%", background: "rgba(255,255,255,0.05)" }}>
+                {openYears[yr] ? <ChevronDown size={24} /> : <ChevronRight size={24} />}
+              </div>
             </button>
 
             {openYears[yr] && (
-              <div className="p-4 flex flex-col gap-4">
+              <div className="p-6 flex flex-col gap-6 bg-black/20">
                 {Object.entries(yearData).sort(([a], [b]) => +a - +b).map(([sem, semData]) => {
                   const semKey = `${yr}-${sem}`;
                   return (
-                    <div key={sem} style={{ border: "1px solid var(--border)", borderRadius: "0.5rem", overflow: "hidden" }}>
-                      <button onClick={() => toggleSem(semKey)} className="w-full flex justify-between items-center p-4"
-                        style={{ width: "100%", backgroundColor: "rgba(255,255,255,0.03)", cursor: "pointer", color: "var(--foreground)" }}>
-                        <span className="font-semibold">Semester {sem}</span>
-                        {openSems[semKey] ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                    <div key={sem} style={{ border: "1px solid rgba(255,255,255,0.05)", borderRadius: "1rem", overflow: "hidden", background: "rgba(15,23,42,0.4)" }}>
+                      <button onClick={() => toggleSem(semKey)} className="w-full flex justify-between items-center p-5 transition-colors hover:bg-white/5"
+                        style={{ background: openSems[semKey] ? "rgba(255,255,255,0.03)" : "transparent", cursor: "pointer", borderBottom: openSems[semKey] ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
+                        <span className="text-lg font-bold text-foreground">Semester {sem}</span>
+                        {openSems[semKey] ? <ChevronDown size={20} className="text-muted" /> : <ChevronRight size={20} className="text-muted" />}
                       </button>
 
                       {openSems[semKey] && (
-                        <div className="p-4 flex flex-col gap-4">
+                        <div className="p-5 flex flex-col gap-6">
                           {Object.values(semData).map(grp => {
                             const grpColor = GROUP_TYPE_COLORS[grp.group_type] ?? "var(--primary)";
                             return (
-                              <div key={grp.group_id}>
-                                <div className="flex items-center gap-2 mb-3">
-                                  <span style={{ width: "10px", height: "10px", borderRadius: "50%", backgroundColor: grpColor, flexShrink: 0, display: "inline-block" }} />
-                                  <span className="font-semibold text-sm" style={{ color: grpColor }}>{grp.group_name}</span>
+                              <div key={grp.group_id} className="bg-white/5 p-5 rounded-xl border border-white/5">
+                                <div className="flex items-center gap-3 mb-5">
+                                  <span style={{ width: "12px", height: "12px", borderRadius: "50%", backgroundColor: grpColor, flexShrink: 0, boxShadow: `0 0 10px ${grpColor}` }} />
+                                  <span className="font-bold tracking-wide uppercase text-sm" style={{ color: grpColor, letterSpacing: "0.05em" }}>{grp.group_name}</span>
                                   {grp.min_credits_required > 0 && (
-                                    <span className="text-xs text-muted">({grp.min_credits_required} credits required)</span>
+                                    <span className="text-xs text-muted font-medium bg-black/40 px-3 py-1 rounded-full border border-white/5">
+                                      {grp.min_credits_required} credits required
+                                    </span>
                                   )}
                                 </div>
                                 <div style={{ overflowX: "auto" }}>
-                                  <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                                  <table style={{ width: "100%", borderCollapse: "separate", borderSpacing: "0 0.5rem" }}>
                                     <thead>
-                                      <tr style={{ backgroundColor: "rgba(255,255,255,0.03)" }}>
-                                        {["Module Code", "Module Name", "Credits", "GPA?", "Grade"].map(h => (
-                                          <th key={h} className="p-3 text-left text-xs font-semibold text-muted" style={{ borderBottom: "1px solid var(--border)", whiteSpace: "nowrap" }}>{h}</th>
+                                      <tr>
+                                        {["Module Code", "Module Name", "Credits", "Type", "Grade"].map(h => (
+                                          <th key={h} className="pb-3 px-4 text-left text-xs font-bold text-muted uppercase tracking-wider" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)", whiteSpace: "nowrap" }}>{h}</th>
                                         ))}
                                       </tr>
                                     </thead>
                                     <tbody>
                                       {grp.modules.map(mod => {
                                         const sel = localGrades[mod.module_id] ?? "";
+                                        const gradeColor = getGradeColor(sel || null);
                                         return (
-                                          <tr key={mod.module_id} style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}
-                                            onMouseEnter={e => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.02)")}
-                                            onMouseLeave={e => (e.currentTarget.style.backgroundColor = "")}>
-                                            <td className="p-3 font-mono text-sm" style={{ whiteSpace: "nowrap" }}>{mod.module_code}</td>
-                                            <td className="p-3 text-sm">
-                                              {mod.module_name}
-                                              {!mod.is_mandatory && <span className="text-xs text-muted ml-2">(Pool)</span>}
+                                          <tr key={mod.module_id} style={{ transition: "all 0.2s" }}
+                                            className="group"
+                                            onMouseEnter={e => (e.currentTarget.style.transform = "scale(1.01)")}
+                                            onMouseLeave={e => (e.currentTarget.style.transform = "scale(1)")}>
+                                            <td className="p-4 font-mono text-sm font-semibold text-foreground bg-black/20 rounded-l-lg border-y border-l border-white/5 group-hover:bg-white/5" style={{ whiteSpace: "nowrap" }}>{mod.module_code}</td>
+                                            <td className="p-4 text-sm text-foreground bg-black/20 border-y border-white/5 group-hover:bg-white/5">
+                                              <span className="font-medium">{mod.module_name}</span>
+                                              {!mod.is_mandatory && <span className="ml-3 text-xs bg-black/40 text-muted px-2 py-1 rounded border border-white/5">Pool</span>}
                                             </td>
-                                            <td className="p-3 text-sm text-center">{mod.credits}</td>
-                                            <td className="p-3 text-center">
+                                            <td className="p-4 text-sm font-semibold text-center text-foreground bg-black/20 border-y border-white/5 group-hover:bg-white/5">{mod.credits}</td>
+                                            <td className="p-4 text-center bg-black/20 border-y border-white/5 group-hover:bg-white/5">
                                               {mod.is_gpa ? (
-                                                <span className="badge" style={{ backgroundColor: "rgba(34,197,94,0.15)", color: "var(--success)", fontSize: "0.65rem" }}>GPA</span>
+                                                <span className="badge font-bold" style={{ backgroundColor: "rgba(34,197,94,0.1)", color: "#86efac", fontSize: "0.7rem", border: "1px solid rgba(34,197,94,0.2)" }}>GPA</span>
                                               ) : (
-                                                <span className="badge" style={{ backgroundColor: "rgba(148,163,184,0.1)", color: "#94a3b8", fontSize: "0.65rem" }}>Non-GPA</span>
+                                                <span className="badge font-bold" style={{ backgroundColor: "rgba(148,163,184,0.1)", color: "#cbd5e1", fontSize: "0.7rem", border: "1px solid rgba(148,163,184,0.2)" }}>Non-GPA</span>
                                               )}
                                             </td>
-                                            <td className="p-3">
-                                              <select className="form-input text-sm"
-                                                style={{ padding: "0.3rem 0.5rem", width: "80px", color: getGradeColor(sel || null), opacity: previewMode ? 0.8 : 1 }}
-                                                value={sel}
-                                                onChange={e => handleGradeChange(mod.module_id, e.target.value)}>
-                                                {GRADES.map(g => <option key={g} value={g}>{g || "—"}</option>)}
-                                              </select>
+                                            <td className="p-4 bg-black/20 rounded-r-lg border-y border-r border-white/5 group-hover:bg-white/5 text-right">
+                                              <div className="relative inline-block">
+                                                <select className="form-input text-base font-bold cursor-pointer appearance-none outline-none"
+                                                  style={{ 
+                                                    padding: "0.5rem 2rem 0.5rem 1rem", 
+                                                    width: "100px", 
+                                                    color: sel ? gradeColor : "var(--muted)", 
+                                                    backgroundColor: sel ? `${gradeColor}1A` : "rgba(0,0,0,0.3)",
+                                                    border: `1px solid ${sel ? gradeColor + "4D" : "rgba(255,255,255,0.1)"}`,
+                                                    opacity: previewMode ? 0.8 : 1,
+                                                    borderRadius: "0.5rem",
+                                                    boxShadow: sel ? `0 0 15px ${gradeColor}33` : "none"
+                                                  }}
+                                                  value={sel}
+                                                  onChange={e => handleGradeChange(mod.module_id, e.target.value)}>
+                                                  {GRADES.map(g => <option key={g} value={g} className="bg-slate-900 text-white">{g || "—"}</option>)}
+                                                </select>
+                                                <ChevronDown size={14} className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none" style={{ color: sel ? gradeColor : "var(--muted)" }} />
+                                              </div>
                                             </td>
                                           </tr>
                                         );
@@ -564,25 +619,30 @@ export default function GPACalculatorPage() {
       {/* Bottom save + grade reference */}
       {!previewMode && (
         <div className="flex justify-end mt-8 gap-4 items-center">
-          {saveMsg && <span className="text-sm" style={{ color: "var(--success)" }}>{saveMsg}</span>}
-          <button className="btn btn-primary" onClick={handleSave} disabled={saving} style={{ backgroundColor: "var(--danger)", padding: "0.75rem 2rem", opacity: saving ? 0.7 : 1 }}>
-            <Save size={18} /> {saving ? "Saving..." : "Save All Grades"}
+          {saveMsg && <span className="text-sm font-medium" style={{ color: "#86efac" }}>{saveMsg}</span>}
+          <button className="btn btn-primary hover-scale shadow-xl" onClick={handleSave} disabled={saving} style={{ backgroundColor: "var(--danger)", padding: "0.85rem 2.5rem", opacity: saving ? 0.7 : 1, borderRadius: "2rem", border: "1px solid rgba(255,255,255,0.2)" }}>
+            <Save size={20} /> {saving ? "Saving..." : "Save All Grades"}
           </button>
         </div>
       )}
 
-      <div className="card mt-8 p-4">
-        <div className="font-semibold mb-3 flex items-center gap-2 text-sm">
-          <TrendingUp size={16} style={{ color: "var(--primary)" }} /> Grade Reference (UWU Scale)
+      {/* Grade Reference Guide */}
+      <div className="card mt-16 p-8 shadow-2xl relative overflow-hidden" style={{ background: "rgba(15,23,42,0.6)", backdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "1.5rem" }}>
+        <div style={{ position: "absolute", top: 0, left: 0, width: "4px", height: "100%", background: "var(--primary)" }} />
+        <div className="text-xl font-black mb-6 flex items-center gap-3 tracking-tight">
+          <TrendingUp size={24} style={{ color: "var(--primary)" }} /> Grade Reference <span className="font-normal text-muted opacity-60">| UWU Scale</span>
         </div>
-        <div className="grid gap-2" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))" }}>
-          {[["A+/A","4.00","90–100"],["A-","3.70","70–79"],["B+","3.30","60–69"],["B","3.00","55–59"],["B-","2.70","50–54"],["C+","2.30","45–49"],["C","2.00","40–44"],["C-","1.70","35–39"],["D+","1.30","30–34"],["D","1.00","25–29"],["E","0.00","0–24"]].map(([g, gpv, range]) => (
-            <div key={g} className="text-center" style={{ padding: "0.4rem", backgroundColor: "rgba(255,255,255,0.03)", borderRadius: "0.4rem" }}>
-              <div className="font-bold text-sm" style={{ color: getGradeColor(g.split("/")[0]) }}>{g}</div>
-              <div className="text-xs text-muted">GPV {gpv}</div>
-              <div className="text-xs text-muted">{range}%</div>
-            </div>
-          ))}
+        <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))" }}>
+          {[["A+/A","4.00","90–100"],["A-","3.70","70–79"],["B+","3.30","60–69"],["B","3.00","55–59"],["B-","2.70","50–54"],["C+","2.30","45–49"],["C","2.00","40–44"],["C-","1.70","35–39"],["D+","1.30","30–34"],["D","1.00","25–29"],["E","0.00","0–24"]].map(([g, gpv, range]) => {
+            const color = getGradeColor(g.split("/")[0]);
+            return (
+              <div key={g} className="text-center p-3 rounded-xl transition-transform hover:-translate-y-1" style={{ backgroundColor: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.05)", boxShadow: `inset 0 0 0 1px ${color}1A` }}>
+                <div className="font-black text-xl mb-1" style={{ color: color, textShadow: `0 0 10px ${color}4D` }}>{g}</div>
+                <div className="text-sm font-semibold text-foreground">{gpv}</div>
+                <div className="text-xs text-muted font-medium mt-1">{range}%</div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

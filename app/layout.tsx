@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { logoutAction } from "./actions/auth";
 import { Shield } from "lucide-react";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
+const outfit = Outfit({ subsets: ["latin"], variable: '--font-outfit' });
 
 export const metadata: Metadata = {
   title: "UWU-NEXUS",
@@ -25,7 +26,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={`${inter.variable} ${outfit.variable} font-sans`}>
         <nav className="navbar">
           <div className="container flex justify-between items-center" style={{ flexWrap: 'wrap', gap: '1rem' }}>
             <Link href="/" className="flex items-center gap-3 font-bold text-xl gradient-text">
