@@ -49,7 +49,7 @@ export default function TicketsPage() {
 
   // Pre-fill user data if logged in
   useEffect(() => {
-    fetch("http://localhost:8000/get_ticketed_events.php")
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/get_ticketed_events.php`)
       .then(r => r.json())
       .then(d => {
         if (d.success) setEvents(d.events);
@@ -69,7 +69,7 @@ export default function TicketsPage() {
       const parseCookie = (name: string) => document.cookie.split("; ").find(r => r.startsWith(name + "="))?.split("=")[1];
       const userId = parseCookie("uwu_user_id");
 
-      const phpRes = await fetch("http://localhost:8000/create_stripe_order.php", {
+      const phpRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/create_stripe_order.php`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

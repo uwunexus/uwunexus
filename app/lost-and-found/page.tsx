@@ -52,7 +52,7 @@ export default function LostAndFoundPage() {
 
   const fetchReports = async () => {
     try {
-      const res = await fetch("http://localhost:8000/get_lost_found.php");
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/get_lost_found.php`);
       const data = await res.json();
       if (data.success) {
         setReports(data.items);
@@ -74,7 +74,7 @@ export default function LostAndFoundPage() {
         files.map(file => uploadToCloudinary(file, "uwunexus/lostandfound"))
       );
 
-      const res = await fetch("http://localhost:8000/create_lost_found.php", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/create_lost_found.php`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -104,7 +104,7 @@ export default function LostAndFoundPage() {
   const handleMarkResolved = async (id: number) => {
     if (!confirm("Are you sure you want to mark this as Found/Resolved?")) return;
     try {
-      const res = await fetch("http://localhost:8000/update_lost_found.php", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/update_lost_found.php`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, user_id: +myId, status: 'resolved' })

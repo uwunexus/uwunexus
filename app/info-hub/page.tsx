@@ -19,7 +19,7 @@ export default function InfoHubPage() {
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    fetch("http://localhost:8000/get_info_hub.php")
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/get_info_hub.php`)
       .then(res => res.json())
       .then(data => {
         if (data.success) {

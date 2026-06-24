@@ -50,7 +50,7 @@ export default function EventsPage() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
   useEffect(() => {
-    fetch("http://localhost:8000/get_events.php")
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/get_events.php`)
       .then(r => r.json())
       .then(data => {
         if (data.success) setEvents(data.events);

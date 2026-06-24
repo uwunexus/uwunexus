@@ -23,7 +23,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8000/login.php", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login.php`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

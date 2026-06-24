@@ -20,7 +20,7 @@ function VerifyEmailContent() {
 
     const verify = async () => {
       try {
-        const res = await fetch("http://localhost:8000/verify_email.php", {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/verify_email.php`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ token }),

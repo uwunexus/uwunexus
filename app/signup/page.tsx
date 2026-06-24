@@ -30,7 +30,7 @@ export default function SignUpPage() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8000/signup.php", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/signup.php`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

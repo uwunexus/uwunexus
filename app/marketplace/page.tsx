@@ -62,14 +62,14 @@ export default function MarketplacePage() {
 
     const fetchAll = async () => {
       try {
-        const catRes = await fetch("http://localhost:8000/get_marketplace_categories.php").then(r => r.json());
+        const catRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/get_marketplace_categories.php`).then(r => r.json());
         if (catRes.success) setCategories(catRes.categories);
 
-        const itemsRes = await fetch("http://localhost:8000/get_marketplace_items.php").then(r => r.json());
+        const itemsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/get_marketplace_items.php`).then(r => r.json());
         if (itemsRes.success) setItems(itemsRes.items);
 
         if (cookieId) {
-          const myRes = await fetch(`http://localhost:8000/get_marketplace_items.php?seller_id=${cookieId}`).then(r => r.json());
+          const myRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/get_marketplace_items.php?seller_id=${cookieId}`).then(r => r.json());
           if (myRes.success) setMyItems(myRes.items);
         }
       } catch (e) {
@@ -106,7 +106,7 @@ export default function MarketplacePage() {
   const handleUpdateStatus = async (itemId: number, newStatus: string) => {
     if (!confirm(`Are you sure you want to mark this as ${newStatus}?`)) return;
     try {
-      const res = await fetch("http://localhost:8000/update_marketplace_item.php", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/update_marketplace_item.php`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: itemId, seller_id: +myId, status: newStatus })
@@ -137,8 +137,8 @@ export default function MarketplacePage() {
       );
 
       const endpoint = editingItem 
-        ? "http://localhost:8000/update_marketplace_item.php" 
-        : "http://localhost:8000/create_marketplace_item.php";
+        ? `${process.env.NEXT_PUBLIC_API_URL}/update_marketplace_item.php` 
+        : `${process.env.NEXT_PUBLIC_API_URL}/create_marketplace_item.php`;
 
       const payload: any = {
         ...form,
@@ -159,7 +159,7 @@ export default function MarketplacePage() {
         alert(data.message || (editingItem ? "Listing updated successfully! It is pending approval." : "Listing created successfully! It is pending approval."));
         setShowModal(false);
         // Refresh My Items
-        const myRes = await fetch(`http://localhost:8000/get_marketplace_items.php?seller_id=${myId}`).then(r => r.json());
+        const myRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/get_marketplace_items.php?seller_id=${myId}`).then(r => r.json());
         if (myRes.success) setMyItems(myRes.items);
       } else {
         alert(data.message);

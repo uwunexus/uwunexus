@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     if (order_id) {
       try {
         // Ping internal PHP API to update database securely
-        await fetch("http://localhost:8000/update_stripe_order.php", {
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/update_stripe_order.php`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

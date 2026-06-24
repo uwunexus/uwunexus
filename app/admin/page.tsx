@@ -83,7 +83,7 @@ export default function AdminPage() {
     if (!myId) return;
     setUsersLoading(true);
     try {
-      const r = await fetch(`http://localhost:8000/users.php?requester_id=${myId}`);
+      const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users.php?requester_id=${myId}`);
       const d = await r.json();
       if (d.success) setUsers(d.users);
     } finally { setUsersLoading(false); }
@@ -93,7 +93,7 @@ export default function AdminPage() {
 
   const updateUserRole = async (targetId: number, newRole: string) => {
     setUpdatingUserId(targetId);
-    await fetch("http://localhost:8000/update_role.php", {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/update_role.php`, {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ requester_id: +myId, target_id: targetId, new_role: newRole }),
     });
@@ -104,7 +104,7 @@ export default function AdminPage() {
   const deleteUser = async (targetId: number) => {
     if (!confirm("Are you sure you want to permanently delete this user? This cannot be undone.")) return;
     try {
-      const res = await fetch("http://localhost:8000/delete_user.php", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/delete_user.php`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ requester_id: +myId, target_id: targetId }),
       });
@@ -136,7 +136,7 @@ export default function AdminPage() {
     if (!myId) return;
     setEventsLoading(true);
     try {
-      const r = await fetch(`http://localhost:8000/get_events.php?requester_id=${myId}&status=all`);
+      const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/get_events.php?requester_id=${myId}&status=all`);
       const d = await r.json();
       if (d.success) setEvents(d.events);
     } finally { setEventsLoading(false); }
@@ -145,7 +145,7 @@ export default function AdminPage() {
   useEffect(() => { if (myId && tab === "events") fetchEvents(); }, [myId, tab, fetchEvents]);
 
   const updateEventStatus = async (eventId: number, status: string) => {
-    await fetch("http://localhost:8000/update_event_status.php", {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/update_event_status.php`, {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ requester_id: +myId, event_id: eventId, status }),
     });
@@ -154,7 +154,7 @@ export default function AdminPage() {
 
   const deleteEvent = async (eventId: number) => {
     if (!confirm("Delete this event permanently?")) return;
-    await fetch("http://localhost:8000/delete_event.php", {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/delete_event.php`, {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ requester_id: +myId, event_id: eventId }),
     });
@@ -193,7 +193,7 @@ export default function AdminPage() {
     if (!myId) return;
     setTicketsLoading(true);
     try {
-      const r = await fetch(`http://localhost:8000/get_ticketed_events.php?all=true`);
+      const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/get_ticketed_events.php?all=true`);
       const d = await r.json();
       if (d.success) setTickets(d.events);
     } finally { setTicketsLoading(false); }
@@ -203,7 +203,7 @@ export default function AdminPage() {
     if (!myId) return;
     setPurchasesLoading(true);
     try {
-      const r = await fetch(`http://localhost:8000/get_ticket_purchases.php?user_id=${myId}`);
+      const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/get_ticket_purchases.php?user_id=${myId}`);
       const d = await r.json();
       if (d.success) setPurchases(d.purchases);
     } finally { setPurchasesLoading(false); }
@@ -213,7 +213,7 @@ export default function AdminPage() {
   useEffect(() => { if (myId && tab === "tickets" && ticketSubTab === "purchases") fetchPurchases(); }, [myId, tab, ticketSubTab, fetchPurchases]);
 
   const updateTicketStatus = async (ticketId: number, status: string) => {
-    await fetch("http://localhost:8000/update_ticket_status.php", {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/update_ticket_status.php`, {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ user_id: +myId, id: ticketId, status }),
     });
@@ -222,7 +222,7 @@ export default function AdminPage() {
 
   const deleteTicket = async (ticketId: number) => {
     if (!confirm("Delete this ticketed event permanently?")) return;
-    await fetch("http://localhost:8000/delete_ticket_event.php", {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/delete_ticket_event.php`, {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ user_id: +myId, id: ticketId }),
     });
@@ -245,7 +245,7 @@ export default function AdminPage() {
     if (!myId) return;
     setMarketplaceLoading(true);
     try {
-      const r = await fetch(`http://localhost:8000/get_marketplace_items.php?admin=true`);
+      const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/get_marketplace_items.php?admin=true`);
       const d = await r.json();
       if (d.success) setMarketplaceItems(d.items);
     } finally { setMarketplaceLoading(false); }
@@ -256,7 +256,7 @@ export default function AdminPage() {
   const updateMarketplaceStatus = async (itemId: number, action: string) => {
     if (!confirm(`Are you sure you want to ${action} this item?`)) return;
     try {
-      const r = await fetch("http://localhost:8000/admin_delete_marketplace_item.php", {
+      const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin_delete_marketplace_item.php`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ item_id: itemId, user_id: +myId, action })
       });
@@ -284,7 +284,7 @@ export default function AdminPage() {
     if (!myId) return;
     setLostFoundLoading(true);
     try {
-      const r = await fetch(`http://localhost:8000/get_lost_found.php`);
+      const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/get_lost_found.php`);
       const d = await r.json();
       if (d.success) setLostFoundItems(d.items);
     } finally { setLostFoundLoading(false); }
@@ -295,7 +295,7 @@ export default function AdminPage() {
   const deleteLostFoundItem = async (itemId: number) => {
     if (!confirm("Are you sure you want to permanently delete this report?")) return;
     try {
-      const r = await fetch("http://localhost:8000/delete_lost_found.php", {
+      const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/delete_lost_found.php`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: itemId, user_id: +myId })
       });
@@ -319,7 +319,7 @@ export default function AdminPage() {
   const fetchInfoHub = useCallback(async () => {
     setInfoHubLoading(true);
     try {
-      const r = await fetch(`http://localhost:8000/get_info_hub.php`);
+      const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/get_info_hub.php`);
       const d = await r.json();
       if (d.success) setInfoHubItems(d.items);
     } finally { setInfoHubLoading(false); }
@@ -330,7 +330,7 @@ export default function AdminPage() {
   const deleteInfoHubItem = async (itemId: number) => {
     if (!confirm("Are you sure you want to delete this Info Hub item?")) return;
     try {
-      const r = await fetch("http://localhost:8000/delete_info_hub.php", {
+      const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/delete_info_hub.php`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: itemId, user_id: +myId })
       });
@@ -1053,7 +1053,7 @@ function EventFormModal({ myId, initialData, onClose, onSaved }: { myId: string;
         image_url = await uploadToCloudinary(imageFile, "uwunexus/events");
         setUploading(false);
       }
-      const endpoint = initialData ? "http://localhost:8000/update_event.php" : "http://localhost:8000/create_event.php";
+      const endpoint = initialData ? `${process.env.NEXT_PUBLIC_API_URL}/update_event.php` : `${process.env.NEXT_PUBLIC_API_URL}/create_event.php`;
       const payload = initialData ? { ...form, image_url, requester_id: +myId, id: initialData.id } : { ...form, image_url, requester_id: +myId };
       const res = await fetch(endpoint, {
         method: "POST", headers: { "Content-Type": "application/json" },
@@ -1195,7 +1195,7 @@ function TicketFormModal({ myId, initialData, onClose, onSaved }: { myId: string
         setUploading(false);
       }
 
-      const endpoint = initialData ? "http://localhost:8000/update_ticket_event.php" : "http://localhost:8000/create_ticket_event.php";
+      const endpoint = initialData ? `${process.env.NEXT_PUBLIC_API_URL}/update_ticket_event.php` : `${process.env.NEXT_PUBLIC_API_URL}/create_ticket_event.php`;
       const payload = initialData ? { ...form, image_url, requester_id: +myId, id: initialData.id } : { ...form, image_url, created_by: +myId };
       const res = await fetch(endpoint, {
         method: "POST", headers: { "Content-Type": "application/json" },
@@ -1300,7 +1300,7 @@ function InfoHubFormModal({ myId, initialData, onClose, onSaved }: { myId: strin
     e.preventDefault();
     setSubmitting(true); setError("");
     try {
-      const endpoint = initialData ? "http://localhost:8000/update_info_hub.php" : "http://localhost:8000/create_info_hub.php";
+      const endpoint = initialData ? `${process.env.NEXT_PUBLIC_API_URL}/update_info_hub.php` : `${process.env.NEXT_PUBLIC_API_URL}/create_info_hub.php`;
       const payload = initialData ? { ...form, user_id: +myId, id: initialData.id } : { ...form, user_id: +myId };
       const res = await fetch(endpoint, {
         method: "POST", headers: { "Content-Type": "application/json" },

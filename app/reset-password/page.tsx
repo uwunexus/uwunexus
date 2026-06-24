@@ -32,7 +32,7 @@ function ResetPasswordContent() {
     setMessage("");
 
     try {
-      const res = await fetch("http://localhost:8000/reset_password.php", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reset_password.php`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, password }),

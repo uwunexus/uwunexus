@@ -116,7 +116,7 @@ export default function GPACalculatorPage() {
 
     // If superadmin: fetch degree list, don't auto-load curriculum
     if (role === "superadmin" && id) {
-      fetch(`http://localhost:8000/get_gpa.php?user_id=${id}&list_degrees=1`)
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/get_gpa.php?user_id=${id}&list_degrees=1`)
         .then(r => r.json())
         .then(d => { if (d.success) setDegrees(d.degrees); });
     }
@@ -133,8 +133,8 @@ export default function GPACalculatorPage() {
     setLoading(true); setError(""); setNotEligible(false); setCurriculumLoaded(false);
     try {
       const url = degreeOverride
-        ? `http://localhost:8000/get_gpa.php?user_id=${myId}&degree_override=${degreeOverride}`
-        : `http://localhost:8000/get_gpa.php?user_id=${myId}`;
+        ? `${process.env.NEXT_PUBLIC_API_URL}/get_gpa.php?user_id=${myId}&degree_override=${degreeOverride}`
+        : `${process.env.NEXT_PUBLIC_API_URL}/get_gpa.php?user_id=${myId}`;
       const r = await fetch(url);
       const d = await r.json();
 
@@ -178,7 +178,7 @@ export default function GPACalculatorPage() {
   const handleSelectSpec = async (specCode: string) => {
     setSettingSpec(true); setSpecError("");
     try {
-      const r = await fetch("http://localhost:8000/set_specialization.php", {
+      const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/set_specialization.php`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user_id: +myId, specialization: specCode }),
       });
@@ -213,7 +213,7 @@ export default function GPACalculatorPage() {
             if (g) gradesToSave.push({ module_id: mod.module_id, academic_year: +yr, semester: +sem, grade: g, gpv: GPV_MAP[g] });
           }
     try {
-      const r = await fetch("http://localhost:8000/save_grades.php", {
+      const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/save_grades.php`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user_id: +myId, grades: gradesToSave }),
       });
