@@ -14,11 +14,17 @@ $email = strtolower(trim($data['email']));
 $password = $data['password'];
 
 try {
-    $stmt = $pdo->prepare("SELECT id, full_name, password_hash, role, enrollment_number, batch, degree FROM users WHERE email = ?");
+    $stmt = $pdo->prepare("SELECT id, full_name, password_hash, role, enrollment_number, batch, degree, is_verified FROM users WHERE email = ?");
     $stmt->execute([$email]);
     $user = $stmt->fetch();
 
     if ($user && password_verify($password, $user['password_hash'])) {
+        if (!$user['is_verified']) {
+            http_response_code(403);
+            echo json_encode(["success" => false, "message" => "Please verify your email address before logging in."]);
+            exit();
+        }
+
         echo json_encode([
             "success" => true,
             "message" => "Login successful",

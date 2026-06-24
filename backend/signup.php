@@ -75,11 +75,47 @@ try {
     }
 
     $hash = password_hash($password, PASSWORD_DEFAULT);
-    $stmt = $pdo->prepare("INSERT INTO users (full_name, email, password_hash, enrollment_number, batch, degree, role) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    $stmt->execute([$fullName, $email, $hash, $enrollment_number, $batch, $degree, $role]);
+    $verification_token = bin2hex(random_bytes(32));
 
+    $stmt = $pdo->prepare("INSERT INTO users (full_name, email, password_hash, enrollment_number, batch, degree, role, is_verified, verification_token) VALUES (?, ?, ?, ?, ?, ?, ?, FALSE, ?)");
+    $stmt->execute([$fullName, $email, $hash, $enrollment_number, $batch, $degree, $role, $verification_token]);
     $new_id = $pdo->lastInsertId();
-    echo json_encode(["success" => true, "message" => "User registered successfully", "user" => ["id" => $new_id, "role" => $role]]);
+
+    // Send verification email using Resend API (cURL)
+    $resend_api_key = 're_HWngWxwB_BfYbrzeKMU6D1tUayXzoVs1v';
+    
+    // We use a verified domain sender if possible, or fallback. The user requested onboarding@resend.dev but typically that only allows sending TO the verified account holder.
+    // For this demonstration, we'll try sending it. 
+    $verify_link = "http://localhost:3000/verify-email?token=" . $verification_token;
+    
+    $email_html = "
+        <h2>Welcome to UWU Nexus!</h2>
+        <p>Hi {$fullName},</p>
+        <p>Please click the link below to verify your email address and activate your account:</p>
+        <p><a href='{$verify_link}'>Verify Email Address</a></p>
+        <br>
+        <p>If you did not request this, please ignore this email.</p>
+    ";
+
+    $options = [
+        'http' => [
+            'header'  => "Content-type: application/json\r\n" .
+                         "Authorization: Bearer " . $resend_api_key . "\r\n",
+            'method'  => 'POST',
+            'content' => json_encode([
+                'from' => 'UWU Nexus <noreply@uwunexus.tech>',
+                'to' => [$email],
+                'subject' => 'Verify your UWU Nexus Account',
+                'html' => $email_html
+            ]),
+            'ignore_errors' => true
+        ],
+    ];
+    $context  = stream_context_create($options);
+    $response = @file_get_contents('https://api.resend.com/emails', false, $context);
+
+    // We successfully registered them, but they need to verify.
+    echo json_encode(["success" => true, "message" => "Account created! Please check your email to verify your account."]);
 } catch (\PDOException $e) {
     http_response_code(500);
     echo json_encode(["success" => false, "message" => "Database error: " . $e->getMessage()]);

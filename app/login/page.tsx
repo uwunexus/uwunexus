@@ -85,7 +85,7 @@ export default function LoginPage() {
           <div className="form-group mb-6">
             <div className="flex justify-between items-center mb-2">
               <label className="form-label text-sm mb-0">Password</label>
-              <a href="#" className="text-xs text-muted hover:text-primary">Forgot password?</a>
+              <Link href="/forgot-password" className="text-xs text-muted hover:text-primary">Forgot password?</Link>
             </div>
             <div style={{ position: 'relative' }}>
               <Lock size={18} className="text-muted" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
