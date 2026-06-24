@@ -23,6 +23,15 @@ interface TicketedEvent {
   total_tickets: number; available_tickets: number; image_url: string;
   status: string; created_by: number; created_at: string;
 }
+interface InfoHubItem {
+  id: number;
+  category: string;
+  title: string;
+  description: string;
+  contact_info: string;
+  action_link: string;
+  action_text: string;
+}
 
 /* ─── Constants ─────────────────────────────────────────────── */
 const ROLE_COLORS: Record<string, { bg: string; color: string }> = {
