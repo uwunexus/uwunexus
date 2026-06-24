@@ -66,7 +66,7 @@ export default function AdminPage() {
   useEffect(() => {
     const parse = (n: string) =>
       document.cookie.split("; ").find(r => r.startsWith(n + "="))?.split("=")[1] ?? "";
-    const role = parse("uwu_user_role");
+    const role = parse("uwu_role");
     setMyId(parse("uwu_user_id"));
     setMyRole(role);
     if (role === "clubadmin") setTab("events");
