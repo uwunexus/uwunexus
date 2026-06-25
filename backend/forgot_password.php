@@ -30,7 +30,7 @@ try {
 
         // Send reset email via Resend
         $resend_api_key = 're_HWngWxwB_BfYbrzeKMU6D1tUayXzoVs1v';
-        $reset_link = "http://localhost:3000/reset-password?token=" . $reset_token;
+        $reset_link = rtrim($allowed_origin, '/') . "/reset-password?token=" . $reset_token;
         
         $email_html = "
             <h2>Password Reset Request</h2>
