@@ -43,5 +43,6 @@ next-env.d.ts
 
 #database
 /databases
-/databases
 /documents
+uwunexus.sql
+*.sql

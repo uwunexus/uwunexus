@@ -23,7 +23,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login.php`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || '/api/backend'}/login.php`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -70,14 +70,14 @@ export default function LoginPage() {
             <label className="form-label text-sm">University Email</label>
             <div style={{ position: 'relative' }}>
               <Mail size={18} className="text-muted" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
-              <input 
-                type="email" 
-                className="form-input" 
-                style={{ paddingLeft: '2.5rem' }} 
-                placeholder="index@uwu.ac.lk" 
+              <input
+                type="email"
+                className="form-input"
+                style={{ paddingLeft: '2.5rem' }}
+                placeholder="index@uwu.ac.lk"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                required 
+                required
               />
             </div>
           </div>
@@ -89,14 +89,14 @@ export default function LoginPage() {
             </div>
             <div style={{ position: 'relative' }}>
               <Lock size={18} className="text-muted" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
-              <input 
-                type="password" 
-                className="form-input" 
-                style={{ paddingLeft: '2.5rem' }} 
-                placeholder="Enter your password" 
+              <input
+                type="password"
+                className="form-input"
+                style={{ paddingLeft: '2.5rem' }}
+                placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                required 
+                required
               />
             </div>
           </div>

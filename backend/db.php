@@ -3,8 +3,8 @@
 $allowed_origin = 'http://localhost:3000';
 $host = '127.0.0.1';
 $db   = 'uwunexus';
-$user = 'nilesh';
-$pass = '12345678';
+$user = 'root';
+$pass = '';
 
 if (file_exists(__DIR__ . '/config-prod.php')) {
     include __DIR__ . '/config-prod.php';
