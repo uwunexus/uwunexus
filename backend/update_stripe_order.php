@@ -36,8 +36,14 @@ $payment_id = isset($data['payment_id']) ? trim($data['payment_id']) : null;
 try {
     $pdo->beginTransaction();
 
-    // Check current status
-    $stmt = $pdo->prepare("SELECT status, ticket_event_id FROM ticket_purchases WHERE order_id = ? FOR UPDATE");
+    // Check current status and join with event price to calculate quantity mathematically
+    $stmt = $pdo->prepare("
+        SELECT p.status, p.ticket_event_id, p.amount, e.price 
+        FROM ticket_purchases p 
+        JOIN ticketed_events e ON p.ticket_event_id = e.id 
+        WHERE p.order_id = ? 
+        FOR UPDATE
+    ");
     $stmt->execute([$order_id]);
     $row = $stmt->fetch();
 
@@ -52,10 +58,14 @@ try {
         $stmt = $pdo->prepare("UPDATE ticket_purchases SET status = ?, payhere_payment_id = ? WHERE order_id = ?");
         $stmt->execute([$status, $payment_id, $order_id]);
 
-        // If success, reduce available_tickets
+        // If success, reduce available_tickets by the purchased quantity
         if ($status === 'success') {
-            $stmt = $pdo->prepare("UPDATE ticketed_events SET available_tickets = available_tickets - 1 WHERE id = ? AND available_tickets > 0");
-            $stmt->execute([$row['ticket_event_id']]);
+            $quantity = 1;
+            if ($row['price'] > 0) {
+                $quantity = max(1, intval(round($row['amount'] / $row['price'])));
+            }
+            $stmt = $pdo->prepare("UPDATE ticketed_events SET available_tickets = available_tickets - ? WHERE id = ? AND available_tickets >= ?");
+            $stmt->execute([$quantity, $row['ticket_event_id'], $quantity]);
         }
     }
 

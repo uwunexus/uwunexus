@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Store, Search, Filter, MessageCircle, X, Upload, Image as ImageIcon, ChevronLeft, ChevronRight, Edit, EyeOff, Tag } from "lucide-react";
-import Image from "next/image";
+import { Search, Filter, Phone, X, Upload, Image as ImageIcon, Edit, Tag, Plus } from "lucide-react";
 import { uploadToCloudinary } from "../lib/cloudinary";
 
 interface Category {
@@ -178,127 +177,290 @@ export default function MarketplacePage() {
   });
 
   return (
-    <div className="container py-8 relative min-h-screen">
-      <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
+    <div className="container" style={{ maxWidth: '1210px', marginTop: '1.5rem', paddingLeft: '0', paddingRight: '0', minHeight: '100vh', paddingBottom: '4rem' }}>
+      {/* Header */}
+      <div className="flex justify-between items-center mb-6 flex-wrap gap-4" style={{ marginTop: '1.5rem' }}>
         <div>
-          <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
-            <Store size={36} className="text-success" />
-            Sarasawi Alewisala
+          <h1 style={{ fontFamily: 'var(--font-syne), sans-serif', fontWeight: 800, fontSize: '3rem', color: '#000000', letterSpacing: '0.02em', marginBottom: '0.25rem' }}>
+            University Marketplace
           </h1>
-          <p className="text-muted">Trusted student-to-student marketplace.</p>
+          <p style={{ fontFamily: 'var(--font-inclusive-sans), sans-serif', fontSize: '1.15rem', color: '#64748b', fontWeight: 500 }}>
+            The smarter way to trade on campus
+          </p>
         </div>
-        <button className="btn btn-primary" style={{ backgroundColor: 'var(--success)' }} onClick={openCreateModal}>
-          + Create Listing
+        <button 
+          style={{ 
+            backgroundColor: '#000c66', 
+            color: '#ffffff', 
+            border: 'none', 
+            borderRadius: '9999px', 
+            padding: '0.6rem 2.2rem', 
+            fontFamily: 'var(--font-syne), sans-serif', 
+            fontWeight: 700, 
+            fontSize: '1rem',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            transition: 'background-color 0.2s'
+          }} 
+          onClick={openCreateModal}
+        >
+          <Plus size={18} />
+          <span>List Item</span>
         </button>
       </div>
 
+      {/* Search & Categories Bar */}
+      <div className="flex flex-wrap gap-4 items-center mb-8" style={{ width: '100%', marginTop: '2rem' }}>
+        {/* Search Input Box */}
+        <div style={{ flex: "0 0 280px", position: "relative" }}>
+          <input 
+            type="text" 
+            placeholder="Search the product" 
+            className="form-input" 
+            style={{ 
+              paddingLeft: '1.25rem', 
+              paddingRight: '3.5rem', 
+              borderRadius: '9999px', 
+              border: '1.5px solid #e2e8f0', 
+              height: '43px',
+              width: '100%',
+              outline: 'none',
+              fontSize: '0.95rem',
+              fontFamily: 'var(--font-inclusive-sans), sans-serif'
+            }} 
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <div style={{ position: 'absolute', right: '1.25rem', top: '50%', transform: 'translateY(-50%)', display: 'flex', gap: '0.5rem', alignItems: 'center', color: '#64748b' }}>
+            {search && <X size={16} style={{ cursor: 'pointer' }} onClick={() => setSearch("")} />}
+            <Filter size={16} />
+          </div>
+        </div>
+
+        {/* Category Buttons Row */}
+        <div className="flex gap-2 flex-wrap">
+          <button
+            onClick={() => setSelectedCategory(null)}
+            style={{
+              height: "43px",
+              padding: "0 1.25rem",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              whiteSpace: "nowrap",
+              borderRadius: "9999px",
+              backgroundColor: selectedCategory === null ? "#000c66" : "#ffffff",
+              color: selectedCategory === null ? "#ffffff" : "#000c66",
+              border: `1.5px solid ${selectedCategory === null ? "#000c66" : "#e2e8f0"}`,
+              fontSize: "0.9rem",
+              fontWeight: 500,
+              fontFamily: "var(--font-inter), sans-serif",
+              cursor: "pointer",
+              transition: "all 0.2s"
+            }}
+          >
+            All
+          </button>
+          {categories.map((c) => {
+            const isActive = selectedCategory === c.id;
+            return (
+              <button
+                key={c.id}
+                onClick={() => setSelectedCategory(c.id)}
+                style={{
+                  height: "43px",
+                  padding: "0 1.25rem",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  whiteSpace: "nowrap",
+                  borderRadius: "9999px",
+                  backgroundColor: isActive ? "#000c66" : "#ffffff",
+                  color: isActive ? "#ffffff" : "#000c66",
+                  border: `1.5px solid ${isActive ? "#000c66" : "#e2e8f0"}`,
+                  fontSize: "0.9rem",
+                  fontWeight: 500,
+                  fontFamily: "var(--font-inter), sans-serif",
+                  cursor: "pointer",
+                  transition: "all 0.2s"
+                }}
+              >
+                {c.name}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Sub-tabs Row */}
       {myId && (
-        <div className="flex gap-6 mb-6 border-b" style={{ borderColor: 'var(--border)' }}>
+        <div className="flex gap-2 mb-8">
           <button 
-            className="pb-3 px-1 font-bold transition-all" 
-            style={{ borderBottom: tab === "browse" ? "2px solid var(--success)" : "2px solid transparent", color: tab === "browse" ? "var(--success)" : "var(--muted)" }} 
-            onClick={() => setTab("browse")}>
+            onClick={() => setTab("browse")}
+            style={{
+              height: '38px',
+              padding: '0 1.25rem',
+              borderRadius: '9999px',
+              backgroundColor: tab === "browse" ? "#000c66" : "#ffffff",
+              color: tab === "browse" ? "#ffffff" : "#000c66",
+              border: `1.5px solid ${tab === "browse" ? "#000c66" : "#e2e8f0"}`,
+              fontSize: '0.9rem',
+              fontWeight: 700,
+              fontFamily: 'var(--font-syne), sans-serif',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
             Browse Items
           </button>
           <button 
-            className="pb-3 px-1 font-bold transition-all" 
-            style={{ borderBottom: tab === "my-items" ? "2px solid var(--success)" : "2px solid transparent", color: tab === "my-items" ? "var(--success)" : "var(--muted)" }} 
-            onClick={() => setTab("my-items")}>
+            onClick={() => setTab("my-items")}
+            style={{
+              height: '38px',
+              padding: '0 1.25rem',
+              borderRadius: '9999px',
+              backgroundColor: tab === "my-items" ? "#000c66" : "#ffffff",
+              color: tab === "my-items" ? "#ffffff" : "#000c66",
+              border: `1.5px solid ${tab === "my-items" ? "#000c66" : "#e2e8f0"}`,
+              fontSize: '0.9rem',
+              fontWeight: 700,
+              fontFamily: 'var(--font-syne), sans-serif',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
             My Items
           </button>
         </div>
       )}
 
-      {/* Search and Filters */}
-      <div className="card mb-8 p-4 flex flex-wrap gap-4 items-center">
-        <div className="flex-1" style={{ minWidth: '250px', position: 'relative' }}>
-          <Search size={18} className="text-muted" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
-          <input 
-            type="text" 
-            placeholder="Search for items..." 
-            className="form-input" 
-            style={{ paddingLeft: '2.5rem' }} 
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-        
-        <select 
-          className="form-input w-auto" 
-          value={selectedCategory || ""} 
-          onChange={(e) => setSelectedCategory(e.target.value ? Number(e.target.value) : null)}
-        >
-          <option value="">All Categories</option>
-          {categories.map(c => (
-            <option key={c.id} value={c.id}>{c.name}</option>
-          ))}
-        </select>
-      </div>
-
       {loading ? (
-        <div className="text-center py-20 text-muted">Loading marketplace items...</div>
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "5rem 0", color: "#64748b", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700 }}>Loading marketplace items...</div>
       ) : filteredItems.length === 0 ? (
-        <div className="card text-center py-20 text-muted max-w-2xl mx-auto">
-          <Store size={48} className="mx-auto mb-4 opacity-30" />
-          <h2 className="text-xl font-semibold mb-2 text-foreground">No Items Found</h2>
-          <p>{tab === "my-items" ? "You haven't listed any items yet." : "No listings match your search criteria."}</p>
+        <div style={{ textAlign: "center", padding: "5rem 0", color: "#64748b", maxWidth: "600px", margin: "0 auto", fontFamily: "var(--font-syne), sans-serif" }}>
+          <Store size={48} style={{ margin: "0 auto 1rem auto", opacity: 0.3 }} />
+          <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: "#000000", marginBottom: "0.5rem" }}>No Items Found</h2>
+          <p style={{ fontWeight: 500 }}>{tab === "my-items" ? "You haven't listed any items yet." : "No listings match your search criteria."}</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md-grid-cols-2 lg-grid-cols-4 gap-6">
+        <div className="grid gap-8" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))" }}>
           {filteredItems.map((product) => (
-            <div key={product.id} className="card p-0 overflow-hidden flex flex-col" style={{ padding: 0 }}>
-              {/* Image Carousel / Banner */}
-              <div className="aspect-4-3 image-container-blurred" style={{ backgroundImage: product.images && product.images.length > 0 ? `url(${product.images[0]})` : 'none' }}>
+            <div key={product.id} className="event-card">
+              {/* Image visual wrapper with aspect ratio matching mockup */}
+              <div className="event-card-image-wrapper">
                 {product.images && product.images.length > 0 ? (
-                  <Image src={product.images[0]} alt={product.title} fill className="next-image" sizes="(max-width: 768px) 100vw, 33vw" />
+                  <img src={product.images[0]} alt={product.title} className="event-card-img" />
                 ) : (
-                  <div className="flex justify-center items-center h-full opacity-50 text-muted relative z-10">
-                    <ImageIcon size={48} />
+                  <div className="event-card-no-img" style={{ background: "linear-gradient(135deg, #000c6622, #000c6611)" }}>
+                    <ImageIcon size={40} style={{ color: "#000c66", opacity: 0.4 }} />
                   </div>
                 )}
                 {product.images && product.images.length > 1 && (
-                  <div className="absolute bottom-2 right-2 badge text-xs z-10" style={{ backgroundColor: "rgba(0,0,0,0.7)", color: "white" }}>
+                  <div className="absolute bottom-3 right-3 badge text-xs z-10" style={{ backgroundColor: "rgba(0,0,0,0.7)", color: "white", padding: "0.2rem 0.5rem", borderRadius: "0.5rem", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700 }}>
                     1 / {product.images.length}
                   </div>
                 )}
                 {tab === "my-items" && (
-                  <div className="absolute top-2 left-2 badge text-xs font-bold shadow z-10" style={{ 
+                  <div className="absolute top-3 left-3 badge text-xs font-bold shadow z-10" style={{ 
                     backgroundColor: product.status === 'active' ? "var(--success)" : product.status === 'pending' ? "var(--warning)" : product.status === 'rejected' ? "var(--danger)" : "var(--muted)", 
-                    color: "white" 
+                    color: "white",
+                    padding: "0.3rem 0.75rem",
+                    borderRadius: "9999px",
+                    fontFamily: "var(--font-syne), sans-serif",
+                    fontWeight: 700
                   }}>
                     {product.status.toUpperCase()}
                   </div>
                 )}
               </div>
-              
-              <div className="p-4 flex flex-col flex-1">
-                <h3 className="font-bold text-lg mb-1 truncate">{product.title}</h3>
-                <div className="text-xl font-bold text-success mb-2">LKR {product.price}</div>
-                
-                <div className="flex flex-col gap-1 text-sm text-muted mb-4">
-                  <span>Condition: <strong className="text-foreground">{product.condition_state}</strong></span>
-                  <span>Category: {product.category_name}</span>
-                  {tab === "browse" && (
-                    <>
-                      <span>Seller: {product.seller_name}</span>
-                      <span>Phone: <strong className="text-foreground">{product.contact_number}</strong></span>
-                    </>
-                  )}
+
+              {/* Content block stack */}
+              <div className="event-card-content">
+                {/* Title & Price Row */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem", marginBottom: "1rem" }}>
+                  <h3 className="event-card-title" style={{ fontSize: "1.15rem", flex: 1, height: "auto", overflow: "visible", display: "block", WebkitLineClamp: "none", marginBottom: 0 }}>
+                    {product.title}
+                  </h3>
+                  <span style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.15rem", fontWeight: 800, color: "#000000", whiteSpace: "nowrap" }}>
+                    LKR.{product.price}
+                  </span>
                 </div>
-                
+
+                {/* Metadata List */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "1.5rem", fontFamily: "var(--font-syne), sans-serif", fontSize: "0.95rem", color: "#000000", fontWeight: 700 }}>
+                  <div>Condition: <span style={{ fontWeight: 500 }}>{product.condition_state}</span></div>
+                  <div>Category: <span style={{ fontWeight: 500 }}>{product.category_name}</span></div>
+                  {tab === "browse" ? (
+                    <>
+                      <div>Seller: <span style={{ fontWeight: 500 }}>{product.seller_name}</span></div>
+                      <div>Phone: <span style={{ fontWeight: 500 }}>{product.contact_number}</span></div>
+                    </>
+                  ) : null}
+                </div>
+
+                {/* Actions Button */}
                 <div className="mt-auto">
                   {tab === "browse" ? (
-                    <a href={`mailto:${product.contact_email || product.email}`} className="btn w-full flex justify-center" style={{ border: '1px solid var(--border)' }}>
-                      <MessageCircle size={16} /> Contact Seller
+                    <a 
+                      href={`mailto:${product.contact_email || product.email}`} 
+                      className="event-card-btn" 
+                      style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        gap: '0.5rem', 
+                        textDecoration: 'none' 
+                      }}
+                    >
+                      <Phone size={16} />
+                      <span>Contact Seller</span>
                     </a>
                   ) : (
                     <div className="flex gap-2">
-                      <button className="btn flex-1 flex justify-center" style={{ border: '1px solid var(--border)' }} onClick={() => openEditModal(product)}>
-                        <Edit size={16} /> Edit
+                      <button 
+                        className="event-card-btn" 
+                        style={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'center', 
+                          gap: '0.35rem',
+                          backgroundColor: '#ffffff',
+                          color: '#000c66',
+                          border: '1.5px solid #000c66',
+                          padding: '0.5rem 0.75rem',
+                          fontSize: '0.9rem'
+                        }} 
+                        onClick={() => openEditModal(product)}
+                      >
+                        <Edit size={14} />
+                        <span>Edit</span>
                       </button>
                       {product.status !== 'sold' && (
-                        <button className="btn flex-1 flex justify-center" style={{ border: '1px solid var(--border)', backgroundColor: 'rgba(34,197,94,0.1)', color: 'var(--success)' }} onClick={() => handleUpdateStatus(product.id, 'sold')}>
-                          <Tag size={16} /> Sold
+                        <button 
+                          className="event-card-btn" 
+                          style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center', 
+                            gap: '0.35rem',
+                            backgroundColor: 'rgba(34,197,94,0.1)', 
+                            color: 'var(--success)',
+                            border: '1.5px solid rgba(34,197,94,0.2)',
+                            padding: '0.5rem 0.75rem',
+                            fontSize: '0.9rem'
+                          }} 
+                          onClick={() => handleUpdateStatus(product.id, 'sold')}
+                        >
+                          <Tag size={14} />
+                          <span>Sold</span>
                         </button>
                       )}
                     </div>
@@ -312,27 +474,109 @@ export default function MarketplacePage() {
 
       {/* Create / Edit Listing Modal */}
       {showModal && (
-        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.8)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={() => setShowModal(false)}>
-          <div className="card max-h-[90vh] overflow-y-auto" style={{ maxWidth: "600px", width: "100%" }} onClick={e => e.stopPropagation()}>
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold">{editingItem ? "Edit Listing" : "Create Listing"}</h2>
-              <button onClick={() => setShowModal(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--muted)" }}><X size={22} /></button>
+        <div 
+          style={{ 
+            position: "fixed", 
+            inset: 0, 
+            backgroundColor: "rgba(0,0,0,0.65)", 
+            zIndex: 100, 
+            display: "flex", 
+            alignItems: "center", 
+            justifyContent: "center", 
+            padding: "1.5rem",
+            backdropFilter: "blur(5px)"
+          }} 
+          onClick={() => setShowModal(false)}
+        >
+          <div 
+            style={{ 
+              maxWidth: "600px", 
+              width: "100%", 
+              backgroundColor: "#ffffff", 
+              borderRadius: "2.2rem", 
+              padding: "2.5rem", 
+              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+              maxHeight: "90vh",
+              overflowY: "auto"
+            }} 
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
+              <h2 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.75rem", fontWeight: 800, color: "#000000" }}>
+                {editingItem ? "Edit Listing" : "Create Listing"}
+              </h2>
+              <button onClick={() => setShowModal(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "#000000" }}><X size={22} /></button>
             </div>
 
-            <form onSubmit={handleSaveListing}>
-              <div className="form-group mb-4">
-                <label className="form-label">Item Title *</label>
-                <input type="text" className="form-input" required value={form.title} onChange={e => setForm({...form, title: e.target.value})} placeholder="e.g., Casio fx-991EX Calculator" />
+            <form onSubmit={handleSaveListing} style={{ fontFamily: "var(--font-syne), sans-serif", display: "flex", flexDirection: "column", gap: "1rem" }}>
+              <div>
+                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Item Title *</label>
+                <input 
+                  type="text" 
+                  required 
+                  value={form.title} 
+                  onChange={e => setForm({...form, title: e.target.value})} 
+                  placeholder="e.g., Casio fx-991EX Calculator" 
+                  style={{
+                    height: "45px",
+                    backgroundColor: "#f1f3f5",
+                    border: "1px solid rgba(0, 0, 0, 0.1)",
+                    borderRadius: "0.75rem",
+                    padding: "0 1rem",
+                    width: "100%",
+                    outline: "none",
+                    fontFamily: "var(--font-syne), sans-serif",
+                    fontWeight: 700,
+                    fontSize: "0.95rem",
+                    color: "#000000"
+                  }}
+                />
               </div>
               
-              <div className="grid gap-4 mb-4 grid-cols-2">
-                <div className="form-group">
-                  <label className="form-label">Price (LKR) *</label>
-                  <input type="number" className="form-input" required min="0" value={form.price} onChange={e => setForm({...form, price: e.target.value})} placeholder="2500" />
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                <div>
+                  <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Price (LKR) *</label>
+                  <input 
+                    type="number" 
+                    required 
+                    min="0" 
+                    value={form.price} 
+                    onChange={e => setForm({...form, price: e.target.value})} 
+                    placeholder="2500" 
+                    style={{
+                      height: "45px",
+                      backgroundColor: "#f1f3f5",
+                      border: "1px solid rgba(0, 0, 0, 0.1)",
+                      borderRadius: "0.75rem",
+                      padding: "0 1rem",
+                      width: "100%",
+                      outline: "none",
+                      fontFamily: "var(--font-syne), sans-serif",
+                      fontWeight: 700,
+                      fontSize: "0.95rem",
+                      color: "#000000"
+                    }}
+                  />
                 </div>
-                <div className="form-group">
-                  <label className="form-label">Condition *</label>
-                  <select className="form-input" value={form.condition_state} onChange={e => setForm({...form, condition_state: e.target.value})}>
+                <div>
+                  <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Condition *</label>
+                  <select 
+                    value={form.condition_state} 
+                    onChange={e => setForm({...form, condition_state: e.target.value})}
+                    style={{
+                      height: "45px",
+                      backgroundColor: "#f1f3f5",
+                      border: "1px solid rgba(0, 0, 0, 0.1)",
+                      borderRadius: "0.75rem",
+                      padding: "0 1rem",
+                      width: "100%",
+                      outline: "none",
+                      fontFamily: "var(--font-syne), sans-serif",
+                      fontWeight: 700,
+                      fontSize: "0.95rem",
+                      color: "#000000"
+                    }}
+                  >
                     <option value="Brand New">Brand New</option>
                     <option value="Like New">Like New</option>
                     <option value="Used - Good">Used - Good</option>
@@ -341,9 +585,26 @@ export default function MarketplacePage() {
                 </div>
               </div>
 
-              <div className="form-group mb-4">
-                <label className="form-label">Category *</label>
-                <select className="form-input" required value={form.category_id} onChange={e => setForm({...form, category_id: e.target.value})}>
+              <div>
+                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Category *</label>
+                <select 
+                  required 
+                  value={form.category_id} 
+                  onChange={e => setForm({...form, category_id: e.target.value})}
+                  style={{
+                    height: "45px",
+                    backgroundColor: "#f1f3f5",
+                    border: "1px solid rgba(0, 0, 0, 0.1)",
+                    borderRadius: "0.75rem",
+                    padding: "0 1rem",
+                    width: "100%",
+                    outline: "none",
+                    fontFamily: "var(--font-syne), sans-serif",
+                    fontWeight: 700,
+                    fontSize: "0.95rem",
+                    color: "#000000"
+                  }}
+                >
                   <option value="" disabled>Select a category</option>
                   {categories.map(c => (
                     <option key={c.id} value={c.id}>{c.name}</option>
@@ -351,30 +612,86 @@ export default function MarketplacePage() {
                 </select>
               </div>
 
-              <div className="grid gap-4 mb-4 grid-cols-2">
-                <div className="form-group">
-                  <label className="form-label">Contact Number *</label>
-                  <input type="text" className="form-input" required value={form.contact_number} onChange={e => setForm({...form, contact_number: e.target.value})} placeholder="e.g., 0712345678" />
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                <div>
+                  <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Contact Number *</label>
+                  <input 
+                    type="text" 
+                    required 
+                    value={form.contact_number} 
+                    onChange={e => setForm({...form, contact_number: e.target.value})} 
+                    placeholder="e.g., 0712345678" 
+                    style={{
+                      height: "45px",
+                      backgroundColor: "#f1f3f5",
+                      border: "1px solid rgba(0, 0, 0, 0.1)",
+                      borderRadius: "0.75rem",
+                      padding: "0 1rem",
+                      width: "100%",
+                      outline: "none",
+                      fontFamily: "var(--font-syne), sans-serif",
+                      fontWeight: 700,
+                      fontSize: "0.95rem",
+                      color: "#000000"
+                    }}
+                  />
                 </div>
-                <div className="form-group">
-                  <label className="form-label">Contact Email</label>
-                  <input type="email" className="form-input" value={form.contact_email} onChange={e => setForm({...form, contact_email: e.target.value})} placeholder="Optional" />
+                <div>
+                  <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Contact Email</label>
+                  <input 
+                    type="email" 
+                    value={form.contact_email} 
+                    onChange={e => setForm({...form, contact_email: e.target.value})} 
+                    placeholder="Optional" 
+                    style={{
+                      height: "45px",
+                      backgroundColor: "#f1f3f5",
+                      border: "1px solid rgba(0, 0, 0, 0.1)",
+                      borderRadius: "0.75rem",
+                      padding: "0 1rem",
+                      width: "100%",
+                      outline: "none",
+                      fontFamily: "var(--font-syne), sans-serif",
+                      fontWeight: 700,
+                      fontSize: "0.95rem",
+                      color: "#000000"
+                    }}
+                  />
                 </div>
               </div>
 
-              <div className="form-group mb-4">
-                <label className="form-label">Description *</label>
-                <textarea className="form-input" rows={4} required value={form.description} onChange={e => setForm({...form, description: e.target.value})} placeholder="Describe your item, any flaws, and preferred meetup location..."></textarea>
+              <div>
+                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Description *</label>
+                <textarea 
+                  rows={4} 
+                  required 
+                  value={form.description} 
+                  onChange={e => setForm({...form, description: e.target.value})} 
+                  placeholder="Describe your item, any flaws, and preferred meetup location..."
+                  style={{
+                    backgroundColor: "#f1f3f5",
+                    border: "1px solid rgba(0, 0, 0, 0.1)",
+                    borderRadius: "0.75rem",
+                    padding: "0.75rem 1rem",
+                    width: "100%",
+                    outline: "none",
+                    fontFamily: "var(--font-syne), sans-serif",
+                    fontWeight: 700,
+                    fontSize: "0.95rem",
+                    color: "#000000",
+                    resize: "none"
+                  }}
+                />
               </div>
 
-              <div className="form-group mb-6">
-                <label className="form-label">Images (Optional, Max 3)</label>
+              <div>
+                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Images (Optional, Max 3)</label>
                 {editingItem && files.length === 0 && (
-                  <p className="text-xs text-warning mb-2">Note: Uploading new images will replace existing ones. Leave blank to keep existing images.</p>
+                  <p style={{ fontSize: "0.75rem", color: "var(--warning)", marginBottom: "0.5rem", fontWeight: 600 }}>Note: Uploading new images will replace existing ones. Leave blank to keep existing images.</p>
                 )}
-                <div className="border-2 border-dashed border-border rounded-lg p-6 text-center text-muted flex flex-col items-center justify-center cursor-pointer relative hover:border-primary transition-colors" style={{ backgroundColor: "var(--background)" }}>
+                <div className="border-2 border-dashed border-border rounded-lg p-6 text-center text-muted flex flex-col items-center justify-center cursor-pointer relative hover:border-primary transition-colors" style={{ backgroundColor: "#f1f3f5", borderRadius: "1rem", border: "2px dashed rgba(0,0,0,0.15)" }}>
                   <Upload size={24} className="mb-2" />
-                  <span>Click to select images</span>
+                  <span style={{ fontWeight: 700, fontSize: "0.9rem" }}>Click to select images</span>
                   <input 
                     type="file" 
                     accept="image/jpeg, image/png, image/webp" 
@@ -389,13 +706,31 @@ export default function MarketplacePage() {
                   />
                 </div>
                 {files.length > 0 && (
-                  <div className="text-sm text-success mt-2 font-medium">
+                  <div style={{ fontSize: "0.85rem", color: "var(--success)", marginTop: "0.5rem", fontWeight: 700 }}>
                     {files.length} file(s) selected
                   </div>
                 )}
               </div>
 
-              <button type="submit" disabled={formLoading} className="btn btn-primary w-full justify-center">
+              <button 
+                type="submit" 
+                disabled={formLoading} 
+                style={{ 
+                  width: "100%", 
+                  backgroundColor: "#000c66", 
+                  color: "#ffffff", 
+                  border: "none", 
+                  borderRadius: "9999px", 
+                  padding: "0.8rem", 
+                  fontSize: "1.1rem", 
+                  fontWeight: 800, 
+                  fontFamily: "var(--font-syne), sans-serif", 
+                  cursor: "pointer",
+                  transition: "opacity 0.2s",
+                  opacity: formLoading ? 0.7 : 1,
+                  marginTop: "0.5rem"
+                }}
+              >
                 {formLoading ? "Saving..." : (editingItem ? "Update Listing" : "Publish Listing")}
               </button>
             </form>

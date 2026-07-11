@@ -8,7 +8,7 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { order_id, title, price, customer_email } = body;
+    const { order_id, title, price, quantity = 1, customer_email } = body;
 
     if (!order_id || !title || !price) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -31,7 +31,7 @@ export async function POST(req: Request) {
             },
             unit_amount: unitAmount,
           },
-          quantity: 1,
+          quantity: quantity,
         },
       ],
       success_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/tickets/success?session_id={CHECKOUT_SESSION_ID}&order_id=${order_id}`,

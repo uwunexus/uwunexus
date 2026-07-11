@@ -1,17 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { loadStripe } from "@stripe/stripe-js";
-import { Ticket, MapPin, Calendar, Clock, X, AlertCircle } from "lucide-react";
-
-// Initialize Stripe. Replace with standard NEXT_PUBLIC_ publishable key logic if we had one.
-// The user put it in .env.local as strippublishablekey.
-// Next.js needs NEXT_PUBLIC_ for client side, so we fetch it from an API or just pass it here.
-// But wait, we can't easily access non-NEXT_PUBLIC_ env vars here.
-// Let's create a wrapper or just use the session ID to redirect without loadStripe.
-// Actually, Stripe recommends: `window.location.href = session.url`! That's much simpler.
+import { Ticket, MapPin, Calendar, Clock, X, AlertCircle, Minus, Plus } from "lucide-react";
 
 interface TicketedEvent {
   id: number;
@@ -27,27 +18,36 @@ interface TicketedEvent {
   status: string;
 }
 
-function formatDate(d: string) {
-  return new Date(d + "T00:00:00").toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" });
+function formatDate(dateStr: string) {
+  const dateObj = new Date(dateStr + "T00:00:00");
+  return dateObj.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
-function formatTime(t: string) {
-  const [h, m] = t.split(":");
-  const date = new Date(); date.setHours(+h, +m);
-  return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+
+function formatTime(timeStr: string) {
+  const [h, m] = timeStr.split(":");
+  const date = new Date();
+  date.setHours(parseInt(h), parseInt(m));
+
+  let hours = date.getHours();
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  return `${hours.toString().padStart(2, '0')}:${minutes} ${ampm}`;
 }
 
 export default function TicketsPage() {
   const searchParams = useSearchParams();
   const [events, setEvents] = useState<TicketedEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   // Checkout Modal State
   const [selectedEvent, setSelectedEvent] = useState<TicketedEvent | null>(null);
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "" });
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState(searchParams.get("canceled") ? "Payment was canceled." : "");
+  const [quantity, setQuantity] = useState(1);
 
-  // Pre-fill user data if logged in
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/get_ticketed_events.php`)
       .then(r => r.json())
@@ -65,7 +65,6 @@ export default function TicketsPage() {
     setProcessing(true);
 
     try {
-      // 1. Create Order in PHP Backend
       const parseCookie = (name: string) => document.cookie.split("; ").find(r => r.startsWith(name + "="))?.split("=")[1];
       const userId = parseCookie("uwu_user_id");
 
@@ -75,7 +74,7 @@ export default function TicketsPage() {
         body: JSON.stringify({
           ticket_event_id: selectedEvent.id,
           user_id: userId || null,
-          amount: selectedEvent.price,
+          amount: selectedEvent.price * quantity,
           currency: "LKR",
           customer_name: `${form.firstName} ${form.lastName}`,
           customer_email: form.email,
@@ -86,7 +85,6 @@ export default function TicketsPage() {
       const phpData = await phpRes.json();
       if (!phpData.success) throw new Error(phpData.message || "Failed to create order");
 
-      // 2. Create Stripe Checkout Session
       const stripeRes = await fetch("/api/create-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -94,6 +92,7 @@ export default function TicketsPage() {
           order_id: phpData.order_id,
           title: selectedEvent.title,
           price: selectedEvent.price,
+          quantity: quantity,
           customer_email: form.email
         })
       });
@@ -101,7 +100,6 @@ export default function TicketsPage() {
       const stripeData = await stripeRes.json();
       if (stripeData.error) throw new Error(stripeData.error);
 
-      // 3. Redirect to Stripe Checkout URL
       window.location.href = stripeData.url;
 
     } catch (err: any) {
@@ -113,138 +111,338 @@ export default function TicketsPage() {
   const closeCheckout = () => {
     setSelectedEvent(null);
     setError("");
+    setQuantity(1);
   };
 
   return (
-    <div className="container py-8 relative min-h-screen">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4">Event Tickets</h1>
-        <p className="text-muted max-w-2xl mx-auto">
-          Securely purchase your tickets online for premium campus events via Stripe.
+    <div className="container" style={{ maxWidth: '1210px', marginTop: '1.5rem', paddingLeft: '0', paddingRight: '0', minHeight: '100vh', paddingBottom: '1rem' }}>
+      {/* Header */}
+      <div className="mb-4 text-center" style={{ marginTop: '0' }}>
+        <h1 style={{ fontFamily: 'var(--font-syne), sans-serif', fontWeight: 800, fontSize: '3rem', color: '#000000', letterSpacing: '0.02em', marginBottom: '0.5rem' }}>
+          Event Tickets
+        </h1>
+        <p style={{ fontFamily: 'var(--font-audiowide), sans-serif', fontSize: '1.25rem', color: '#0d0e4aff', fontWeight: 400, letterSpacing: '0.05em', textTransform: 'lowercase' }}>
+          securely purchase your tickets online
         </p>
+        <hr style={{ border: 'none', borderTop: '1.5px solid #cbd5e1', marginTop: '2rem', marginBottom: '3rem', width: '100%' }} />
       </div>
 
       {error && !selectedEvent && (
-        <div className="card mb-8 p-4 text-center" style={{ backgroundColor: "rgba(239,68,68,0.1)", color: "var(--danger)", border: "1px solid rgba(239,68,68,0.2)" }}>
-          <AlertCircle className="mx-auto mb-2" size={24} />
+        <div style={{ marginBottom: "2rem", padding: "1rem", borderRadius: "1rem", backgroundColor: "rgba(239,68,68,0.1)", color: "var(--danger)", border: "1px solid rgba(239,68,68,0.2)", display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <AlertCircle className="mb-2" size={24} />
           {error}
         </div>
       )}
 
       {loading ? (
-        <div className="flex justify-center items-center py-20 text-muted">Loading events...</div>
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "5rem 0", color: "#64748b", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700 }}>Loading events...</div>
       ) : events.length === 0 ? (
-        <div className="card text-center py-20 text-muted max-w-2xl mx-auto">
-          <Ticket size={48} className="mx-auto mb-4 opacity-30" />
-          <h2 className="text-xl font-semibold mb-2 text-foreground">No Upcoming Events</h2>
-          <p>There are currently no active ticketed events available. Please check back later!</p>
+        <div style={{ textAlign: "center", padding: "5rem 0", color: "#64748b", maxWidth: "600px", margin: "0 auto", fontFamily: "var(--font-syne), sans-serif" }}>
+          <Ticket size={48} style={{ margin: "0 auto 1rem auto", opacity: 0.3 }} />
+          <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: "#000000", marginBottom: "0.5rem" }}>No Upcoming Events</h2>
+          <p style={{ fontWeight: 500 }}>There are currently no active ticketed events available. Please check back later!</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md-grid-cols-2 lg-grid-cols-3 gap-8">
-          {events.map((event) => (
-            <div key={event.id} className="card p-0 overflow-hidden flex flex-col" style={{ padding: 0 }}>
-              {/* Image */}
-              <div className="aspect-video image-container-blurred" style={{ backgroundImage: event.image_url ? `url(${event.image_url})` : 'none', backgroundColor: 'var(--background)' }}>
-                {event.image_url ? (
-                  <Image src={event.image_url} alt={event.title} fill className="next-image" sizes="(max-width: 768px) 100vw, 33vw" />
-                ) : (
-                  <div className="relative z-10" style={{ width: '100%', height: '100%', background: "linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)" }} />
-                )}
-              </div>
-              
-              <div className="p-6 flex flex-col flex-1">
-                <div className="flex justify-between items-start mb-4">
-                  <h2 className="text-2xl font-bold leading-tight pr-4">{event.title}</h2>
-                  <span className="badge badge-primary text-lg font-bold" style={{ backgroundColor: 'var(--primary)', color: 'white', flexShrink: 0 }}>
-                    LKR {event.price}
-                  </span>
+        <div className="grid gap-8" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(270px, 1fr))" }}>
+          {events.map((event) => {
+            return (
+              <div key={event.id} className="event-card">
+                {/* Image wrapper matching the visual layout */}
+                <div className="event-card-image-wrapper">
+                  {event.image_url ? (
+                    <img src={event.image_url} alt={event.title} className="event-card-img" />
+                  ) : (
+                    <div className="event-card-no-img" style={{ background: "linear-gradient(135deg, #000c6622, #000c6611)" }}>
+                      <Ticket size={40} style={{ color: "#000c66", opacity: 0.4 }} />
+                    </div>
+                  )}
                 </div>
 
-                <div className="flex flex-col gap-3 text-muted text-sm mb-6">
-                  <div className="flex items-center gap-2">
-                    <Calendar size={16} />
-                    <span>{formatDate(event.event_date)}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock size={16} />
-                    <span>{formatTime(event.event_time)}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MapPin size={16} />
-                    <span>{event.venue}</span>
-                  </div>
-                </div>
+                {/* Content Stack */}
+                <div className="event-card-content">
+                  <h3 className="event-card-title">{event.title}</h3>
 
-                <div className="mt-auto">
-                  <div className="flex justify-between items-center mb-4 text-sm font-semibold">
-                    <span className="text-muted">Tickets left:</span>
-                    <span className={event.available_tickets < 50 ? "text-warning" : "text-success"}>
+                  <div className="event-card-info-stack">
+                    <div className="event-card-info-row">
+                      <Calendar size={20} style={{ color: '#000000', flexShrink: 0, marginTop: "2px" }} />
+                      <span>{formatDate(event.event_date)}</span>
+                    </div>
+                    <div className="event-card-info-row">
+                      <Clock size={20} style={{ color: '#000000', flexShrink: 0, marginTop: "2px" }} />
+                      <span>{formatTime(event.event_time)}</span>
+                    </div>
+                    <div className="event-card-info-row">
+                      <MapPin size={20} style={{ color: '#000000', flexShrink: 0, marginTop: "2px" }} />
+                      <span>{event.venue}</span>
+                    </div>
+                  </div>
+
+                  {/* Tickets Left Row */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem", fontFamily: "var(--font-syne), sans-serif", fontSize: "1rem", color: "#000000", fontWeight: 500 }}>
+                    <span style={{ opacity: 0.8 }}>Tickets left:</span>
+                    <span style={{ fontWeight: 800 }}>
                       {event.available_tickets} / {event.total_tickets}
                     </span>
                   </div>
-                  <button 
-                    onClick={() => { setSelectedEvent(event); setProcessing(false); setError(""); }} 
+
+                  {/* Book Now Button */}
+                  <button
+                    onClick={() => { setSelectedEvent(event); setProcessing(false); setError(""); }}
                     disabled={event.available_tickets <= 0}
-                    className="btn btn-primary w-full" style={{ width: '100%', justifyContent: 'center', opacity: event.available_tickets <= 0 ? 0.5 : 1 }}>
+                    className="event-card-btn"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "0.5rem",
+                      opacity: event.available_tickets <= 0 ? 0.5 : 1
+                    }}
+                  >
                     <Ticket size={18} />
-                    {event.available_tickets <= 0 ? "Sold Out" : "Book Now"}
+                    <span>{event.available_tickets <= 0 ? "Sold Out" : "Book Now"}</span>
                   </button>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
       {/* Checkout Modal */}
       {selectedEvent && (
-        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.8)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={closeCheckout}>
-          <div className="card" style={{ maxWidth: "500px", width: "100%" }} onClick={e => e.stopPropagation()}>
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold">Checkout details</h2>
-              <button onClick={closeCheckout} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--muted)" }}><X size={22} /></button>
+        <div 
+          style={{ 
+            position: "fixed", 
+            inset: 0, 
+            backgroundColor: "rgba(0,0,0,0.65)", 
+            zIndex: 100, 
+            display: "flex", 
+            alignItems: "center", 
+            justifyContent: "center", 
+            padding: "1.5rem", 
+            backdropFilter: "blur(5px)" 
+          }} 
+          onClick={closeCheckout}
+        >
+          <div className="checkout-modal-container" onClick={e => e.stopPropagation()}>
+            {/* Close Button */}
+            <button className="checkout-close-btn" onClick={closeCheckout}>
+              <X size={18} />
+            </button>
+
+            {/* Left Column - Poster Image */}
+            <div className="checkout-modal-img-col">
+              {selectedEvent.image_url ? (
+                <img 
+                  src={selectedEvent.image_url} 
+                  alt={selectedEvent.title} 
+                  style={{ width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: 0 }} 
+                />
+              ) : (
+                <div style={{ height: "100%", background: "linear-gradient(135deg, #000c6622, #000c6611)", display: "flex", alignItems: "center", justifyContent: "center", position: "absolute", inset: 0 }}>
+                  <Ticket size={80} style={{ color: "#000c66", opacity: 0.4 }} />
+                </div>
+              )}
             </div>
 
-            <div className="mb-6 p-4 rounded-lg" style={{ backgroundColor: "var(--secondary)" }}>
-              <h3 className="font-bold mb-1">{selectedEvent.title}</h3>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted">1 × Ticket</span>
-                <span className="font-bold">LKR {selectedEvent.price}</span>
+            {/* Right Column - Checkout Form */}
+            <div className="checkout-modal-info-col">
+              <h2 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "2.2rem", fontWeight: 800, color: "#000000", marginBottom: "1.75rem", lineHeight: 1.2 }}>
+                Checkout details
+              </h2>
+
+              {/* Item Summary Row */}
+              <div style={{ marginBottom: "1.5rem" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", fontFamily: "var(--font-syne), sans-serif", fontSize: "1.25rem", fontWeight: 800, color: "#000000", paddingBottom: "0.5rem" }}>
+                  <span>{selectedEvent.title}</span>
+                  <span>LKR.{selectedEvent.price}</span>
+                </div>
+                <hr style={{ border: "none", borderTop: "1.5px solid #000000", margin: 0 }} />
               </div>
+
+              {error && (
+                <div style={{ marginBottom: "1.25rem", padding: "0.75rem 1rem", borderRadius: "0.8rem", fontSize: "0.9rem", display: "flex", gap: "0.5rem", alignItems: "center", backgroundColor: "rgba(239,68,68,0.1)", color: "var(--danger)", border: "1px solid rgba(239,68,68,0.2)" }}>
+                  <AlertCircle size={16} /> {error}
+                </div>
+              )}
+
+              <form onSubmit={handleCheckout} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                  <div>
+                    <label style={{ display: "block", fontFamily: "var(--font-syne), sans-serif", fontSize: "0.95rem", fontWeight: 700, marginBottom: "0.5rem", color: "#000000" }}>First Name</label>
+                    <input 
+                      type="text" 
+                      required 
+                      value={form.firstName} 
+                      onChange={e => setForm({ ...form, firstName: e.target.value })}
+                      style={{
+                        height: "45px",
+                        backgroundColor: "#f1f3f5",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        borderRadius: "0.75rem",
+                        padding: "0 1rem",
+                        width: "100%",
+                        outline: "none",
+                        fontFamily: "var(--font-syne), sans-serif",
+                        fontWeight: 700,
+                        fontSize: "0.95rem",
+                        color: "#000000"
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontFamily: "var(--font-syne), sans-serif", fontSize: "0.95rem", fontWeight: 700, marginBottom: "0.5rem", color: "#000000" }}>Last Name</label>
+                    <input 
+                      type="text" 
+                      required 
+                      value={form.lastName} 
+                      onChange={e => setForm({ ...form, lastName: e.target.value })}
+                      style={{
+                        height: "45px",
+                        backgroundColor: "#f1f3f5",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        borderRadius: "0.75rem",
+                        padding: "0 1rem",
+                        width: "100%",
+                        outline: "none",
+                        fontFamily: "var(--font-syne), sans-serif",
+                        fontWeight: 700,
+                        fontSize: "0.95rem",
+                        color: "#000000"
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ display: "block", fontFamily: "var(--font-syne), sans-serif", fontSize: "0.95rem", fontWeight: 700, marginBottom: "0.5rem", color: "#000000" }}>Email Address</label>
+                  <input 
+                    type="email" 
+                    required 
+                    value={form.email} 
+                    onChange={e => setForm({ ...form, email: e.target.value })}
+                    style={{
+                      height: "45px",
+                      backgroundColor: "#f1f3f5",
+                      border: "1px solid rgba(0, 0, 0, 0.1)",
+                      borderRadius: "0.75rem",
+                      padding: "0 1rem",
+                      width: "100%",
+                      outline: "none",
+                      fontFamily: "var(--font-syne), sans-serif",
+                      fontWeight: 700,
+                      fontSize: "0.95rem",
+                      color: "#000000"
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: "block", fontFamily: "var(--font-syne), sans-serif", fontSize: "0.95rem", fontWeight: 700, marginBottom: "0.5rem", color: "#000000" }}>Phone Number</label>
+                  <input 
+                    type="tel" 
+                    placeholder="e.g. 0771234567"
+                    required 
+                    value={form.phone} 
+                    onChange={e => setForm({ ...form, phone: e.target.value })}
+                    style={{
+                      height: "45px",
+                      backgroundColor: "#f1f3f5",
+                      border: "1px solid rgba(0, 0, 0, 0.1)",
+                      borderRadius: "0.75rem",
+                      padding: "0 1rem",
+                      width: "100%",
+                      outline: "none",
+                      fontFamily: "var(--font-syne), sans-serif",
+                      fontWeight: 700,
+                      fontSize: "0.95rem",
+                      color: "#000000"
+                    }}
+                  />
+                </div>
+
+                {/* Qty & Total Selector Row */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "0.5rem", marginBottom: "0.5rem" }}>
+                  {/* Qty counter */}
+                  <div>
+                    <div style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "0.85rem", fontWeight: 700, color: "#000000", marginBottom: "0.35rem" }}>Qty</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                      <button
+                        type="button"
+                        onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                        disabled={quantity <= 1}
+                        style={{
+                          width: "30px",
+                          height: "30px",
+                          borderRadius: "50%",
+                          backgroundColor: "#000000",
+                          color: "#ffffff",
+                          border: "none",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center"
+                        }}
+                      >
+                        <Minus size={12} />
+                      </button>
+                      <span style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.2rem", fontWeight: 500, color: "#000000", minWidth: "20px", textAlign: "center" }}>
+                        {quantity}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setQuantity(q => Math.min(selectedEvent.available_tickets, q + 1))}
+                        disabled={quantity >= selectedEvent.available_tickets}
+                        style={{
+                          width: "30px",
+                          height: "30px",
+                          borderRadius: "50%",
+                          backgroundColor: "#000000",
+                          color: "#ffffff",
+                          border: "none",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          cursor: quantity >= selectedEvent.available_tickets ? "not-allowed" : "pointer",
+                          opacity: quantity >= selectedEvent.available_tickets ? 0.3 : 1
+                        }}
+                      >
+                        <Plus size={12} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Total price display */}
+                  <div style={{ textAlign: "right" }}>
+                    <div style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "0.85rem", fontWeight: 700, color: "#000000", marginBottom: "0.35rem" }}>Total</div>
+                    <div style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.3rem", fontWeight: 700, color: "#000000" }}>
+                      LKR.{selectedEvent.price * quantity}
+                    </div>
+                  </div>
+                </div>
+
+                <button 
+                  type="submit" 
+                  disabled={processing}
+                  style={{ 
+                    width: "100%", 
+                    backgroundColor: "#000c66", 
+                    color: "#ffffff", 
+                    border: "none", 
+                    borderRadius: "9999px", 
+                    padding: "1rem", 
+                    fontSize: "1.25rem", 
+                    fontWeight: 800, 
+                    fontFamily: "var(--font-syne), sans-serif", 
+                    cursor: "pointer",
+                    transition: "opacity 0.2s",
+                    opacity: processing ? 0.7 : 1,
+                    marginTop: "0.5rem"
+                  }}
+                >
+                  {processing ? "Connecting to Stripe..." : "PAY NOW"}
+                </button>
+              </form>
             </div>
-
-            {error && (
-              <div className="mb-4 p-3 rounded-lg text-sm flex gap-2 items-center" style={{ backgroundColor: "rgba(239,68,68,0.1)", color: "var(--danger)", border: "1px solid rgba(239,68,68,0.2)" }}>
-                <AlertCircle size={16} /> {error}
-              </div>
-            )}
-
-            <form onSubmit={handleCheckout}>
-              <div className="grid gap-4 mb-4" style={{ gridTemplateColumns: "1fr 1fr" }}>
-                <div className="form-group">
-                  <label className="form-label text-sm">First Name *</label>
-                  <input type="text" className="form-input" required value={form.firstName} onChange={e => setForm({...form, firstName: e.target.value})} />
-                </div>
-                <div className="form-group">
-                  <label className="form-label text-sm">Last Name *</label>
-                  <input type="text" className="form-input" required value={form.lastName} onChange={e => setForm({...form, lastName: e.target.value})} />
-                </div>
-              </div>
-
-              <div className="form-group mb-4">
-                <label className="form-label text-sm">Email Address *</label>
-                <input type="email" className="form-input" required value={form.email} onChange={e => setForm({...form, email: e.target.value})} />
-              </div>
-
-              <div className="form-group mb-6">
-                <label className="form-label text-sm">Phone Number *</label>
-                <input type="tel" className="form-input" placeholder="e.g. 0771234567" required value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} />
-              </div>
-
-              <button type="submit" disabled={processing} className="btn btn-primary w-full justify-center text-lg" style={{ padding: "0.75rem", opacity: processing ? 0.7 : 1 }}>
-                {processing ? "Connecting to Stripe..." : `Pay LKR ${selectedEvent.price}`}
-              </button>
-            </form>
           </div>
         </div>
       )}
