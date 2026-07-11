@@ -34,7 +34,7 @@ export default async function RootLayout({
     <html lang="en">
       <body className={`${inter.variable} ${outfit.variable} ${syne.variable} ${nobile.variable} ${zain.variable} ${audiowide.variable} ${dmSans.variable} font-sans`}>
         <nav className="navbar">
-          <div className="container flex justify-between items-center" style={{ flexWrap: 'wrap', gap: '1rem' }}>
+          <div className="container flex justify-between items-center" style={{ gap: '1rem' }}>
             <Link href="/" className="flex items-center gap-3 font-bold text-xl gradient-text">
               <img src="/logo.png" alt="UWU-NEXUS Logo" style={{ height: '50px', width: 'auto' }} />
             </Link>
@@ -45,13 +45,15 @@ export default async function RootLayout({
               {isAuthenticated ? (
                 <>
                   {isAdmin && (
-                    <Link href="/admin" className="btn flex items-center gap-2" style={{ backgroundColor: 'rgba(0, 12, 102, 0.1)', color: 'var(--primary)', border: '1px solid var(--primary)' }}>
+                    <Link href="/admin" className="btn flex items-center gap-2" style={{ backgroundColor: 'rgba(0, 12, 102, 0.1)', color: 'var(--primary)', border: '1px solid var(--primary)', whiteSpace: 'nowrap', fontFamily: 'var(--font-inter), sans-serif', fontWeight: 900 }}>
                       <Shield size={16} />
-                      Admin Panel
+                      Admin
                     </Link>
                   )}
                   <form action={logoutAction}>
-                    <button type="submit" className="btn btn-secondary">Logout</button>
+                    <button type="submit" className="btn-logout" style={{ fontFamily: 'var(--font-inter), sans-serif', fontWeight: 900 }}>
+                      <span>Logout</span>
+                    </button>
                   </form>
                 </>
               ) : (
