@@ -203,7 +203,8 @@ export default function MarketplacePage() {
             display: 'flex',
             alignItems: 'center',
             gap: '0.5rem',
-            transition: 'background-color 0.2s'
+            transition: 'background-color 0.2s',
+            transform: 'translateY(-12px)'
           }}
           onClick={openCreateModal}
         >
@@ -416,20 +417,20 @@ export default function MarketplacePage() {
                   {/* Actions Button */}
                   <div style={{ display: "flex", justifyContent: "center", width: "100%", marginTop: "auto" }}>
                     {tab === "browse" ? (
-                      <button 
+                      <button
                         onClick={() => setContactProduct(product)}
-                        style={{ 
-                          backgroundColor: "#0d0e4aff", 
-                          color: "#ffffff", 
-                          borderRadius: "9999px", 
-                          padding: "0.65rem 1.5rem", 
-                          fontFamily: "var(--font-syne), sans-serif", 
-                          fontWeight: 700, 
-                          fontSize: "0.95rem", 
-                          display: "inline-flex", 
-                          alignItems: "center", 
-                          justifyContent: "center", 
-                          gap: "0.5rem", 
+                        style={{
+                          backgroundColor: "#0d0e4aff",
+                          color: "#ffffff",
+                          borderRadius: "9999px",
+                          padding: "0.65rem 1.5rem",
+                          fontFamily: "var(--font-syne), sans-serif",
+                          fontWeight: 700,
+                          fontSize: "0.95rem",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "0.5rem",
                           textDecoration: "none",
                           border: "none",
                           cursor: "pointer",
@@ -763,49 +764,49 @@ export default function MarketplacePage() {
       )}
       {/* Contact Via Modal */}
       {contactProduct && (
-        <div 
-          style={{ 
-            position: "fixed", 
-            inset: 0, 
-            backgroundColor: "rgba(0,0,0,0.65)", 
-            zIndex: 110, 
-            display: "flex", 
-            alignItems: "center", 
-            justifyContent: "center", 
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0,0,0,0.65)",
+            zIndex: 110,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             padding: "1.5rem",
             backdropFilter: "blur(5px)"
-          }} 
+          }}
           onClick={() => setContactProduct(null)}
         >
-          <div 
-            style={{ 
-              maxWidth: "400px", 
-              width: "100%", 
-              backgroundColor: "#ffffff", 
-              borderRadius: "2.2rem", 
-              padding: "3rem 2.5rem", 
+          <div
+            style={{
+              maxWidth: "400px",
+              width: "100%",
+              backgroundColor: "#ffffff",
+              borderRadius: "2.2rem",
+              padding: "3rem 2.5rem",
               boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
               position: "relative",
               textAlign: "center"
-            }} 
+            }}
             onClick={e => e.stopPropagation()}
           >
             {/* Close Button */}
-            <button 
-              onClick={() => setContactProduct(null)} 
-              style={{ 
+            <button
+              onClick={() => setContactProduct(null)}
+              style={{
                 position: "absolute",
                 top: "1.5rem",
                 right: "1.5rem",
-                background: "#ffffff", 
-                border: "1.5px solid #e2e8f0", 
+                background: "#ffffff",
+                border: "1.5px solid #e2e8f0",
                 borderRadius: "50%",
                 width: "36px",
                 height: "36px",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                cursor: "pointer", 
+                cursor: "pointer",
                 color: "#000000",
                 boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.08)"
               }}
@@ -845,8 +846,8 @@ export default function MarketplacePage() {
                 }}
               >
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12.004 2C6.48 2 2 6.48 2 12.004c0 1.764.46 3.42 1.268 4.876L2 22l5.284-1.388c1.392.76 2.972 1.196 4.72 1.196 5.524 0 10.004-4.48 10.004-10.004C22.008 6.48 17.528 2 12.004 2z" fill="#25D366"/>
-                  <path d="M17.508 14.304c-.304-.152-1.8-.888-2.076-.988-.276-.1-.476-.152-.676.152-.2.304-.776.988-.952 1.188-.176.2-.352.224-.656.072-1.14-.572-1.9-1.02-2.652-2.312-.2-.344.2-.32.572-1.064.092-.184.048-.344-.024-.496-.072-.152-.676-1.632-.928-2.236-.244-.588-.492-.508-.676-.516-.176-.008-.376-.008-.576-.008s-.524.076-.8.376c-.276.3-1.052 1.028-1.052 2.508s1.076 2.904 1.224 3.104c.148.2 2.116 3.232 5.128 4.532.716.308 1.276.492 1.712.632.72.228 1.376.196 1.896.116.58-.088 1.8-.736 2.052-1.44.252-.704.252-1.308.176-1.44-.076-.132-.276-.232-.58-.384z" fill="#FFF"/>
+                  <path d="M12.004 2C6.48 2 2 6.48 2 12.004c0 1.764.46 3.42 1.268 4.876L2 22l5.284-1.388c1.392.76 2.972 1.196 4.72 1.196 5.524 0 10.004-4.48 10.004-10.004C22.008 6.48 17.528 2 12.004 2z" fill="#25D366" />
+                  <path d="M17.508 14.304c-.304-.152-1.8-.888-2.076-.988-.276-.1-.476-.152-.676.152-.2.304-.776.988-.952 1.188-.176.2-.352.224-.656.072-1.14-.572-1.9-1.02-2.652-2.312-.2-.344.2-.32.572-1.064.092-.184.048-.344-.024-.496-.072-.152-.676-1.632-.928-2.236-.244-.588-.492-.508-.676-.516-.176-.008-.376-.008-.576-.008s-.524.076-.8.376c-.276.3-1.052 1.028-1.052 2.508s1.076 2.904 1.224 3.104c.148.2 2.116 3.232 5.128 4.532.716.308 1.276.492 1.712.632.72.228 1.376.196 1.896.116.58-.088 1.8-.736 2.052-1.44.252-.704.252-1.308.176-1.44-.076-.132-.276-.232-.58-.384z" fill="#FFF" />
                 </svg>
                 <span style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.3rem", fontWeight: 700, color: "#000000" }}>
                   Whatsapp
@@ -873,10 +874,10 @@ export default function MarketplacePage() {
                 }}
               >
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path fill="#4285F4" d="M20 18h2V6c0-1.1-.9-2-2-2h-3v14h3z"/>
-                  <path fill="#34A853" d="M4 18h2V4H4c-1.1 0-2 0.9-2 2v12h2z"/>
-                  <path fill="#EA4335" d="M12 13.5l8-6.5V4l-8 6.5L4 4v3l8 6.5z"/>
-                  <path fill="#FBBC05" d="M17 4h-3v5l3-2.5V4zM7 4h3v5L7 6.5V4z"/>
+                  <path fill="#4285F4" d="M20 18h2V6c0-1.1-.9-2-2-2h-3v14h3z" />
+                  <path fill="#34A853" d="M4 18h2V4H4c-1.1 0-2 0.9-2 2v12h2z" />
+                  <path fill="#EA4335" d="M12 13.5l8-6.5V4l-8 6.5L4 4v3l8 6.5z" />
+                  <path fill="#FBBC05" d="M17 4h-3v5l3-2.5V4zM7 4h3v5L7 6.5V4z" />
                 </svg>
                 <span style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.3rem", fontWeight: 700, color: "#000000" }}>
                   Email
