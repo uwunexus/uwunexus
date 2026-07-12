@@ -48,7 +48,7 @@ export default function NavBar({ isAuthenticated, isAdmin }: NavBarProps) {
           </Link>
 
           {/* ── DESKTOP nav pills ── */}
-          <div className="nav-pill-container desktop-only" style={{ overflowX: "auto", justifyContent: "center" }}>
+          <div className="nav-pill-container desktop-only" style={{ overflowX: "auto" }}>
             {LINKS.map(link => (
               <Link
                 key={link.href}
