@@ -462,11 +462,10 @@ button {
 .form-input {
   width: 100%;
   padding: 0.85rem 1rem;
-  background-color: rgba(255, 255, 255, 0.05);
-  /* Lighter for contrast */
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background-color: #f8fafc;
+  border: 1px solid #cbd5e1;
   border-radius: 0.75rem;
-  color: var(--foreground);
+  color: #0f172a;
   font-family: inherit;
   transition: all 0.3s ease;
 }
@@ -474,8 +473,8 @@ button {
 .form-input:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25);
-  background-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(0, 12, 102, 0.1);
+  background-color: #ffffff;
 }
 
 select.form-input option {
