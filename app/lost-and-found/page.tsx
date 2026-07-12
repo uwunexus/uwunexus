@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, MapPin, Clock, PlusCircle, X, Upload, MessageCircle, Image as ImageIcon, CheckCircle } from "lucide-react";
+import { Search, MapPin, Clock, X, Upload, Phone, CheckCircle, Image as ImageIcon, PlusCircle } from "lucide-react";
 import Image from "next/image";
 import { uploadToCloudinary } from "../lib/cloudinary";
 
@@ -21,6 +21,32 @@ interface Report {
   images: string[];
 }
 
+const formatReportDateTime = (dateTimeStr: string) => {
+  if (!dateTimeStr) return "";
+  if (dateTimeStr.includes("T")) {
+    try {
+      const date = new Date(dateTimeStr);
+      if (isNaN(date.getTime())) return dateTimeStr;
+      
+      const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+      const month = monthNames[date.getMonth()];
+      const day = date.getDate();
+      
+      let hours = date.getHours();
+      const minutes = date.getMinutes();
+      const ampm = hours >= 12 ? "pm" : "am";
+      hours = hours % 12;
+      hours = hours ? hours : 12;
+      const minutesStr = minutes < 10 ? "0" + minutes : minutes;
+      
+      return `${month} ${day} , ${hours}.${minutesStr}${ampm}`;
+    } catch (e) {
+      return dateTimeStr;
+    }
+  }
+  return dateTimeStr;
+};
+
 export default function LostAndFoundPage() {
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,6 +58,12 @@ export default function LostAndFoundPage() {
   const [showModal, setShowModal] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   const [myId, setMyId] = useState("");
+  const [contactReport, setContactReport] = useState<Report | null>(null);
+
+  // Split date/time states (Option B: Remove Year)
+  const [selectedMonth, setSelectedMonth] = useState("jan");
+  const [selectedDay, setSelectedDay] = useState("1");
+  const [selectedTime, setSelectedTime] = useState("12:00");
 
   const [form, setForm] = useState({
     title: "",
@@ -48,6 +80,15 @@ export default function LostAndFoundPage() {
     const parseCookie = (name: string) => document.cookie.split("; ").find(r => r.startsWith(name + "="))?.split("=")[1];
     setMyId(parseCookie("uwu_user_id") || "");
     fetchReports();
+
+    // Initialize with current date and time
+    const now = new Date();
+    const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+    setSelectedMonth(monthNames[now.getMonth()]);
+    setSelectedDay(now.getDate().toString());
+    const hr = now.getHours().toString().padStart(2, '0');
+    const min = now.getMinutes().toString().padStart(2, '0');
+    setSelectedTime(`${hr}:${min}`);
   }, []);
 
   const fetchReports = async () => {
@@ -74,11 +115,26 @@ export default function LostAndFoundPage() {
         files.map(file => uploadToCloudinary(file, "uwunexus/lostandfound"))
       );
 
+      // Format selectedTime into AM/PM with dot syntax (e.g. 10.30pm)
+      let timeStr = "";
+      if (selectedTime) {
+        const [hoursStr, minutesStr] = selectedTime.split(":");
+        let hours = parseInt(hoursStr, 10);
+        const minutes = parseInt(minutesStr, 10);
+        const ampm = hours >= 12 ? "pm" : "am";
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        const minStr = minutes < 10 ? "0" + minutes : minutes;
+        timeStr = `${hours}.${minStr}${ampm}`;
+      }
+      const combinedDateTime = `${selectedMonth} ${selectedDay} , ${timeStr}`;
+
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/create_lost_found.php`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
+          time_date: combinedDateTime,
           user_id: +myId,
           images: imageUrls
         })
@@ -90,6 +146,16 @@ export default function LostAndFoundPage() {
         setShowModal(false);
         setForm({ title: "", description: "", location: "", time_date: "", type: "Lost", contact_number: "", contact_email: "" });
         setFiles([]);
+        
+        // Reset date/time to current values
+        const now = new Date();
+        const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+        setSelectedMonth(monthNames[now.getMonth()]);
+        setSelectedDay(now.getDate().toString());
+        const hr = now.getHours().toString().padStart(2, '0');
+        const min = now.getMinutes().toString().padStart(2, '0');
+        setSelectedTime(`${hr}:${min}`);
+
         fetchReports();
       } else {
         alert(data.message);
@@ -128,97 +194,279 @@ export default function LostAndFoundPage() {
   });
 
   return (
-    <div className="container py-8 relative min-h-screen">
-      <div className="flex justify-between items-center mb-8 flex-wrap gap-4">
+    <div className="container" style={{ maxWidth: '1210px', marginTop: '1.5rem', paddingLeft: '0', paddingRight: '0', minHeight: '100vh', paddingBottom: '4rem' }}>
+      {/* Header */}
+      <div className="flex justify-between items-center mb-6 flex-wrap gap-4" style={{ marginTop: '1.5rem' }}>
         <div>
-          <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
-            <Search size={36} className="text-warning" />
-            Lost & Found
+          <h1 style={{ fontFamily: 'var(--font-syne), sans-serif', fontWeight: 700, fontSize: '3rem', color: '#000000', letterSpacing: '0.02em', marginBottom: '0.25rem' }}>
+            Lost & Found Items
           </h1>
-          <p className="text-muted">Community portal to report and recover misplaced items.</p>
+          <p style={{ fontFamily: 'var(--font-inclusive-sans), sans-serif', fontSize: '1.15rem', color: '#64748b', fontWeight: 500 }}>
+            Community portal to report and recover misplaced items.
+          </p>
         </div>
-        <button className="btn btn-primary" style={{ backgroundColor: 'var(--warning)', color: '#000' }} onClick={() => setShowModal(true)}>
-          <PlusCircle size={18} /> Report Item
+        <button 
+          style={{ 
+            backgroundColor: '#000c66', 
+            color: '#ffffff', 
+            border: 'none', 
+            borderRadius: '9999px', 
+            padding: '0.6rem 2.2rem', 
+            fontFamily: 'var(--font-syne), sans-serif', 
+            fontWeight: 700, 
+            fontSize: '1rem',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            transition: 'background-color 0.2s',
+            transform: 'translateY(-12px)'
+          }} 
+          onClick={() => setShowModal(true)}
+        >
+          <PlusCircle size={18} />
+          <span>Report Item</span>
         </button>
       </div>
 
-      <div className="flex gap-4 mb-8 flex-wrap">
-        <button className="btn" style={{ borderBottom: filter === "All" ? '2px solid var(--warning)' : '2px solid transparent', color: filter === "All" ? 'var(--warning)' : 'var(--muted)' }} onClick={() => setFilter("All")}>All Reports</button>
-        <button className="btn" style={{ borderBottom: filter === "Lost" ? '2px solid var(--danger)' : '2px solid transparent', color: filter === "Lost" ? 'var(--danger)' : 'var(--muted)' }} onClick={() => setFilter("Lost")}>Lost Items</button>
-        <button className="btn" style={{ borderBottom: filter === "Found" ? '2px solid var(--success)' : '2px solid transparent', color: filter === "Found" ? 'var(--success)' : 'var(--muted)' }} onClick={() => setFilter("Found")}>Found Items</button>
+      {/* Filter Buttons */}
+      <div className="flex gap-2 flex-wrap mb-8" style={{ marginTop: '2rem' }}>
+        <button 
+          onClick={() => setFilter("All")}
+          style={{
+            height: '38px',
+            padding: '0 1.25rem',
+            borderRadius: '9999px',
+            backgroundColor: filter === "All" ? "#000c66" : "#ffffff",
+            color: filter === "All" ? "#ffffff" : "#000c66",
+            border: `1.5px solid ${filter === "All" ? "#000c66" : "#e2e8f0"}`,
+            fontSize: '0.9rem',
+            fontWeight: 700,
+            fontFamily: 'var(--font-syne), sans-serif',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          All Reports
+        </button>
+        <button 
+          onClick={() => setFilter("Lost")}
+          style={{
+            height: '38px',
+            padding: '0 1.25rem',
+            borderRadius: '9999px',
+            backgroundColor: filter === "Lost" ? "#000c66" : "#ffffff",
+            color: filter === "Lost" ? "#ffffff" : "#000c66",
+            border: `1.5px solid ${filter === "Lost" ? "#000c66" : "#e2e8f0"}`,
+            fontSize: '0.9rem',
+            fontWeight: 700,
+            fontFamily: 'var(--font-syne), sans-serif',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          Lost Items
+        </button>
+        <button 
+          onClick={() => setFilter("Found")}
+          style={{
+            height: '38px',
+            padding: '0 1.25rem',
+            borderRadius: '9999px',
+            backgroundColor: filter === "Found" ? "#000c66" : "#ffffff",
+            color: filter === "Found" ? "#ffffff" : "#000c66",
+            border: `1.5px solid ${filter === "Found" ? "#000c66" : "#e2e8f0"}`,
+            fontSize: '0.9rem',
+            fontWeight: 700,
+            fontFamily: 'var(--font-syne), sans-serif',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          Found Items
+        </button>
         {myId && (
-          <button className="btn" style={{ borderBottom: filter === "Mine" ? '2px solid var(--primary)' : '2px solid transparent', color: filter === "Mine" ? 'var(--primary)' : 'var(--muted)' }} onClick={() => setFilter("Mine")}>My Reports</button>
+          <button 
+            onClick={() => setFilter("Mine")}
+            style={{
+              height: '38px',
+              padding: '0 1.25rem',
+              borderRadius: '9999px',
+              backgroundColor: filter === "Mine" ? "#000c66" : "#ffffff",
+              color: filter === "Mine" ? "#ffffff" : "#000c66",
+              border: `1.5px solid ${filter === "Mine" ? "#000c66" : "#e2e8f0"}`,
+              fontSize: '0.9rem',
+              fontWeight: 700,
+              fontFamily: 'var(--font-syne), sans-serif',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            My Reports
+          </button>
         )}
       </div>
 
+      {/* Reports Grid */}
       {loading ? (
-        <div className="text-center py-20 text-muted">Loading reports...</div>
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "5rem 0", color: "#64748b", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700 }}>Loading reports...</div>
       ) : filteredReports.length === 0 ? (
-        <div className="card text-center py-20 text-muted max-w-2xl mx-auto">
-          <Search size={48} className="mx-auto mb-4 opacity-30" />
-          <h2 className="text-xl font-semibold mb-2 text-foreground">No Reports Found</h2>
-          <p>No listings match your criteria. You can create a report if you lost or found an item.</p>
+        <div style={{ textAlign: "center", padding: "5rem 0", color: "#64748b", maxWidth: "600px", margin: "0 auto", fontFamily: "var(--font-syne), sans-serif" }}>
+          <Search size={48} style={{ margin: "0 auto 1rem auto", opacity: 0.3 }} />
+          <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: "#000000", marginBottom: "0.5rem" }}>No Reports Found</h2>
+          <p style={{ fontWeight: 500 }}>No listings match your criteria. You can create a report if you lost or found an item.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md-grid-cols-2 lg-grid-cols-3 gap-6">
+        <div className="grid gap-8" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))" }}>
           {filteredReports.map((report) => {
-            const color = report.type === "Lost" ? "var(--danger)" : "var(--success)";
             const isMine = report.user_id === +myId;
             const isResolved = report.status === 'resolved';
 
             return (
-              <div key={report.id} className="card p-0 overflow-hidden flex flex-col relative" style={{ padding: 0, borderTop: `4px solid ${color}`, opacity: isResolved ? 0.6 : 1 }}>
-                
-                {/* Images */}
-                <div className="aspect-4-3 image-container-blurred" style={{ backgroundImage: report.images && report.images.length > 0 ? `url(${report.images[0]})` : 'none' }}>
+              <div key={report.id} className="event-card" style={{ opacity: isResolved ? 0.6 : 1 }}>
+                {/* Image visual wrapper with aspect ratio matching mockup */}
+                <div className="event-card-image-wrapper">
                   {report.images && report.images.length > 0 ? (
-                    <Image src={report.images[0]} alt={report.title} fill className="next-image" sizes="(max-width: 768px) 100vw, 33vw" />
+                    <img src={report.images[0]} alt={report.title} className="event-card-img" />
                   ) : (
-                    <div className="flex justify-center items-center h-full opacity-50 text-muted relative z-10">
-                      <ImageIcon size={48} />
+                    <div className="event-card-no-img" style={{ background: "linear-gradient(135deg, #000c6622, #000c6611)" }}>
+                      <ImageIcon size={40} style={{ color: "#000c66", opacity: 0.4 }} />
                     </div>
                   )}
                   {isResolved && (
                     <div className="absolute inset-0 flex justify-center items-center z-10" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                      <div className="badge text-lg font-bold shadow-lg" style={{ backgroundColor: "var(--success)", color: "white" }}>RESOLVED</div>
+                      <div style={{ backgroundColor: "#10b981", color: "white", padding: "0.4rem 1.25rem", borderRadius: "9999px", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "0.95rem" }}>RESOLVED</div>
                     </div>
                   )}
                 </div>
 
-                <div className="p-4 flex flex-col flex-1">
-                  <div className="flex justify-between items-start mb-4">
-                    <h3 className="font-bold text-xl">{report.title}</h3>
-                    <span className="badge" style={{ backgroundColor: `${color}33`, color: color }}>
+                {/* Content block stack */}
+                <div className="event-card-content">
+                  {/* Title & Type Badge Row */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
+                    <h3 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.25rem", fontWeight: 700, color: "#000000", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
+                      {report.title}
+                    </h3>
+                    <span style={{ 
+                      backgroundColor: report.type === "Lost" ? "#a61c1c" : "#1b8a5a", 
+                      color: "#ffffff", 
+                      borderRadius: "9999px",
+                      padding: "0.25rem 0.9rem",
+                      fontSize: "0.85rem",
+                      fontWeight: 700,
+                      fontFamily: "var(--font-syne), sans-serif"
+                    }}>
                       {report.type}
                     </span>
                   </div>
-                  
-                  <p className="text-sm mb-4">{report.description}</p>
-                  
-                  <div className="flex flex-col gap-2 text-muted text-sm mb-6">
-                    <div className="flex items-center gap-2">
-                      <MapPin size={16} />
+
+                  {/* Description Box Container */}
+                  <div style={{ 
+                    backgroundColor: "#d6d9de", 
+                    borderRadius: "1rem", 
+                    padding: "0.75rem 1rem", 
+                    marginTop: "0.75rem", 
+                    marginBottom: "1.25rem",
+                    fontFamily: "var(--font-syne), sans-serif",
+                    fontSize: "0.95rem",
+                    fontWeight: 700,
+                    color: "#000000",
+                    textAlign: "left",
+                    minHeight: "55px",
+                    display: "flex",
+                    alignItems: "center"
+                  }}>
+                    {report.description}
+                  </div>
+
+                  {/* Metadata List */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.65rem", marginBottom: "1.5rem", fontFamily: "var(--font-syne), sans-serif", fontSize: "1.05rem", color: "#000000", fontWeight: 700 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                      <MapPin size={18} style={{ color: "#000000", flexShrink: 0 }} />
                       <span>{report.location}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Clock size={16} />
-                      <span>{report.time_date}</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                      <Clock size={18} style={{ color: "#000000", flexShrink: 0 }} />
+                      <span>{formatReportDateTime(report.time_date)}</span>
                     </div>
-                    <div className="mt-2 pt-2 border-t" style={{ borderColor: 'var(--border)' }}>
-                      <div>Reporter: <strong className="text-foreground">{report.reporter_name}</strong></div>
-                      <div>Phone: <strong className="text-foreground">{report.contact_number}</strong></div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                      </svg>
+                      <span>{report.reporter_name}</span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: "18px", color: "#000000", flexShrink: 0 }}>call</span>
+                      <span>{report.contact_number}</span>
                     </div>
                   </div>
 
-                  <div className="mt-auto flex flex-col gap-2">
+                  {/* Actions Buttons */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", width: "100%", marginTop: "auto" }}>
                     {!isResolved && (
-                      <a href={`mailto:${report.contact_email || report.reporter_email}`} className="btn w-full flex justify-center" style={{ border: '1px solid var(--border)' }}>
-                        <MessageCircle size={16} /> Contact Reporter
-                      </a>
+                      <button 
+                        onClick={() => setContactReport(report)}
+                        style={{ 
+                          backgroundColor: "#0d0e4aff", 
+                          color: "#ffffff", 
+                          borderRadius: "9999px", 
+                          padding: "0.65rem 1.5rem", 
+                          fontFamily: "var(--font-syne), sans-serif", 
+                          fontWeight: 700, 
+                          fontSize: "0.95rem", 
+                          display: "inline-flex", 
+                          alignItems: "center", 
+                          justifyContent: "center", 
+                          gap: "0.5rem", 
+                          border: "none",
+                          cursor: "pointer",
+                          transition: "opacity 0.2s",
+                          whiteSpace: "nowrap",
+                          width: "100%"
+                        }}
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: "18px", color: "inherit", display: "inline-block" }}>call</span>
+                        <span>Contact Reporter</span>
+                      </button>
                     )}
+
                     {isMine && !isResolved && (
-                      <button className="btn w-full flex justify-center" style={{ backgroundColor: 'var(--success)', color: 'white' }} onClick={() => handleMarkResolved(report.id)}>
-                        <CheckCircle size={16} /> Mark as Found/Resolved
+                      <button 
+                        onClick={() => handleMarkResolved(report.id)}
+                        style={{ 
+                          backgroundColor: "#115e3b", 
+                          color: "#ffffff", 
+                          borderRadius: "9999px", 
+                          padding: "0.65rem 1.5rem", 
+                          fontFamily: "var(--font-syne), sans-serif", 
+                          fontWeight: 700, 
+                          fontSize: "0.95rem", 
+                          display: "inline-flex", 
+                          alignItems: "center", 
+                          justifyContent: "center", 
+                          gap: "0.5rem", 
+                          border: "none",
+                          cursor: "pointer",
+                          transition: "opacity 0.2s",
+                          whiteSpace: "nowrap",
+                          width: "100%"
+                        }}
+                      >
+                        <CheckCircle size={16} />
+                        <span>Mark as Found</span>
                       </button>
                     )}
                   </div>
@@ -231,60 +479,261 @@ export default function LostAndFoundPage() {
 
       {/* Create Modal */}
       {showModal && (
-        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.8)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={() => setShowModal(false)}>
-          <div className="card max-h-[90vh] overflow-y-auto" style={{ maxWidth: "600px", width: "100%" }} onClick={e => e.stopPropagation()}>
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold">Report an Item</h2>
-              <button onClick={() => setShowModal(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--muted)" }}><X size={22} /></button>
+        <div 
+          style={{ 
+            position: "fixed", 
+            inset: 0, 
+            backgroundColor: "rgba(0,0,0,0.65)", 
+            zIndex: 100, 
+            display: "flex", 
+            alignItems: "center", 
+            justifyContent: "center", 
+            padding: "1.5rem",
+            backdropFilter: "blur(5px)"
+          }} 
+          onClick={() => setShowModal(false)}
+        >
+          <div 
+            style={{ 
+              maxWidth: "600px", 
+              width: "100%", 
+              backgroundColor: "#ffffff", 
+              borderRadius: "2.2rem", 
+              padding: "2.5rem", 
+              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+              maxHeight: "90vh",
+              overflowY: "auto"
+            }} 
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
+              <h2 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.75rem", fontWeight: 700, color: "#000000" }}>Report an Item</h2>
+              <button onClick={() => setShowModal(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "#000000" }}><X size={22} /></button>
             </div>
 
-            <form onSubmit={handleCreateReport}>
-              <div className="grid gap-4 mb-4 grid-cols-2">
-                <div className="form-group">
-                  <label className="form-label">Report Type *</label>
-                  <select className="form-input" value={form.type} onChange={e => setForm({...form, type: e.target.value})}>
+            <form onSubmit={handleCreateReport} style={{ fontFamily: "var(--font-syne), sans-serif", display: "flex", flexDirection: "column", gap: "1rem" }}>
+              <div className="responsive-form-grid">
+                <div>
+                  <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Report Type *</label>
+                  <select 
+                    value={form.type} 
+                    onChange={e => setForm({...form, type: e.target.value})}
+                    style={{
+                      height: "45px",
+                      backgroundColor: "#f1f3f5",
+                      border: "1px solid rgba(0, 0, 0, 0.1)",
+                      borderRadius: "0.75rem",
+                      padding: "0 1rem",
+                      width: "100%",
+                      outline: "none",
+                      fontFamily: "var(--font-syne), sans-serif",
+                      fontWeight: 700,
+                      fontSize: "0.95rem",
+                      color: "#000000"
+                    }}
+                  >
                     <option value="Lost">I Lost Something</option>
                     <option value="Found">I Found Something</option>
                   </select>
                 </div>
-                <div className="form-group">
-                  <label className="form-label">Item Title *</label>
-                  <input type="text" className="form-input" required value={form.title} onChange={e => setForm({...form, title: e.target.value})} placeholder="e.g., Black Wallet" />
+                <div>
+                  <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Item Title *</label>
+                  <input 
+                    type="text" 
+                    required 
+                    value={form.title} 
+                    onChange={e => setForm({...form, title: e.target.value})} 
+                    placeholder="e.g., Black Wallet" 
+                    style={{
+                      height: "45px",
+                      backgroundColor: "#f1f3f5",
+                      border: "1px solid rgba(0, 0, 0, 0.1)",
+                      borderRadius: "0.75rem",
+                      padding: "0 1rem",
+                      width: "100%",
+                      outline: "none",
+                      fontFamily: "var(--font-syne), sans-serif",
+                      fontWeight: 700,
+                      fontSize: "0.95rem",
+                      color: "#000000"
+                    }}
+                  />
                 </div>
               </div>
               
-              <div className="grid gap-4 mb-4 grid-cols-2">
-                <div className="form-group">
-                  <label className="form-label">Location *</label>
-                  <input type="text" className="form-input" required value={form.location} onChange={e => setForm({...form, location: e.target.value})} placeholder="e.g., Library 2nd Floor" />
+              <div className="responsive-form-grid">
+                <div>
+                  <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Location *</label>
+                  <input 
+                    type="text" 
+                    required 
+                    value={form.location} 
+                    onChange={e => setForm({...form, location: e.target.value})} 
+                    placeholder="e.g., Library 2nd Floor" 
+                    style={{
+                      height: "45px",
+                      backgroundColor: "#f1f3f5",
+                      border: "1px solid rgba(0, 0, 0, 0.1)",
+                      borderRadius: "0.75rem",
+                      padding: "0 1rem",
+                      width: "100%",
+                      outline: "none",
+                      fontFamily: "var(--font-syne), sans-serif",
+                      fontWeight: 700,
+                      fontSize: "0.95rem",
+                      color: "#000000"
+                    }}
+                  />
                 </div>
-                <div className="form-group">
-                  <label className="form-label">Time & Date *</label>
-                  <input type="text" className="form-input" required value={form.time_date} onChange={e => setForm({...form, time_date: e.target.value})} placeholder="e.g., Oct 12, 10:30 AM" />
+                <div>
+                  <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Time & Date *</label>
+                  <div className="responsive-date-time-flex">
+                    {/* Month Dropdown */}
+                    <select
+                      value={selectedMonth}
+                      onChange={e => setSelectedMonth(e.target.value)}
+                      style={{
+                        flex: 1,
+                        height: "45px",
+                        backgroundColor: "#f1f3f5",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        borderRadius: "0.75rem",
+                        padding: "0 0.5rem",
+                        outline: "none",
+                        fontFamily: "var(--font-syne), sans-serif",
+                        fontWeight: 700,
+                        fontSize: "0.9rem",
+                        color: "#000000"
+                      }}
+                    >
+                      {["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"].map(m => (
+                        <option key={m} value={m}>{m.toUpperCase()}</option>
+                      ))}
+                    </select>
+
+                    {/* Day Dropdown */}
+                    <select
+                      value={selectedDay}
+                      onChange={e => setSelectedDay(e.target.value)}
+                      style={{
+                        flex: 1,
+                        height: "45px",
+                        backgroundColor: "#f1f3f5",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        borderRadius: "0.75rem",
+                        padding: "0 0.5rem",
+                        outline: "none",
+                        fontFamily: "var(--font-syne), sans-serif",
+                        fontWeight: 700,
+                        fontSize: "0.9rem",
+                        color: "#000000"
+                      }}
+                    >
+                      {Array.from({ length: 31 }, (_, i) => (i + 1).toString()).map(d => (
+                        <option key={d} value={d}>{d}</option>
+                      ))}
+                    </select>
+
+                    {/* Time Input */}
+                    <input
+                      type="time"
+                      value={selectedTime}
+                      onChange={e => setSelectedTime(e.target.value)}
+                      style={{
+                        flex: 1.2,
+                        height: "45px",
+                        backgroundColor: "#f1f3f5",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        borderRadius: "0.75rem",
+                        padding: "0 0.5rem",
+                        outline: "none",
+                        fontFamily: "var(--font-syne), sans-serif",
+                        fontWeight: 700,
+                        fontSize: "0.9rem",
+                        color: "#000000"
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="grid gap-4 mb-4 grid-cols-2">
-                <div className="form-group">
-                  <label className="form-label">Contact Number *</label>
-                  <input type="text" className="form-input" required value={form.contact_number} onChange={e => setForm({...form, contact_number: e.target.value})} placeholder="e.g., 0712345678" />
+              <div className="responsive-form-grid">
+                <div>
+                  <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Contact Number *</label>
+                  <input 
+                    type="text" 
+                    required 
+                    value={form.contact_number} 
+                    onChange={e => setForm({...form, contact_number: e.target.value})} 
+                    placeholder="e.g., 0712345678" 
+                    style={{
+                      height: "45px",
+                      backgroundColor: "#f1f3f5",
+                      border: "1px solid rgba(0, 0, 0, 0.1)",
+                      borderRadius: "0.75rem",
+                      padding: "0 1rem",
+                      width: "100%",
+                      outline: "none",
+                      fontFamily: "var(--font-syne), sans-serif",
+                      fontWeight: 700,
+                      fontSize: "0.95rem",
+                      color: "#000000"
+                    }}
+                  />
                 </div>
-                <div className="form-group">
-                  <label className="form-label">Contact Email</label>
-                  <input type="email" className="form-input" value={form.contact_email} onChange={e => setForm({...form, contact_email: e.target.value})} placeholder="Optional" />
+                <div>
+                  <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Contact Email</label>
+                  <input 
+                    type="email" 
+                    value={form.contact_email} 
+                    onChange={e => setForm({...form, contact_email: e.target.value})} 
+                    placeholder="Optional" 
+                    style={{
+                      height: "45px",
+                      backgroundColor: "#f1f3f5",
+                      border: "1px solid rgba(0, 0, 0, 0.1)",
+                      borderRadius: "0.75rem",
+                      padding: "0 1rem",
+                      width: "100%",
+                      outline: "none",
+                      fontFamily: "var(--font-syne), sans-serif",
+                      fontWeight: 700,
+                      fontSize: "0.95rem",
+                      color: "#000000"
+                    }}
+                  />
                 </div>
               </div>
 
-              <div className="form-group mb-4">
-                <label className="form-label">Description *</label>
-                <textarea className="form-input" rows={3} required value={form.description} onChange={e => setForm({...form, description: e.target.value})} placeholder="Provide detailed description, identifying marks, etc."></textarea>
+              <div>
+                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Description *</label>
+                <textarea 
+                  rows={4} 
+                  required 
+                  value={form.description} 
+                  onChange={e => setForm({...form, description: e.target.value})} 
+                  placeholder="Provide detailed description, identifying marks, etc."
+                  style={{
+                    backgroundColor: "#f1f3f5",
+                    border: "1px solid rgba(0, 0, 0, 0.1)",
+                    borderRadius: "0.75rem",
+                    padding: "0.75rem 1rem",
+                    width: "100%",
+                    outline: "none",
+                    fontFamily: "var(--font-syne), sans-serif",
+                    fontWeight: 700,
+                    fontSize: "0.95rem",
+                    color: "#000000",
+                    resize: "none"
+                  }}
+                />
               </div>
 
-              <div className="form-group mb-6">
-                <label className="form-label">Images (Optional, Max 3)</label>
-                <div className="border-2 border-dashed border-border rounded-lg p-6 text-center text-muted flex flex-col items-center justify-center cursor-pointer relative hover:border-primary transition-colors" style={{ backgroundColor: "var(--background)" }}>
+              <div>
+                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Images (Optional, Max 3)</label>
+                <div className="border-2 border-dashed border-border rounded-lg p-6 text-center text-muted flex flex-col items-center justify-center cursor-pointer relative hover:border-primary transition-colors" style={{ backgroundColor: "#f1f3f5", borderRadius: "1rem", border: "2px dashed rgba(0,0,0,0.15)" }}>
                   <Upload size={24} className="mb-2" />
-                  <span>Click to select images</span>
+                  <span style={{ fontWeight: 700, fontSize: "0.9rem" }}>Click to select images</span>
                   <input 
                     type="file" 
                     accept="image/jpeg, image/png, image/webp" 
@@ -299,16 +748,160 @@ export default function LostAndFoundPage() {
                   />
                 </div>
                 {files.length > 0 && (
-                  <div className="text-sm text-success mt-2 font-medium">
+                  <div style={{ fontSize: "0.85rem", color: "var(--success)", marginTop: "0.5rem", fontWeight: 700 }}>
                     {files.length} file(s) selected
                   </div>
                 )}
               </div>
 
-              <button type="submit" disabled={formLoading} className="btn w-full justify-center" style={{ backgroundColor: 'var(--warning)', color: '#000' }}>
+              <button 
+                type="submit" 
+                disabled={formLoading} 
+                style={{ 
+                  width: "100%", 
+                  backgroundColor: "#000c66", 
+                  color: "#ffffff", 
+                  border: "none", 
+                  borderRadius: "9999px", 
+                  padding: "0.8rem", 
+                  fontSize: "1.1rem", 
+                  fontWeight: 700, 
+                  fontFamily: "var(--font-syne), sans-serif", 
+                  cursor: "pointer",
+                  transition: "opacity 0.2s",
+                  opacity: formLoading ? 0.7 : 1,
+                  marginTop: "0.5rem"
+                }}
+              >
                 {formLoading ? "Submitting..." : "Submit Report"}
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Contact Via Modal */}
+      {contactReport && (
+        <div 
+          style={{ 
+            position: "fixed", 
+            inset: 0, 
+            backgroundColor: "rgba(0,0,0,0.65)", 
+            zIndex: 110, 
+            display: "flex", 
+            alignItems: "center", 
+            justifyContent: "center", 
+            padding: "1.5rem",
+            backdropFilter: "blur(5px)"
+          }} 
+          onClick={() => setContactReport(null)}
+        >
+          <div 
+            style={{ 
+              maxWidth: "400px", 
+              width: "100%", 
+              backgroundColor: "#ffffff", 
+              borderRadius: "2.2rem", 
+              padding: "3rem 2.5rem", 
+              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+              position: "relative",
+              textAlign: "center"
+            }} 
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button 
+              onClick={() => setContactReport(null)} 
+              style={{ 
+                position: "absolute",
+                top: "1.5rem",
+                right: "1.5rem",
+                background: "#ffffff", 
+                border: "1.5px solid #e2e8f0", 
+                borderRadius: "50%",
+                width: "36px",
+                height: "36px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer", 
+                color: "#000000",
+                boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.08)"
+              }}
+            >
+              <X size={18} />
+            </button>
+
+            {/* Header */}
+            <h2 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "2.2rem", fontWeight: 700, color: "#000000", marginBottom: "2rem" }}>
+              Contact Via
+            </h2>
+
+            {/* Options Grid */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+              {/* WhatsApp Button */}
+              <button
+                onClick={() => {
+                  const phone = contactReport.contact_number;
+                  let clean = phone.replace(/\D/g, "");
+                  if (clean.startsWith("0")) {
+                    clean = "94" + clean.slice(1);
+                  }
+                  window.open(`https://wa.me/${clean}`, "_blank");
+                }}
+                style={{
+                  width: "100%",
+                  height: "55px",
+                  borderRadius: "9999px",
+                  border: "1.5px solid #000000",
+                  backgroundColor: "#ffffff",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "1rem",
+                  cursor: "pointer",
+                  transition: "background-color 0.2s"
+                }}
+              >
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12.004 2C6.48 2 2 6.48 2 12.004c0 1.764.46 3.42 1.268 4.876L2 22l5.284-1.388c1.392.76 2.972 1.196 4.72 1.196 5.524 0 10.004-4.48 10.004-10.004C22.008 6.48 17.528 2 12.004 2z" fill="#25D366"/>
+                  <path d="M17.508 14.304c-.304-.152-1.8-.888-2.076-.988-.276-.1-.476-.152-.676.152-.2.304-.776.988-.952 1.188-.176.2-.352.224-.656.072-1.14-.572-1.9-1.02-2.652-2.312-.2-.344.2-.32.572-1.064.092-.184.048-.344-.024-.496-.072-.152-.676-1.632-.928-2.236-.244-.588-.492-.508-.676-.516-.176-.008-.376-.008-.576-.008s-.524.076-.8.376c-.276.3-1.052 1.028-1.052 2.508s1.076 2.904 1.224 3.104c.148.2 2.116 3.232 5.128 4.532.716.308 1.276.492 1.712.632.72.228 1.376.196 1.896.116.58-.088 1.8-.736 2.052-1.44.252-.704.252-1.308.176-1.44-.076-.132-.276-.232-.58-.384z" fill="#FFF"/>
+                </svg>
+                <span style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.3rem", fontWeight: 700, color: "#000000" }}>
+                  Whatsapp
+                </span>
+              </button>
+
+              {/* Email Button */}
+              <button
+                onClick={() => {
+                  window.location.href = `mailto:${contactReport.contact_email || contactReport.reporter_email}`;
+                }}
+                style={{
+                  width: "100%",
+                  height: "55px",
+                  borderRadius: "9999px",
+                  border: "1.5px solid #000000",
+                  backgroundColor: "#ffffff",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "1rem",
+                  cursor: "pointer",
+                  transition: "background-color 0.2s"
+                }}
+              >
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path fill="#4285F4" d="M20 18h2V6c0-1.1-.9-2-2-2h-3v14h3z" />
+                  <path fill="#34A853" d="M4 18h2V4H4c-1.1 0-2 0.9-2 2v12h2z" />
+                  <path fill="#EA4335" d="M12 13.5l8-6.5V4l-8 6.5L4 4v3l8 6.5z" />
+                  <path fill="#FBBC05" d="M17 4h-3v5l3-2.5V4zM7 4h3v5L7 6.5V4z" />
+                </svg>
+                <span style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.3rem", fontWeight: 700, color: "#000000" }}>
+                  Email
+                </span>
+              </button>
+            </div>
           </div>
         </div>
       )}

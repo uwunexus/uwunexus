@@ -438,7 +438,7 @@ export default function MarketplacePage() {
                           whiteSpace: "nowrap"
                         }}
                       >
-                        <Phone size={16} />
+                        <span className="material-symbols-outlined" style={{ fontSize: "18px", color: "inherit", display: "inline-block" }}>call</span>
                         <span>Contact Seller</span>
                       </button>
                     ) : (
@@ -558,7 +558,7 @@ export default function MarketplacePage() {
                 />
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+              <div className="responsive-form-grid">
                 <div>
                   <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Price (LKR) *</label>
                   <input
@@ -637,7 +637,7 @@ export default function MarketplacePage() {
                 </select>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+              <div className="responsive-form-grid">
                 <div>
                   <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Contact Number *</label>
                   <input

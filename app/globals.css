@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined');
+
 :root {
   /* Core Colors */
   --background: #ffffff;
@@ -1133,5 +1135,30 @@ html {
   }
   .checkout-modal-info-col {
     padding: 2rem 1.5rem;
+  }
+}
+
+/* Force Material Symbols Outlined Font Family */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined' !important;
+}
+
+/* Responsive Grid for Forms */
+.responsive-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.responsive-date-time-flex {
+  display: flex;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+@media (max-width: 600px) {
+  .responsive-form-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
   }
 }
