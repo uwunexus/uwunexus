@@ -11,9 +11,15 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $headers = getallheaders();
 $auth_header = isset($headers['Authorization']) ? $headers['Authorization'] : (isset($headers['authorization']) ? $headers['authorization'] : '');
 
-// Read the secret from .env.local to authenticate internal requests
-$env = parse_ini_file(__DIR__ . '/../.env.local');
-$stripe_secret = trim($env['stripsecretekey'] ?? '');
+// $stripe_secret is injected by config-prod.php (via db.php require above)
+// Falls back to reading .env.local only when running locally
+if (empty($stripe_secret ?? '')) {
+    $env_file = __DIR__ . '/../.env.local';
+    if (file_exists($env_file)) {
+        $env = parse_ini_file($env_file);
+        $stripe_secret = trim($env['stripsecretekey'] ?? '');
+    }
+}
 
 if (empty($stripe_secret) || strpos($auth_header, $stripe_secret) === false) {
     http_response_code(403);

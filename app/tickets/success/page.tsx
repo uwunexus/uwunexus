@@ -23,7 +23,7 @@ export default async function SuccessPage({ searchParams }: { searchParams: Prom
       success = true;
 
       // Synchronous update fallback (in case webhook was missed locally)
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/update_stripe_order.php`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || '/api/backend'}/update_stripe_order.php`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
