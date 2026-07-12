@@ -87,11 +87,11 @@ export default function Home() {
 
           <div>
             {/* Note: Source can be replaced with custom hero-image.png, logo.png acts as fallback placeholder */}
-            <div className="hero-image-container" style={{ width: '100%', minHeight: '280px', height: '100%', maxHeight: '450px' }}>
+            <div className="hero-image-container" style={{ width: '100%', minHeight: '280px', height: '100%', maxHeight: '450px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               <img
                 src="/hero-image-container.gif"
                 alt="Students studying at Uva Wellassa University"
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
               />
             </div>
           </div>

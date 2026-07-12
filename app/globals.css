@@ -454,9 +454,9 @@ button {
 .form-label {
   display: block;
   margin-bottom: 0.5rem;
-  font-weight: 500;
+  font-weight: 700;
   font-size: 0.9rem;
-  color: #e4e4e7;
+  color: #1e293b;
 }
 
 .form-input {
