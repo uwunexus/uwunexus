@@ -86,7 +86,7 @@ try {
     
     // We use a verified domain sender if possible, or fallback. The user requested onboarding@resend.dev but typically that only allows sending TO the verified account holder.
     // For this demonstration, we'll try sending it. 
-    $verify_link = "http://localhost:3000/verify-email?token=" . $verification_token;
+    $verify_link = rtrim($frontend_url, '/') . "/verify-email?token=" . $verification_token;
     
     $email_html = "
         <h2>Welcome to UWU Nexus!</h2>

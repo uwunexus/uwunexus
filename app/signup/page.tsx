@@ -11,6 +11,7 @@ export default function SignUpPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -27,10 +28,11 @@ export default function SignUpPage() {
     }
 
     setError("");
+    setSuccess("");
     setLoading(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/signup.php`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || '/api/backend'}/signup.php`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -44,8 +46,7 @@ export default function SignUpPage() {
         throw new Error(data.message || "Failed to sign up");
       }
 
-      // Automatically log the user in after successful signup
-      await loginAction(data.user.role, String(data.user.id));
+      setSuccess(data.message || "Account created successfully! Please check your email to verify.");
     } catch (err: any) {
       setError(err.message || "An error occurred during sign up.");
     } finally {
@@ -72,6 +73,19 @@ export default function SignUpPage() {
           </div>
         )}
 
+        {success && (
+          <div className="mb-6 p-4 rounded text-sm text-center" style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)', color: 'var(--success)', border: '1px solid rgba(34, 197, 94, 0.2)' }}>
+            <p className="font-bold mb-2 text-lg">Success!</p>
+            {success}
+            <div className="mt-4">
+              <Link href="/login" className="btn btn-primary w-full text-center block">
+                Go to Login
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {!success && (
         <form onSubmit={handleSubmit}>
           <div className="form-group mb-4 position-relative">
             <label className="form-label text-sm">Full Name</label>
@@ -137,10 +151,11 @@ export default function SignUpPage() {
             </div>
           </div>
 
-          <button type="submit" disabled={loading} className="btn btn-primary w-full text-lg justify-center mb-6" style={{ padding: '0.75rem', opacity: loading ? 0.7 : 1 }}>
-            {loading ? "Signing up..." : "Sign Up"}
+          <button type="submit" disabled={loading} className="btn btn-primary w-full text-lg justify-center mb-6" style={{ padding: '0.75rem', backgroundColor: 'var(--primary)', opacity: loading ? 0.7 : 1 }}>
+            {loading ? "Creating account..." : "Sign Up"}
           </button>
         </form>
+        )}
 
         <div className="text-center text-sm text-muted">
           Already have an account? <Link href="/login" className="font-semibold" style={{ color: 'var(--primary)' }}>Login here</Link>
