@@ -110,7 +110,7 @@ export default function GPACalculatorPage() {
     const parse = (n: string) =>
       document.cookie.split("; ").find(r => r.startsWith(n + "="))?.split("=")[1] ?? "";
     const id   = parse("uwu_user_id");
-    const role = parse("uwu_user_role");
+    const role = parse("uwu_role");
     setMyId(id);
     setMyRole(role);
 
