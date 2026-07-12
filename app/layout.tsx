@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 import { logoutAction } from "./actions/auth";
 import { Shield, ArrowRight } from "lucide-react";
 import NavLinks from "./components/NavLinks";
+import AuthModal from "./components/AuthModal";
 
 const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
 const outfit = Outfit({ subsets: ["latin"], variable: '--font-outfit' });
@@ -62,8 +63,8 @@ export default async function RootLayout({
                 </>
               ) : (
                 <>
-                  <Link href="/login" className="btn btn-secondary">Login</Link>
-                  <Link href="/signup" className="btn btn-primary">
+                  <Link href="?auth=login" scroll={false} className="btn btn-secondary">Login</Link>
+                  <Link href="?auth=signup" scroll={false} className="btn btn-primary">
                     <span>Sign Up</span>
                     <ArrowRight size={16} />
                   </Link>
@@ -75,6 +76,7 @@ export default async function RootLayout({
         <main style={{ minHeight: 'calc(100vh - 200px)' }}>
           {children}
         </main>
+        {!isAuthenticated && <AuthModal />}
         <footer className="footer">
           <div className="container">
             <div className="flex justify-between items-center" style={{ flexWrap: 'wrap', gap: '2rem', paddingBottom: '1.5rem' }}>
@@ -115,7 +117,7 @@ export default async function RootLayout({
             <hr style={{ border: 0, borderTop: '1px solid var(--border)', margin: '1.5rem 0' }} />
 
             <div className="flex justify-between items-center" style={{ flexWrap: 'wrap', gap: '1rem', fontSize: '0.875rem' }}>
-              <p className="text-muted">© 2022 UWU - Nexus. All rights reserved.</p>
+              <p className="text-muted">© 2026 UWU - Nexus. All rights reserved.</p>
 
               <div className="flex items-center justify-center">
                 <img src="/logo.png" alt="UWU-NEXUS Icon" style={{ height: '32px', width: 'auto' }} />
