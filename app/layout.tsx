@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 import { logoutAction } from "./actions/auth";
 import { Shield, ArrowRight } from "lucide-react";
 import NavLinks from "./components/NavLinks";
+import NavBar from "./components/NavBar";
 
 const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
 const outfit = Outfit({ subsets: ["latin"], variable: '--font-outfit' });
@@ -19,6 +20,12 @@ const inclusiveSans = Inclusive_Sans({ subsets: ["latin"], weight: "400", variab
 export const metadata: Metadata = {
   title: "UWU-NEXUS",
   description: "Centralized Digital Ecosystem for Student Life Management",
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 export default async function RootLayout({
@@ -37,41 +44,7 @@ export default async function RootLayout({
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
       </head>
       <body className={`${inter.variable} ${outfit.variable} ${syne.variable} ${nobile.variable} ${zain.variable} ${audiowide.variable} ${dmSans.variable} ${inclusiveSans.variable} font-sans`}>
-        <nav className="navbar">
-          <div className="container flex justify-between items-center" style={{ gap: '1rem' }}>
-            <Link href="/" className="flex items-center gap-3 font-bold text-xl gradient-text">
-              <img src="/logo.png" alt="UWU-NEXUS Logo" style={{ height: '50px', width: 'auto' }} />
-            </Link>
-
-            <NavLinks />
-
-            <div className="flex gap-3 items-center">
-              {isAuthenticated ? (
-                <>
-                  {isAdmin && (
-                    <Link href="/admin" className="btn flex items-center gap-2" style={{ backgroundColor: 'rgba(0, 12, 102, 0.1)', color: 'var(--primary)', border: '1px solid var(--primary)', whiteSpace: 'nowrap', fontFamily: 'var(--font-inter), sans-serif', fontWeight: 900 }}>
-                      <Shield size={16} />
-                      Admin
-                    </Link>
-                  )}
-                  <form action={logoutAction}>
-                    <button type="submit" className="btn-logout" style={{ fontFamily: 'var(--font-inter), sans-serif', fontWeight: 900 }}>
-                      <span>Logout</span>
-                    </button>
-                  </form>
-                </>
-              ) : (
-                <>
-                  <Link href="/login" className="btn btn-secondary">Login</Link>
-                  <Link href="/signup" className="btn btn-primary">
-                    <span>Sign Up</span>
-                    <ArrowRight size={16} />
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
-        </nav>
+        <NavBar isAuthenticated={isAuthenticated} isAdmin={isAdmin} />
         <main style={{ minHeight: 'calc(100vh - 200px)' }}>
           {children}
         </main>

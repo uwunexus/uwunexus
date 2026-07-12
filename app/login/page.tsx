@@ -1,15 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { GraduationCap, Mail, Lock } from "lucide-react";
-import { loginAction } from "../actions/auth";
+import { setAuthCookies } from "../actions/auth";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,8 +39,11 @@ export default function LoginPage() {
         throw new Error(data.message || "Failed to log in");
       }
 
-      // Automatically log the user in locally via Next.js server actions
-      await loginAction(data.user.role, String(data.user.id));
+      // Set auth cookies server-side, then navigate client-side
+      // (avoids the red NEXT_REDIRECT flash from calling redirect() inside a server action)
+      await setAuthCookies(data.user.role, String(data.user.id));
+      router.push("/");
+      router.refresh();
     } catch (err: any) {
       setError(err.message || "An error occurred during login.");
     } finally {

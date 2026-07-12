@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import { Shield, Users, Calendar, Search, RefreshCw, CheckCircle, XCircle, Trash2, PlusCircle, Clock, MapPin, X, Upload, ChevronDown, Ticket, Store, EyeOff, BookOpen, Edit } from "lucide-react";
+import { Shield, Users, Calendar, Search, RefreshCw, CheckCircle, XCircle, Trash2, PlusCircle, Clock, MapPin, X, Upload, ChevronDown, Ticket, Store, Eye, EyeOff, BookOpen, Edit } from "lucide-react";
 import { uploadToCloudinary } from "../lib/cloudinary";
 
 /* ─── Types ──────────────────────────────────────────────────── */
@@ -821,25 +821,32 @@ export default function AdminPage() {
                           {item.status.toUpperCase()}
                         </span>
                       </td>
-                      <td className="p-4 text-right">
+                      <td className="p-4">
+                        <div className="flex flex-wrap justify-end gap-2">
                         {item.status === 'pending' && (
                           <>
-                            <button className="btn mr-2" style={{ backgroundColor: "var(--success)", color: "white", padding: "0.4rem 0.8rem" }} onClick={() => updateMarketplaceStatus(item.id, "approve")}>
+                            <button className="btn" style={{ backgroundColor: "var(--success)", color: "white", padding: "0.4rem 0.8rem" }} onClick={() => updateMarketplaceStatus(item.id, "approve")}>
                               <CheckCircle size={14} /> Approve
                             </button>
-                            <button className="btn mr-2" style={{ backgroundColor: "var(--danger)", color: "white", padding: "0.4rem 0.8rem" }} onClick={() => updateMarketplaceStatus(item.id, "reject")}>
+                            <button className="btn" style={{ backgroundColor: "var(--danger)", color: "white", padding: "0.4rem 0.8rem" }} onClick={() => updateMarketplaceStatus(item.id, "reject")}>
                               <XCircle size={14} /> Reject
                             </button>
                           </>
                         )}
                         {item.status !== 'pending' && item.status !== 'hidden' && (
-                          <button className="btn mr-2" style={{ backgroundColor: "var(--warning)", color: "black", padding: "0.4rem 0.8rem" }} onClick={() => updateMarketplaceStatus(item.id, "hide")}>
+                          <button className="btn" style={{ backgroundColor: "var(--warning)", color: "black", padding: "0.4rem 0.8rem" }} onClick={() => updateMarketplaceStatus(item.id, "hide")}>
                             <EyeOff size={14} /> Hide
+                          </button>
+                        )}
+                        {item.status === 'hidden' && (
+                          <button className="btn" style={{ backgroundColor: "var(--success)", color: "white", padding: "0.4rem 0.8rem" }} onClick={() => updateMarketplaceStatus(item.id, "approve")}>
+                            <Eye size={14} /> Unhide
                           </button>
                         )}
                         <button className="btn" style={{ backgroundColor: "transparent", color: "var(--danger)", border: "1px solid var(--danger)", padding: "0.4rem 0.8rem" }} onClick={() => updateMarketplaceStatus(item.id, "delete")}>
                           <Trash2 size={14} />
                         </button>
+                        </div>
                       </td>
                     </tr>
                   ))}

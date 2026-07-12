@@ -3,7 +3,9 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-export async function loginAction(role: string = "student", userId: string = "") {
+// Sets auth cookies WITHOUT redirecting — use this from client components
+// so you can navigate with router.push() and avoid the NEXT_REDIRECT flash.
+export async function setAuthCookies(role: string = "student", userId: string = "") {
   const cookieStore = await cookies();
   cookieStore.set("uwu_auth", "true", {
     path: "/",
@@ -17,6 +19,11 @@ export async function loginAction(role: string = "student", userId: string = "")
     path: "/",
     maxAge: 60 * 60 * 24 * 7
   });
+}
+
+// Kept for any form-action usage (e.g. server-rendered forms)
+export async function loginAction(role: string = "student", userId: string = "") {
+  await setAuthCookies(role, userId);
   redirect("/");
 }
 

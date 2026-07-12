@@ -1,10 +1,11 @@
 <?php
 // Handle CORS globally for all API requests
-$allowed_origin = 'http://localhost:3000';
+$allowed_origin  = 'http://localhost:3000';
+$frontend_url    = 'http://localhost:3000'; // Used for email links – override in config-prod.php
 $host = '127.0.0.1';
 $db   = 'uwunexus';
-$user = 'root';
-$pass = '';
+$user = 'nilesh';
+$pass = '12345678';
 
 if (file_exists(__DIR__ . '/config-prod.php')) {
     include __DIR__ . '/config-prod.php';

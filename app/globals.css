@@ -770,6 +770,26 @@ html {
   }
 }
 
+@media (max-width: 550px) {
+  .subscribe-form-container {
+    flex-direction: column !important;
+    border-radius: 1.5rem !important;
+    padding: 0 !important;
+    background-color: transparent !important;
+    border: none !important;
+    gap: 1rem !important;
+  }
+  .subscribe-input {
+    width: 100% !important;
+    background-color: #ffffff !important;
+    border-radius: 9999px !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  }
+  .subscribe-button {
+    width: 100% !important;
+  }
+}
+
 .subscribe-title {
   font-size: 2rem;
   font-weight: 400;
@@ -1160,5 +1180,114 @@ html {
   .responsive-form-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
+  }
+}
+
+/* ── COMPREHENSIVE MOBILE RESPONSIVENESS ── */
+
+/* Typography Scaling */
+.page-title {
+  font-size: clamp(2rem, 5vw + 1rem, 3rem);
+}
+.hero-title {
+  font-size: clamp(2.25rem, 6vw + 1rem, 3.5rem) !important;
+}
+
+/* NavBar Mobile Overrides */
+@media (min-width: 851px) {
+  .mobile-only { display: none !important; }
+}
+@media (max-width: 850px) {
+  .desktop-only { display: none !important; }
+  
+  .mobile-hamburger {
+    background: transparent;
+    border: none;
+    color: var(--primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+  }
+  
+  .mobile-menu-overlay {
+    position: fixed;
+    top: 60px; /* height of navbar approx */
+    left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(4px);
+    z-index: 40;
+    animation: fadeIn 0.2s ease-out;
+  }
+  
+  .mobile-menu-panel {
+    background: #ffffff;
+    width: 100%;
+    padding: 1.5rem;
+    border-bottom-left-radius: 1.5rem;
+    border-bottom-right-radius: 1.5rem;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .mobile-menu-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .mobile-nav-link {
+    padding: 0.875rem 1.25rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--primary);
+    border-radius: 1rem;
+    background: #f8fafc;
+    transition: background 0.2s;
+  }
+  
+  .mobile-nav-link.active {
+    background: var(--primary);
+    color: #ffffff !important;
+  }
+}
+
+/* Admin Tabs Mobile Scroll Tweaks */
+@media (max-width: 768px) {
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+  }
+  .overflow-x-auto::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+  }
+  
+  /* Tables in cards */
+  .card table {
+    min-width: 600px; /* Force scroll rather than squash */
+  }
+}
+
+/* Ensure Modals Stack on Mobile (if not already handled) */
+@media (max-width: 850px) {
+  .event-detail-modal-container,
+  .checkout-modal-container {
+    flex-direction: column !important;
+    max-height: 95vh;
+  }
+  .event-detail-modal-img-col {
+    flex: 0 0 220px !important;
+    min-height: 220px;
+  }
+  .checkout-modal-img-col {
+    display: none !important;
+  }
+  .checkout-modal-info-col,
+  .event-detail-modal-info-col {
+    padding: 1.5rem !important;
+    flex: 1 1 auto;
   }
 }

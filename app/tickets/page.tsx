@@ -115,16 +115,16 @@ export default function TicketsPage() {
   };
 
   return (
-    <div className="container" style={{ maxWidth: '1210px', marginTop: '1.5rem', paddingLeft: '0', paddingRight: '0', minHeight: '100vh', paddingBottom: '1rem' }}>
+    <div className="container" style={{ maxWidth: '1210px', marginTop: '1.5rem', minHeight: '100vh', paddingBottom: '1rem' }}>
       {/* Header */}
       <div className="mb-4 text-center" style={{ marginTop: '0' }}>
-        <h1 style={{ fontFamily: 'var(--font-syne), sans-serif', fontWeight: 700, fontSize: '3rem', color: '#000000', letterSpacing: '0.02em', marginBottom: '0.5rem' }}>
+        <h1 className="page-title" style={{ fontFamily: 'var(--font-syne), sans-serif', fontWeight: 700, color: '#000000', letterSpacing: '0.02em', marginBottom: '0.5rem' }}>
           Event Tickets
         </h1>
         <p style={{ fontFamily: 'var(--font-audiowide), sans-serif', fontSize: '1.25rem', color: '#0d0e4aff', fontWeight: 400, letterSpacing: '0.05em', textTransform: 'lowercase' }}>
           securely purchase your tickets online
         </p>
-        <hr style={{ border: 'none', borderTop: '1.5px solid #cbd5e1', marginTop: '2rem', marginBottom: '3rem', width: '100%' }} />
+        <hr className="page-divider" style={{ border: 'none', borderTop: '1.5px solid #cbd5e1', width: '100%' }} />
       </div>
 
       {error && !selectedEvent && (
