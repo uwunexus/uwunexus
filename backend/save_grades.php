@@ -51,7 +51,7 @@ try {
 
         // Check existing best grade
         $stmt = $pdo->prepare("
-            SELECT id, gpv, attempt_number FROM user_grades
+            SELECT id, grade, gpv, attempt_number FROM user_grades
             WHERE user_id = ? AND module_id = ? AND is_best_grade = 1
         ");
         $stmt->execute([$user_id, $module_id]);
@@ -68,29 +68,57 @@ try {
             // Same grade unchanged — skip
             if ($existing['grade'] === $grade) continue;
 
-            $new_attempt = $existing['attempt_number'] + 1;
-            if ($new_attempt > 3) continue; // max 3 attempts
-
-            // Cap repeat grade at C (gpv 2.00)
-            $capped_gpv   = min($gpv, 2.00);
-            $capped_grade = $grade;
-            if ($gpv > 2.00) { $capped_gpv = $existing['gpv']; $capped_grade = $existing['grade']; } // keep old if new is better (capped)
-
-            if ($capped_gpv > $existing['gpv']) {
-                // New attempt is better — mark old as not best
-                $pdo->prepare("UPDATE user_grades SET is_best_grade = 0 WHERE user_id = ? AND module_id = ?")->execute([$user_id, $module_id]);
+            // Is this a simple correction/edit of the existing best grade?
+            // If the best grade is already a passing grade (GPV >= 2.00), they cannot repeat it.
+            // Any change is simply a correction to the grade.
+            if ($existing['gpv'] >= 2.00) {
                 $stmt = $pdo->prepare("
-                    INSERT INTO user_grades (user_id, module_id, academic_year, semester, grade, gpv, attempt_number, is_best_grade)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, 1)
+                    UPDATE user_grades 
+                    SET grade = ?, gpv = ? 
+                    WHERE id = ?
                 ");
-                $stmt->execute([$user_id, $module_id, $academic_year, $semester, $capped_grade, $capped_gpv, $new_attempt]);
+                $stmt->execute([$grade, $gpv, $existing['id']]);
             } else {
-                // New attempt is same or worse — insert but keep old as best
-                $stmt = $pdo->prepare("
-                    INSERT INTO user_grades (user_id, module_id, academic_year, semester, grade, gpv, attempt_number, is_best_grade)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, 0)
-                ");
-                $stmt->execute([$user_id, $module_id, $academic_year, $semester, $grade, $gpv, $new_attempt]);
+                // It is a repeat attempt (since previous best was a fail/weak pass < 2.00)
+                $new_attempt = $existing['attempt_number'] + 1;
+                if ($new_attempt > 3) continue; // max 3 attempts
+
+                // Cap repeat grade at C (gpv 2.00)
+                $capped_gpv   = min($gpv, 2.00);
+                $capped_grade = $grade;
+                if ($gpv > 2.00) { 
+                    $capped_gpv = 2.00; 
+                    $capped_grade = 'C'; 
+                } // Cap repeat grade at C (gpv 2.00) if they got a better grade
+
+                $is_best_grade = 0;
+                if ($capped_gpv > $existing['gpv']) {
+                    $is_best_grade = 1;
+                    // Mark old as not best
+                    $pdo->prepare("UPDATE user_grades SET is_best_grade = 0 WHERE user_id = ? AND module_id = ?")->execute([$user_id, $module_id]);
+                }
+
+                // Check if this attempt number already exists to avoid Duplicate Key Violation
+                $stmt = $pdo->prepare("SELECT id FROM user_grades WHERE user_id = ? AND module_id = ? AND attempt_number = ?");
+                $stmt->execute([$user_id, $module_id, $new_attempt]);
+                $dup = $stmt->fetch();
+
+                if ($dup) {
+                    // Update the existing attempt instead of inserting
+                    $stmt = $pdo->prepare("
+                        UPDATE user_grades 
+                        SET grade = ?, gpv = ?, is_best_grade = ?, academic_year = ?, semester = ? 
+                        WHERE id = ?
+                    ");
+                    $stmt->execute([$capped_grade, $capped_gpv, $is_best_grade, $academic_year, $semester, $dup['id']]);
+                } else {
+                    // Insert new attempt
+                    $stmt = $pdo->prepare("
+                        INSERT INTO user_grades (user_id, module_id, academic_year, semester, grade, gpv, attempt_number, is_best_grade)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    ");
+                    $stmt->execute([$user_id, $module_id, $academic_year, $semester, $capped_grade, $capped_gpv, $new_attempt, $is_best_grade]);
+                }
             }
         }
     }
@@ -110,10 +138,10 @@ try {
     $summary = $stmt->fetch();
 
     $gpa = (float)($summary['current_gpa'] ?? 0);
-    if ($gpa >= 3.70)     $class = 'First Class Honours';
-    elseif ($gpa >= 3.30) $class = 'Second Class Upper Division';
-    elseif ($gpa >= 3.00) $class = 'Second Class Lower Division';
-    elseif ($gpa >= 2.00) $class = 'General Pass';
+    if ($gpa >= 3.70)     $class = 'First Class';
+    elseif ($gpa >= 3.30) $class = 'Upper Second';
+    elseif ($gpa >= 3.00) $class = 'Lower Second';
+    elseif ($gpa >= 2.00) $class = 'Third Class';
     elseif ($gpa > 0)     $class = 'Below Minimum';
     else                   $class = 'Not Enough Data';
 
