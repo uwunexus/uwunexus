@@ -6,6 +6,11 @@ export async function POST(req: Request) {
     apiVersion: "2024-06-20" as any,
   });
 
+  // Derive base URL from the incoming request — always correct on any domain
+  const host = req.headers.get("host") || "localhost:3000";
+  const protocol = host.startsWith("localhost") ? "http" : "https";
+  const baseUrl = `${protocol}://${host}`;
+
   try {
     const body = await req.json();
     const { order_id, title, price, quantity = 1, customer_email } = body;
@@ -34,8 +39,8 @@ export async function POST(req: Request) {
           quantity: quantity,
         },
       ],
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/tickets/success?session_id={CHECKOUT_SESSION_ID}&order_id=${order_id}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/tickets?canceled=true`,
+      success_url: `${baseUrl}/tickets/success?session_id={CHECKOUT_SESSION_ID}&order_id=${order_id}`,
+      cancel_url: `${baseUrl}/tickets?canceled=true`,
     });
 
     return NextResponse.json({ sessionId: session.id, url: session.url });
