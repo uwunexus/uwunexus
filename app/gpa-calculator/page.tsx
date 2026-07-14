@@ -43,10 +43,10 @@ function computeGPA(curriculum: Curriculum, localGrades: Record<number, string>)
 
 function classFromGPA(gpa: number) {
   if (gpa >= 3.70) return "First Class";
-  if (gpa >= 3.30) return "Upper Second";
-  if (gpa >= 3.00) return "Lower Second";
-  if (gpa >= 2.00) return "Third Class";
-  if (gpa > 0) return "Below Minimum";
+  if (gpa >= 3.30) return "Second Class Upper";
+  if (gpa >= 3.00) return "Second Class Lower";
+  if (gpa >= 2.00) return "General Pass";
+  if (gpa > 0) return "Academic Probation";
   return "Not Enough Data";
 }
 
@@ -185,7 +185,7 @@ export default function GPACalculatorPage() {
         for (const grp of Object.values(semData))
           for (const mod of grp.modules) {
             const g = localGrades[mod.module_id];
-            if (g) gradesToSave.push({ module_id: mod.module_id, academic_year: +yr, semester: +sem, grade: g, gpv: GPV_MAP[g] });
+            if (g !== undefined) gradesToSave.push({ module_id: mod.module_id, academic_year: +yr, semester: +sem, grade: g, gpv: GPV_MAP[g] || 0 });
           }
     try {
       const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/save_grades.php`, {
@@ -270,15 +270,6 @@ export default function GPACalculatorPage() {
     );
   }
 
-  /* ── Loading ── */
-  if (loading) return (
-    <div className="container py-20 text-center">
-      <Loader size={48} style={{ margin: "0 auto 1rem", color: "#000c66", animation: "spin 1s linear infinite" }} />
-      <p style={{ fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "1.25rem", color: "#64748b" }}>Analyzing Curriculum Data...</p>
-      <style>{`@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}`}</style>
-    </div>
-  );
-
   /* ── Not eligible ── */
   if (notEligible) return (
     <div className="container py-16 flex justify-center">
@@ -308,43 +299,50 @@ export default function GPACalculatorPage() {
 
   return (
     <div className="container" style={{ maxWidth: '1210px', marginTop: '1.5rem', paddingBottom: '4rem' }}>
+      {/* Skeleton Animation Style Injection */}
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.4; }
+        }
+        .skeleton-pulse {
+          animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+      `}</style>
+
       {/* Title Section */}
       <div className="flex justify-between items-start mb-8 flex-wrap gap-4" style={{ marginTop: '1.5rem' }}>
         <div>
           <h1 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "3rem", fontWeight: 700, color: "#000000", letterSpacing: "0.02em", marginBottom: "0.25rem" }}>
             Smart GPA Calculator
           </h1>
-          {userInfo && (
-            <p style={{ fontFamily: "var(--font-inclusive-sans), sans-serif", fontSize: "1.15rem", color: "#64748b", fontWeight: 500, marginBottom: "1rem" }}>
-              {userInfo.degree_name}
-            </p>
-          )}
-          {userInfo && !previewMode && (
-            <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
-              <span style={{ 
-                border: "1.5px solid #000c66", 
-                borderRadius: "9999px", 
-                padding: "0.4rem 1.25rem", 
-                color: "#000c66", 
-                fontSize: "0.9rem", 
-                fontWeight: 700, 
-                fontFamily: "var(--font-syne), sans-serif" 
-              }}>
-                {userInfo.enrollment_number}
-              </span>
-              <span style={{ 
-                border: "1.5px solid #000c66", 
-                borderRadius: "9999px", 
-                padding: "0.4rem 1.25rem", 
-                color: "#000c66", 
-                fontSize: "0.9rem", 
-                fontWeight: 700, 
-                fontFamily: "var(--font-syne), sans-serif" 
-              }}>
-                Batch {userInfo.batch}
-              </span>
-            </div>
-          )}
+          <p style={{ fontFamily: "var(--font-inclusive-sans), sans-serif", fontSize: "1.15rem", color: "#64748b", fontWeight: 500, marginBottom: "1rem" }}>
+            {userInfo ? userInfo.degree_name : "Loading Degree Programme..."}
+          </p>
+          <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+            <span style={{ 
+              border: "1.5px solid #000c66", 
+              borderRadius: "9999px", 
+              padding: "0.4rem 1.25rem", 
+              color: "#000c66", 
+              fontSize: "0.9rem", 
+              fontWeight: 700, 
+              fontFamily: "var(--font-syne), sans-serif" 
+            }}>
+              {userInfo ? userInfo.enrollment_number : "UWU/IIT/.../.../"}
+            </span>
+            <span style={{ 
+              border: "1.5px solid #000c66", 
+              borderRadius: "9999px", 
+              padding: "0.4rem 1.25rem", 
+              color: "#000c66", 
+              fontSize: "0.9rem", 
+              fontWeight: 700, 
+              fontFamily: "var(--font-syne), sans-serif" 
+            }}>
+              {userInfo ? `Batch ${userInfo.batch}` : "Batch ..."}
+            </span>
+          </div>
 
           {/* MRT/SCT: Specialization Toggles */}
           {userInfo && !previewMode && !needsSpecialization && userInfo.raw_degree && ["MRT", "SCT"].includes(userInfo.raw_degree) && (
@@ -378,39 +376,37 @@ export default function GPACalculatorPage() {
       </div>
 
       {/* GPA Summary Boxes Block */}
-      {userInfo && (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.5rem", marginBottom: "3rem" }}>
-          {/* Simulated GPA */}
-          <div style={{ backgroundColor: "#e6e9ec", borderRadius: "1.8rem", padding: "1.5rem 1.25rem", display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <div style={{ backgroundColor: "#000c66", color: "#ffffff", borderRadius: "9999px", padding: "0.5rem 2.2rem", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "1.15rem", textAlign: "center", width: "fit-content" }}>
-              Simulated GPA
-            </div>
-            <div style={{ fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "2.5rem", color: "#000000", marginTop: "1rem" }}>
-              {liveGPA.toFixed(2)}
-            </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.5rem", marginBottom: "3rem" }}>
+        {/* Simulated GPA */}
+        <div style={{ backgroundColor: "#e6e9ec", borderRadius: "1.8rem", padding: "1.5rem 1.25rem", display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <div style={{ backgroundColor: "#000c66", color: "#ffffff", borderRadius: "9999px", padding: "0.5rem 2.2rem", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "1.15rem", textAlign: "center", width: "fit-content" }}>
+            Simulated GPA
           </div>
-
-          {/* Official GPA */}
-          <div style={{ backgroundColor: "#e6e9ec", borderRadius: "1.8rem", padding: "1.5rem 1.25rem", display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <div style={{ backgroundColor: "#000c66", color: "#ffffff", borderRadius: "9999px", padding: "0.5rem 2.2rem", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "1.15rem", textAlign: "center", width: "fit-content" }}>
-              Official GPA
-            </div>
-            <div style={{ fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "2.5rem", color: "#000000", marginTop: "1rem" }}>
-              {previewMode ? liveGPA.toFixed(2) : (gpaSummary?.current_gpa ?? 0) === 0 ? liveGPA.toFixed(2) : (gpaSummary?.current_gpa ?? 0).toFixed(2)}
-            </div>
-          </div>
-
-          {/* Projected Honors */}
-          <div style={{ backgroundColor: "#e6e9ec", borderRadius: "1.8rem", padding: "1.5rem 1.25rem", display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <div style={{ backgroundColor: "#000c66", color: "#ffffff", borderRadius: "9999px", padding: "0.5rem 2.2rem", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "1.15rem", textAlign: "center", width: "fit-content" }}>
-              Projected Honors
-            </div>
-            <div style={{ fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "2.2rem", color: "#000000", marginTop: "1.2rem", textAlign: "center", whiteSpace: "nowrap" }}>
-              {liveClass}
-            </div>
+          <div style={{ fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "2.5rem", color: "#000000", marginTop: "1rem" }}>
+            {liveGPA.toFixed(2)}
           </div>
         </div>
-      )}
+
+        {/* Official GPA */}
+        <div style={{ backgroundColor: "#e6e9ec", borderRadius: "1.8rem", padding: "1.5rem 1.25rem", display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <div style={{ backgroundColor: "#000c66", color: "#ffffff", borderRadius: "9999px", padding: "0.5rem 2.2rem", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "1.15rem", textAlign: "center", width: "fit-content" }}>
+            Official GPA
+          </div>
+          <div style={{ fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "2.5rem", color: "#000000", marginTop: "1rem" }}>
+            {previewMode ? liveGPA.toFixed(2) : (gpaSummary?.current_gpa ?? 0) === 0 ? liveGPA.toFixed(2) : (gpaSummary?.current_gpa ?? 0).toFixed(2)}
+          </div>
+        </div>
+
+        {/* Projected Honors */}
+        <div style={{ backgroundColor: "#e6e9ec", borderRadius: "1.8rem", padding: "1.5rem 1.25rem", display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <div style={{ backgroundColor: "#000c66", color: "#ffffff", borderRadius: "9999px", padding: "0.5rem 2.2rem", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "1.15rem", textAlign: "center", width: "fit-content" }}>
+            Projected Honors
+          </div>
+          <div style={{ fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "1.65rem", color: "#000000", marginTop: "1.2rem", textAlign: "center", lineHeight: "1.2" }}>
+            {liveClass}
+          </div>
+        </div>
+      </div>
 
       {/* Action Status Prompts */}
       {error && (
@@ -451,66 +447,72 @@ export default function GPACalculatorPage() {
       )}
 
       {/* Level Tabs Accordion Bar & Save Grades Row */}
-      {userInfo && (
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem", flexWrap: "wrap", gap: "1rem" }}>
-          {/* Level Tabs Pill Container */}
-          <div style={{ display: "inline-flex", backgroundColor: "#e6effd", padding: "0.3rem", borderRadius: "9999px", border: "1px solid rgba(0, 12, 102, 0.05)" }}>
-            {["1", "2", "3", "4"].map(lvl => {
-              const isActive = activeLevel === lvl;
-              return (
-                <button
-                  key={lvl}
-                  onClick={() => setActiveLevel(lvl)}
-                  style={{
-                    backgroundColor: isActive ? "#000c66" : "transparent",
-                    color: isActive ? "#ffffff" : "#000c66",
-                    border: "none",
-                    borderRadius: "9999px",
-                    padding: "0.6rem 2rem",
-                    fontFamily: "var(--font-syne), sans-serif",
-                    fontWeight: 700,
-                    fontSize: "1rem",
-                    cursor: "pointer",
-                    transition: "all 0.2s"
-                  }}
-                >
-                  Level {lvl}00
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Save Grades Button */}
-          {!previewMode && (
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              style={{
-                backgroundColor: "#334155",
-                color: "#ffffff",
-                border: "none",
-                borderRadius: "9999px",
-                padding: "0.75rem 2rem",
-                fontFamily: "var(--font-syne), sans-serif",
-                fontWeight: 700,
-                fontSize: "1rem",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                transition: "opacity 0.2s",
-                opacity: saving ? 0.7 : 1
-              }}
-            >
-              <Save size={18} />
-              <span>Save All Grades</span>
-            </button>
-          )}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem", flexWrap: "wrap", gap: "1rem" }}>
+        {/* Level Tabs Pill Container */}
+        <div style={{ display: "inline-flex", backgroundColor: "#e6effd", padding: "0.3rem", borderRadius: "9999px", border: "1px solid rgba(0, 12, 102, 0.05)" }}>
+          {["1", "2", "3", "4"].map(lvl => {
+            const isActive = activeLevel === lvl;
+            return (
+              <button
+                key={lvl}
+                onClick={() => setActiveLevel(lvl)}
+                style={{
+                  backgroundColor: isActive ? "#000c66" : "transparent",
+                  color: isActive ? "#ffffff" : "#000c66",
+                  border: "none",
+                  borderRadius: "9999px",
+                  padding: "0.6rem 2rem",
+                  fontFamily: "var(--font-syne), sans-serif",
+                  fontWeight: 700,
+                  fontSize: "1rem",
+                  cursor: "pointer",
+                  transition: "all 0.2s"
+                }}
+              >
+                Level {lvl}00
+              </button>
+            );
+          })}
         </div>
-      )}
+
+        {/* Save Grades Button */}
+        {!previewMode && (
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            style={{
+              backgroundColor: "#334155",
+              color: "#ffffff",
+              border: "none",
+              borderRadius: "9999px",
+              padding: "0.75rem 2rem",
+              fontFamily: "var(--font-syne), sans-serif",
+              fontWeight: 700,
+              fontSize: "1rem",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              transition: "opacity 0.2s",
+              opacity: saving ? 0.7 : 1
+            }}
+          >
+            <Save size={18} />
+            <span>Save All Grades</span>
+          </button>
+        )}
+      </div>
 
       {/* Curriculum View (Filtered by selected level/year) */}
-      {userInfo && curriculum[activeLevel] && (
+      {loading || !curriculumLoaded || !curriculum[activeLevel] ? (
+        <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+          {/* Skeleton placeholders representing Semester I and Semester II loading */}
+          <div className="skeleton-pulse" style={{ width: "100%", backgroundColor: "#cbd5e1", height: "48px", borderRadius: "9999px" }} />
+          <div className="skeleton-pulse" style={{ width: "100%", backgroundColor: "#e2e8f0", height: "180px", borderRadius: "1.8rem", marginTop: "-0.75rem" }} />
+          
+          <div className="skeleton-pulse" style={{ width: "100%", backgroundColor: "#cbd5e1", height: "48px", borderRadius: "9999px", marginTop: "1rem" }} />
+        </div>
+      ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
           {Object.entries(curriculum[activeLevel]).sort(([a], [b]) => +a - +b).map(([sem, semData]) => {
             const semKey = `${activeLevel}-${sem}`;
@@ -616,28 +618,30 @@ export default function GPACalculatorPage() {
                                         <select
                                           value={sel}
                                           onChange={e => handleGradeChange(mod.module_id, e.target.value)}
-                                          disabled={previewMode}
+                                          disabled={false}
                                           style={{
-                                            paddingRight: "1.25rem",
+                                            padding: "0.35rem 1.8rem 0.35rem 0.8rem",
                                             fontFamily: "var(--font-syne), sans-serif",
                                             fontWeight: 700,
-                                            fontSize: "0.95rem",
-                                            color: "#000c66",
-                                            border: "none",
-                                            backgroundColor: "transparent",
+                                            fontSize: "0.9rem",
+                                            color: sel ? "#ffffff" : "#000c66",
+                                            backgroundColor: sel ? "var(--primary)" : "rgba(0, 12, 102, 0.05)",
+                                            border: sel ? "1px solid var(--primary)" : "1px solid rgba(0, 12, 102, 0.15)",
+                                            borderRadius: "9999px",
                                             outline: "none",
                                             cursor: "pointer",
                                             appearance: "none",
-                                            textAlign: "right"
+                                            textAlign: "center",
+                                            minWidth: "75px"
                                           }}
                                         >
                                           {GRADES.map(g => (
-                                            <option key={g} value={g} style={{ backgroundColor: "#ffffff", color: "#000000" }}>
+                                            <option key={g} value={g} style={{ backgroundColor: "#ffffff", color: "#000000", fontWeight: 600 }}>
                                               {g || "—"}
                                             </option>
                                           ))}
                                         </select>
-                                        <ChevronDown size={14} style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)", pointerEvents: "none", color: "#000c66" }} />
+                                        <ChevronDown size={14} style={{ position: "absolute", right: "0.5rem", top: "50%", transform: "translateY(-50%)", pointerEvents: "none", color: sel ? "#ffffff" : "#000c66" }} />
                                       </div>
                                     </td>
                                   </tr>

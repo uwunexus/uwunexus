@@ -59,6 +59,11 @@ export default function LostAndFoundPage() {
   const [formLoading, setFormLoading] = useState(false);
   const [myId, setMyId] = useState("");
   const [contactReport, setContactReport] = useState<Report | null>(null);
+  const [detailReport, setDetailReport] = useState<Report | null>(null);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+
+  const [alertMessage, setAlertMessage] = useState("");
+  const [confirmDialog, setConfirmDialog] = useState<{ message: string, onConfirm: () => void } | null>(null);
 
   // Split date/time states (Option B: Remove Year)
   const [selectedMonth, setSelectedMonth] = useState("jan");
@@ -107,7 +112,31 @@ export default function LostAndFoundPage() {
 
   const handleCreateReport = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!myId) return alert("You must be logged in to create a report.");
+    if (!myId) {
+      setAlertMessage("You must be logged in to create a report.");
+      return;
+    }
+
+    // Validate that the selected date/time is not in the future
+    const now = new Date();
+    const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+    const monthIndex = monthNames.indexOf(selectedMonth);
+    const day = parseInt(selectedDay, 10);
+    
+    let year = now.getFullYear();
+    // If selected month is greater than current month, it must be from last year
+    if (monthIndex > now.getMonth()) {
+      year -= 1;
+    }
+    
+    const [hoursStr, minutesStr] = selectedTime.split(":");
+    const selectedDateObj = new Date(year, monthIndex, day, parseInt(hoursStr || "0", 10), parseInt(minutesStr || "0", 10));
+    
+    if (selectedDateObj > now) {
+      setAlertMessage("Future dates and times are not allowed for Lost & Found items.");
+      return;
+    }
+
     setFormLoading(true);
 
     try {
@@ -142,7 +171,7 @@ export default function LostAndFoundPage() {
       
       const data = await res.json();
       if (data.success) {
-        alert("Report created successfully!");
+        setAlertMessage("Report created successfully!");
         setShowModal(false);
         setForm({ title: "", description: "", location: "", time_date: "", type: "Lost", contact_number: "", contact_email: "" });
         setFiles([]);
@@ -158,32 +187,36 @@ export default function LostAndFoundPage() {
 
         fetchReports();
       } else {
-        alert(data.message);
+        setAlertMessage(data.message);
       }
     } catch (err: any) {
-      alert(err.message || "An error occurred");
+      setAlertMessage(err.message || "An error occurred");
     } finally {
       setFormLoading(false);
     }
   };
 
   const handleMarkResolved = async (id: number) => {
-    if (!confirm("Are you sure you want to mark this as Found/Resolved?")) return;
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/update_lost_found.php`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, user_id: +myId, status: 'resolved' })
-      });
-      const data = await res.json();
-      if (data.success) {
-        setReports(prev => prev.map(r => r.id === id ? { ...r, status: 'resolved' } : r));
-      } else {
-        alert(data.message);
+    setConfirmDialog({
+      message: "Are you sure you want to mark this as Found/Resolved?",
+      onConfirm: async () => {
+        setConfirmDialog(null);
+        try {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/update_lost_found.php`, {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id, user_id: +myId, status: 'resolved' })
+          });
+          const data = await res.json();
+          if (data.success) {
+            setReports(prev => prev.map(r => r.id === id ? { ...r, status: 'resolved' } : r));
+          } else {
+            setAlertMessage(data.message);
+          }
+        } catch (e) {
+          setAlertMessage("Error updating status.");
+        }
       }
-    } catch (e) {
-      alert("Error updating status.");
-    }
+    });
   };
 
   const filteredReports = reports.filter(r => {
@@ -335,7 +368,7 @@ export default function LostAndFoundPage() {
             const isResolved = report.status === 'resolved';
 
             return (
-              <div key={report.id} className="event-card" style={{ opacity: isResolved ? 0.6 : 1 }}>
+              <div key={report.id} className="event-card" onClick={() => { setDetailReport(report); setActiveImageIndex(0); }} style={{ opacity: isResolved ? 0.6 : 1, cursor: "pointer" }}>
                 {/* Image visual wrapper with aspect ratio matching mockup */}
                 <div className="event-card-image-wrapper">
                   {report.images && report.images.length > 0 ? (
@@ -418,7 +451,7 @@ export default function LostAndFoundPage() {
                   <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", width: "100%", marginTop: "auto" }}>
                     {!isResolved && (
                       <button 
-                        onClick={() => setContactReport(report)}
+                        className="event-card-btn"
                         style={{ 
                           backgroundColor: "#0d0e4aff", 
                           color: "#ffffff", 
@@ -438,14 +471,14 @@ export default function LostAndFoundPage() {
                           width: "100%"
                         }}
                       >
-                        <span className="material-symbols-outlined" style={{ fontSize: "18px", color: "inherit", display: "inline-block" }}>call</span>
-                        <span>Contact Reporter</span>
+                        <span className="material-symbols-outlined" style={{ fontSize: "18px", color: "inherit", display: "inline-block" }}>visibility</span>
+                        <span>View Details</span>
                       </button>
                     )}
 
                     {isMine && !isResolved && (
                       <button 
-                        onClick={() => handleMarkResolved(report.id)}
+                        onClick={(e) => { e.stopPropagation(); handleMarkResolved(report.id); }}
                         style={{ 
                           backgroundColor: "#115e3b", 
                           color: "#ffffff", 
@@ -663,8 +696,14 @@ export default function LostAndFoundPage() {
                   <input 
                     type="text" 
                     required 
+                    maxLength={10}
+                    pattern="[0-9]{10}"
+                    title="Phone number must be exactly 10 digits"
                     value={form.contact_number} 
-                    onChange={e => setForm({...form, contact_number: e.target.value})} 
+                    onChange={e => {
+                      const val = e.target.value.replace(/\D/g, '');
+                      setForm({...form, contact_number: val});
+                    }} 
                     placeholder="e.g., 0712345678" 
                     style={{
                       height: "45px",
@@ -776,6 +815,125 @@ export default function LostAndFoundPage() {
                 {formLoading ? "Submitting..." : "Submit Report"}
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Report Detail Modal */}
+      {detailReport && (
+        <div
+          style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.65)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: "1.5rem", backdropFilter: "blur(5px)" }}
+          onClick={() => setDetailReport(null)}
+        >
+          <div className="event-detail-modal-container" onClick={e => e.stopPropagation()}>
+            {/* Left Column - Image & Thumbnails */}
+            <div className="event-detail-modal-img-col" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              <div style={{ flex: 1, position: "relative", borderRadius: "1.5rem", overflow: "hidden", backgroundColor: "#f8fafc" }}>
+                {detailReport.images && detailReport.images.length > 0 ? (
+                  <img src={detailReport.images[activeImageIndex]} alt={detailReport.title} style={{ width: "100%", height: "100%", objectFit: "contain", position: "absolute", inset: 0 }} />
+                ) : (
+                  <div style={{ height: "100%", background: "linear-gradient(135deg, #000c6622, #000c6611)", display: "flex", alignItems: "center", justifyContent: "center", position: "absolute", inset: 0 }}>
+                    <ImageIcon size={80} style={{ color: "#000c66", opacity: 0.4 }} />
+                  </div>
+                )}
+              </div>
+              
+              {/* Thumbnail Gallery */}
+              {detailReport.images && detailReport.images.length > 1 && (
+                <div style={{ display: "flex", gap: "0.75rem", height: "80px" }}>
+                  {detailReport.images.map((img, idx) => (
+                    <div 
+                      key={idx}
+                      onClick={() => setActiveImageIndex(idx)}
+                      style={{ 
+                        flex: 1, 
+                        borderRadius: "0.75rem", 
+                        overflow: "hidden", 
+                        cursor: "pointer",
+                        border: activeImageIndex === idx ? "3px solid #000c66" : "3px solid transparent",
+                        opacity: activeImageIndex === idx ? 1 : 0.6,
+                        transition: "all 0.2s"
+                      }}
+                    >
+                      <img src={img} alt={`${detailReport.title} - ${idx + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Right Column - Details */}
+            <div className="event-detail-modal-info-col">
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", marginBottom: "0.5rem" }}>
+                <h2 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "2.2rem", fontWeight: 800, color: "#000000", lineHeight: 1.2, margin: 0 }}>
+                  {detailReport.title}
+                </h2>
+                <span style={{ 
+                  backgroundColor: detailReport.type === "Lost" ? "#a61c1c" : "#1b8a5a", 
+                  color: "#ffffff", 
+                  borderRadius: "9999px",
+                  padding: "0.4rem 1.2rem",
+                  fontSize: "1rem",
+                  fontWeight: 700,
+                  fontFamily: "var(--font-syne), sans-serif",
+                  flexShrink: 0
+                }}>
+                  {detailReport.type}
+                </span>
+              </div>
+              
+              <div style={{ 
+                backgroundColor: "#d6d9de", 
+                borderRadius: "1rem", 
+                padding: "1.25rem", 
+                marginTop: "1.5rem", 
+                marginBottom: "1.5rem",
+                fontFamily: "var(--font-syne), sans-serif",
+                fontSize: "1.05rem",
+                fontWeight: 700,
+                color: "#000000",
+                lineHeight: 1.6,
+                whiteSpace: "pre-wrap"
+              }}>
+                {detailReport.description}
+              </div>
+              
+              <div style={{ backgroundColor: "#e6e9ec", borderRadius: "1.5rem", padding: "1.25rem 1.5rem", border: "1px solid rgba(0,0,0,0.03)", marginBottom: "1.25rem" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", fontFamily: "var(--font-syne), sans-serif", fontSize: "1rem", fontWeight: 700, color: "#000000" }}>
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}><MapPin size={18} style={{ color: "#000000", flexShrink: 0, marginTop: "2px" }} /><span>Location: {detailReport.location}</span></div>
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}><Clock size={18} style={{ color: "#000000", flexShrink: 0, marginTop: "2px" }} /><span>Time: {formatReportDateTime(detailReport.time_date)}</span></div>
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: "2px" }}>
+                      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                      <circle cx="12" cy="7" r="4" />
+                    </svg>
+                    <span>Reporter: {detailReport.reporter_name}</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}><span className="material-symbols-outlined" style={{ fontSize: "18px", color: "#000000", flexShrink: 0, marginTop: "2px" }}>call</span><span>Phone: {detailReport.contact_number}</span></div>
+                  {detailReport.contact_email && (
+                    <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}><span className="material-symbols-outlined" style={{ fontSize: "18px", color: "#000000", flexShrink: 0, marginTop: "2px" }}>mail</span><span>Email: {detailReport.contact_email}</span></div>
+                  )}
+                </div>
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: "1rem", marginTop: "auto" }}>
+                <button onClick={() => setDetailReport(null)} style={{ backgroundColor: "#ffffff", color: "#0d0e4aff", border: "1.5px solid #0d0e4aff", borderRadius: "9999px", padding: "0.6rem 2rem", fontSize: "1rem", fontWeight: 700, fontFamily: "var(--font-syne), sans-serif", cursor: "pointer", transition: "all 0.2s" }}>
+                  Close
+                </button>
+                {myId !== detailReport.user_id?.toString() && detailReport.status !== 'resolved' && (
+                  <button 
+                    onClick={() => { 
+                      setContactReport(detailReport); 
+                      setDetailReport(null); 
+                    }} 
+                    style={{ backgroundColor: "#0d0e4aff", color: "#ffffff", border: "none", borderRadius: "9999px", padding: "0.6rem 2.5rem", fontSize: "1rem", fontWeight: 700, fontFamily: "var(--font-syne), sans-serif", cursor: "pointer", transition: "background-color 0.2s", display: "flex", alignItems: "center", gap: "0.5rem" }}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: "18px", color: "inherit", display: "inline-block" }}>call</span>
+                    Contact Reporter
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -901,6 +1059,31 @@ export default function LostAndFoundPage() {
                   Email
                 </span>
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Alert Modal */}
+      {alertMessage && (
+        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "1.5rem", backdropFilter: "blur(5px)" }}>
+          <div className="card" style={{ maxWidth: "400px", width: "100%", textAlign: "center", padding: "2rem" }}>
+            <h3 style={{ fontSize: "1.25rem", fontWeight: "bold", marginBottom: "1rem" }}>Notice</h3>
+            <p style={{ marginBottom: "1.5rem", color: "var(--muted)" }}>{alertMessage}</p>
+            <button onClick={() => setAlertMessage("")} className="btn btn-primary w-full justify-center">OK</button>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Confirm Modal */}
+      {confirmDialog && (
+        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "1.5rem", backdropFilter: "blur(5px)" }}>
+          <div className="card" style={{ maxWidth: "400px", width: "100%", padding: "2rem" }}>
+            <h3 style={{ fontSize: "1.25rem", fontWeight: "bold", marginBottom: "1rem" }}>Confirm Action</h3>
+            <p style={{ marginBottom: "1.5rem", color: "var(--muted)" }}>{confirmDialog.message}</p>
+            <div style={{ display: "flex", gap: "1rem", justifyContent: "flex-end" }}>
+              <button onClick={() => setConfirmDialog(null)} className="btn btn-secondary">Cancel</button>
+              <button onClick={confirmDialog.onConfirm} className="btn btn-primary" style={{ backgroundColor: "var(--danger)", color: "white", border: "none" }}>Confirm</button>
             </div>
           </div>
         </div>

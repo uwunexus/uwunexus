@@ -45,7 +45,14 @@ try {
         $semester     = intval($entry['semester']);
         $grade        = strtoupper(trim($entry['grade']));
 
-        if (!isset($GPV_MAP[$grade])) continue; // skip invalid grades
+        if (!isset($GPV_MAP[$grade])) {
+            // Empty grade ("") means user cleared it → delete all records for this module
+            if ($grade === '') {
+                $pdo->prepare("DELETE FROM user_grades WHERE user_id = ? AND module_id = ?")
+                    ->execute([$user_id, $module_id]);
+            }
+            continue; // skip invalid/non-empty non-grade values
+        }
 
         $gpv = $GPV_MAP[$grade];
 
@@ -139,10 +146,10 @@ try {
 
     $gpa = (float)($summary['current_gpa'] ?? 0);
     if ($gpa >= 3.70)     $class = 'First Class';
-    elseif ($gpa >= 3.30) $class = 'Upper Second';
-    elseif ($gpa >= 3.00) $class = 'Lower Second';
-    elseif ($gpa >= 2.00) $class = 'Third Class';
-    elseif ($gpa > 0)     $class = 'Below Minimum';
+    elseif ($gpa >= 3.30) $class = 'Second Class Upper';
+    elseif ($gpa >= 3.00) $class = 'Second Class Lower';
+    elseif ($gpa >= 2.00) $class = 'General Pass';
+    elseif ($gpa > 0)     $class = 'Academic Probation';
     else                   $class = 'Not Enough Data';
 
     echo json_encode([

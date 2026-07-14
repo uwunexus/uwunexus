@@ -236,7 +236,7 @@ export default function EventsPage() {
             <div style={{ overflowX: "auto" }}>
               <div style={{ minWidth: "600px" }}>
                 {/* Weekday labels */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", backgroundColor: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(0, 1fr))", backgroundColor: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
                   {WEEKDAYS.map(d => (
                     <div key={d} style={{ padding: "0.75rem 0", textAlign: "center", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "0.85rem", color: d === "Sun" || d === "Sat" ? "#94a3b8" : "#000c66" }}>
                       {d}
@@ -245,7 +245,7 @@ export default function EventsPage() {
                 </div>
 
                 {/* Day cells */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(0, 1fr))" }}>
                   {calCells.map((day, idx) => {
                     const dayEvents = day ? (eventsByDay[day] ?? []) : [];
                     const active = selectedDay === day && day !== null;
@@ -453,7 +453,7 @@ export default function EventsPage() {
             {/* Left Column - Image */}
             <div className="event-detail-modal-img-col">
               {selectedEvent.image_url ? (
-                <img src={selectedEvent.image_url} alt={selectedEvent.title} style={{ width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: 0 }} />
+                <img src={selectedEvent.image_url} alt={selectedEvent.title} style={{ width: "100%", height: "100%", objectFit: "contain", position: "absolute", inset: 0 }} />
               ) : (
                 <div style={{ height: "100%", background: `linear-gradient(135deg, ${CATEGORY_COLORS[selectedEvent.category] ?? "#8b5cf6"}33, ${CATEGORY_COLORS[selectedEvent.category] ?? "#8b5cf6"}11)`, display: "flex", alignItems: "center", justifyContent: "center", position: "absolute", inset: 0 }}>
                   <Calendar size={80} style={{ color: CATEGORY_COLORS[selectedEvent.category], opacity: 0.4 }} />
@@ -465,7 +465,7 @@ export default function EventsPage() {
             <div className="event-detail-modal-info-col">
               <h2 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "2.2rem", fontWeight: 800, color: "#000000", marginBottom: "1rem", lineHeight: 1.2 }}>{selectedEvent.title}</h2>
               {selectedEvent.description && (
-                <p style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.05rem", fontWeight: 500, color: "#000000", lineHeight: 1.6, marginBottom: "1.25rem" }}>{selectedEvent.description}</p>
+                <p style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.05rem", fontWeight: 500, color: "#000000", lineHeight: 1.6, marginBottom: "1.25rem", whiteSpace: "pre-wrap" }}>{selectedEvent.description}</p>
               )}
               <div style={{ backgroundColor: "#e6e9ec", borderRadius: "1.8rem", padding: "1.25rem 1.5rem", border: "1px solid rgba(0,0,0,0.03)", marginBottom: "1.25rem" }}>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem 1.5rem", fontFamily: "var(--font-syne), sans-serif", fontSize: "1rem", fontWeight: 700, color: "#000000" }}>

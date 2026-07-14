@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Outfit, Syne, Nobile, Zain, Audiowide, DM_Sans, Inclusive_Sans } from "next/font/google";
+import { Inter, Outfit, Syne, Nobile, Zain, Audiowide, DM_Sans, Inclusive_Sans, Roboto } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
 import { cookies } from "next/headers";
@@ -7,6 +7,7 @@ import { logoutAction } from "./actions/auth";
 import { Shield, ArrowRight } from "lucide-react";
 import NavLinks from "./components/NavLinks";
 import NavBar from "./components/NavBar";
+import AuthModal from "./components/AuthModal";
 
 const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
 const outfit = Outfit({ subsets: ["latin"], variable: '--font-outfit' });
@@ -16,6 +17,7 @@ const zain = Zain({ subsets: ["latin"], weight: ["400", "700"], variable: '--fon
 const audiowide = Audiowide({ subsets: ["latin"], weight: "400", variable: '--font-audiowide' });
 const dmSans = DM_Sans({ subsets: ["latin"], weight: ["400", "500"], variable: '--font-dm-sans' });
 const inclusiveSans = Inclusive_Sans({ subsets: ["latin"], weight: "400", variable: '--font-inclusive-sans' });
+const roboto = Roboto({ subsets: ["latin"], weight: ["400", "500", "700"], variable: '--font-roboto' });
 
 export const metadata: Metadata = {
   title: "UWU-NEXUS",
@@ -43,11 +45,12 @@ export default async function RootLayout({
       <head>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
       </head>
-      <body className={`${inter.variable} ${outfit.variable} ${syne.variable} ${nobile.variable} ${zain.variable} ${audiowide.variable} ${dmSans.variable} ${inclusiveSans.variable} font-sans`}>
+      <body className={`${inter.variable} ${outfit.variable} ${syne.variable} ${nobile.variable} ${zain.variable} ${audiowide.variable} ${dmSans.variable} ${inclusiveSans.variable} ${roboto.variable} font-sans`}>
         <NavBar isAuthenticated={isAuthenticated} isAdmin={isAdmin} />
         <main style={{ minHeight: 'calc(100vh - 200px)' }}>
           {children}
         </main>
+        {!isAuthenticated && <AuthModal />}
         <footer className="footer">
           <div className="container">
             <div className="flex justify-between items-center" style={{ flexWrap: 'wrap', gap: '2rem', paddingBottom: '1.5rem' }}>
@@ -88,7 +91,7 @@ export default async function RootLayout({
             <hr style={{ border: 0, borderTop: '1px solid var(--border)', margin: '1.5rem 0' }} />
 
             <div className="flex justify-between items-center" style={{ flexWrap: 'wrap', gap: '1rem', fontSize: '0.875rem' }}>
-              <p className="text-muted">© 2022 UWU - Nexus. All rights reserved.</p>
+              <p className="text-muted">© 2026 UWU - Nexus. All rights reserved.</p>
 
               <div className="flex items-center justify-center">
                 <img src="/logo.png" alt="UWU-NEXUS Icon" style={{ height: '32px', width: 'auto' }} />

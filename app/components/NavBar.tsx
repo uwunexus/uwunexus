@@ -78,8 +78,8 @@ export default function NavBar({ isAuthenticated, isAdmin }: NavBarProps) {
               </>
             ) : (
               <>
-                <Link href="/login" className="btn btn-secondary">Login</Link>
-                <Link href="/signup" className="btn btn-primary">
+                <Link href="?auth=login" scroll={false} className="btn btn-secondary">Login</Link>
+                <Link href="?auth=signup" scroll={false} className="btn btn-primary">
                   <span>Sign Up</span><ArrowRight size={16} />
                 </Link>
               </>
@@ -140,8 +140,8 @@ export default function NavBar({ isAuthenticated, isAdmin }: NavBarProps) {
                 </>
               ) : (
                 <>
-                  <Link href="/login" className="mobile-nav-link" onClick={() => setOpen(false)}>Login</Link>
-                  <Link href="/signup" onClick={() => setOpen(false)}
+                  <Link href="?auth=login" scroll={false} className="mobile-nav-link" onClick={() => setOpen(false)}>Login</Link>
+                  <Link href="?auth=signup" scroll={false} onClick={() => setOpen(false)}
                     style={{ display: "block", padding: "0.875rem 1.25rem", borderRadius: "1rem", background: "var(--primary)", color: "#ffffff", fontWeight: 700, fontSize: "1rem", textAlign: "left" }}>
                     Sign Up
                   </Link>

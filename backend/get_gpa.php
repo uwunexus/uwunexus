@@ -139,11 +139,11 @@ try {
         $stmt->execute([$user_id]);
         $s = $stmt->fetch();
         $gpa = (float)($s['current_gpa'] ?? 0);
-        if ($gpa >= 3.70)     $class = 'First Class Honours';
-        elseif ($gpa >= 3.30) $class = 'Second Class Upper Division';
-        elseif ($gpa >= 3.00) $class = 'Second Class Lower Division';
+        if ($gpa >= 3.70)     $class = 'First Class';
+        elseif ($gpa >= 3.30) $class = 'Second Class Upper';
+        elseif ($gpa >= 3.00) $class = 'Second Class Lower';
         elseif ($gpa >= 2.00) $class = 'General Pass';
-        elseif ($gpa > 0)     $class = 'Below Minimum';
+        elseif ($gpa > 0)     $class = 'Academic Probation';
         else                   $class = 'Not Enough Data';
         $gpa_summary = ["current_gpa" => $gpa, "total_gpa_credits" => (int)($s['total_gpa_credits'] ?? 0), "modules_completed" => (int)($s['modules_completed'] ?? 0), "degree_class" => $class];
     }

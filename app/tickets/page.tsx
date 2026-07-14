@@ -43,6 +43,7 @@ export default function TicketsPage() {
 
   // Checkout Modal State
   const [selectedEvent, setSelectedEvent] = useState<TicketedEvent | null>(null);
+  const [detailEvent, setDetailEvent] = useState<TicketedEvent | null>(null);
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "" });
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState(searchParams.get("canceled") ? "Payment was canceled." : "");
@@ -146,7 +147,7 @@ export default function TicketsPage() {
         <div className="grid gap-8" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(270px, 1fr))" }}>
           {events.map((event) => {
             return (
-              <div key={event.id} className="event-card">
+              <div key={event.id} className="event-card" onClick={() => setDetailEvent(event)} style={{ cursor: "pointer" }}>
                 {/* Image wrapper matching the visual layout */}
                 <div className="event-card-image-wrapper">
                   {event.image_url ? (
@@ -185,9 +186,8 @@ export default function TicketsPage() {
                     </span>
                   </div>
 
-                  {/* Book Now Button */}
+                  {/* View Details Button */}
                   <button
-                    onClick={() => { setSelectedEvent(event); setProcessing(false); setError(""); }}
                     disabled={event.available_tickets <= 0}
                     className="event-card-btn"
                     style={{
@@ -199,12 +199,75 @@ export default function TicketsPage() {
                     }}
                   >
                     <Ticket size={18} />
-                    <span>{event.available_tickets <= 0 ? "Sold Out" : "Book Now"}</span>
+                    <span>{event.available_tickets <= 0 ? "Sold Out" : "View Details"}</span>
                   </button>
                 </div>
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Event Detail Modal */}
+      {detailEvent && (
+        <div
+          style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.65)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: "1.5rem", backdropFilter: "blur(5px)" }}
+          onClick={() => setDetailEvent(null)}
+        >
+          <div className="event-detail-modal-container" onClick={e => e.stopPropagation()}>
+            {/* Left Column - Image */}
+            <div className="event-detail-modal-img-col">
+              {detailEvent.image_url ? (
+                <img src={detailEvent.image_url} alt={detailEvent.title} style={{ width: "100%", height: "100%", objectFit: "contain", position: "absolute", inset: 0 }} />
+              ) : (
+                <div style={{ height: "100%", background: "linear-gradient(135deg, #000c6622, #000c6611)", display: "flex", alignItems: "center", justifyContent: "center", position: "absolute", inset: 0 }}>
+                  <Ticket size={80} style={{ color: "#000c66", opacity: 0.4 }} />
+                </div>
+              )}
+            </div>
+
+            {/* Right Column - Details */}
+            <div className="event-detail-modal-info-col">
+              <h2 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "2.2rem", fontWeight: 800, color: "#000000", marginBottom: "1rem", lineHeight: 1.2 }}>{detailEvent.title}</h2>
+              {detailEvent.description && (
+                <p style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.05rem", fontWeight: 500, color: "#000000", lineHeight: 1.6, marginBottom: "1.25rem", whiteSpace: "pre-wrap" }}>{detailEvent.description}</p>
+              )}
+              
+              <div style={{ backgroundColor: "#e6e9ec", borderRadius: "1.8rem", padding: "1.25rem 1.5rem", border: "1px solid rgba(0,0,0,0.03)", marginBottom: "1.25rem" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem 1.5rem", fontFamily: "var(--font-syne), sans-serif", fontSize: "1rem", fontWeight: 700, color: "#000000" }}>
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}><Calendar size={20} style={{ color: "#000000", flexShrink: 0, marginTop: "2px" }} /><span style={{ lineHeight: "1.3" }}>{formatDate(detailEvent.event_date)}</span></div>
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}><Clock size={20} style={{ color: "#000000", flexShrink: 0, marginTop: "2px" }} /><span style={{ lineHeight: "1.3" }}>{formatTime(detailEvent.event_time)}</span></div>
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}><MapPin size={20} style={{ color: "#000000", flexShrink: 0, marginTop: "2px" }} /><span style={{ lineHeight: "1.3" }}>{detailEvent.venue}</span></div>
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}>
+                    <Ticket size={20} style={{ color: "#000000", flexShrink: 0, marginTop: "2px" }} />
+                    <div style={{ display: "flex", flexDirection: "column" }}>
+                      <span style={{ lineHeight: "1.3" }}>LKR.{detailEvent.price}</span>
+                      <span style={{ fontSize: "0.85rem", opacity: 0.8 }}>{detailEvent.available_tickets} / {detailEvent.total_tickets} left</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: "1rem", marginTop: "auto" }}>
+                <button onClick={() => setDetailEvent(null)} style={{ backgroundColor: "#ffffff", color: "#000c66", border: "1.5px solid #000c66", borderRadius: "9999px", padding: "0.6rem 2rem", fontSize: "1rem", fontWeight: 700, fontFamily: "var(--font-syne), sans-serif", cursor: "pointer", transition: "all 0.2s" }}>
+                  Close
+                </button>
+                <button 
+                  disabled={detailEvent.available_tickets <= 0}
+                  onClick={() => { 
+                    setSelectedEvent(detailEvent); 
+                    setProcessing(false); 
+                    setError(""); 
+                    setDetailEvent(null); 
+                  }} 
+                  style={{ backgroundColor: "#000c66", color: "#ffffff", border: "none", borderRadius: "9999px", padding: "0.6rem 2.5rem", fontSize: "1rem", fontWeight: 700, fontFamily: "var(--font-syne), sans-serif", cursor: detailEvent.available_tickets <= 0 ? "not-allowed" : "pointer", transition: "background-color 0.2s", opacity: detailEvent.available_tickets <= 0 ? 0.5 : 1, display: "flex", alignItems: "center", gap: "0.5rem" }}
+                >
+                  <Ticket size={18} />
+                  {detailEvent.available_tickets <= 0 ? "Sold Out" : "Book Now"}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -236,7 +299,7 @@ export default function TicketsPage() {
                 <img 
                   src={selectedEvent.image_url} 
                   alt={selectedEvent.title} 
-                  style={{ width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: 0 }} 
+                  style={{ width: "100%", height: "100%", objectFit: "contain", position: "absolute", inset: 0 }} 
                 />
               ) : (
                 <div style={{ height: "100%", background: "linear-gradient(135deg, #000c6622, #000c6611)", display: "flex", alignItems: "center", justifyContent: "center", position: "absolute", inset: 0 }}>

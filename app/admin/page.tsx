@@ -60,6 +60,9 @@ function formatTime(t: string) {
 export default function AdminPage() {
   const [tab, setTab] = useState<"users" | "events" | "tickets" | "marketplace" | "lost-found" | "info-hub">("users");
 
+  const [alertMessage, setAlertMessage] = useState("");
+  const [confirmDialog, setConfirmDialog] = useState<{ message: string, onConfirm: () => void } | null>(null);
+
   /* auth from cookie */
   const [myId, setMyId] = useState("");
   const [myRole, setMyRole] = useState("");
@@ -102,21 +105,26 @@ export default function AdminPage() {
   };
 
   const deleteUser = async (targetId: number) => {
-    if (!confirm("Are you sure you want to permanently delete this user? This cannot be undone.")) return;
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/delete_user.php`, {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ requester_id: +myId, target_id: targetId }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setUsers(prev => prev.filter(u => u.id !== targetId));
-      } else {
-        alert(data.message);
+    setConfirmDialog({
+      message: "Are you sure you want to permanently delete this user? This cannot be undone.",
+      onConfirm: async () => {
+        setConfirmDialog(null);
+        try {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/delete_user.php`, {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ requester_id: +myId, target_id: targetId }),
+          });
+          const data = await res.json();
+          if (data.success) {
+            setUsers(prev => prev.filter(u => u.id !== targetId));
+          } else {
+            setAlertMessage(data.message);
+          }
+        } catch (e) {
+          setAlertMessage("Error deleting user.");
+        }
       }
-    } catch (e) {
-      alert("Error deleting user.");
-    }
+    });
   };
 
   const filteredUsers = users.filter(u => {
@@ -153,12 +161,17 @@ export default function AdminPage() {
   };
 
   const deleteEvent = async (eventId: number) => {
-    if (!confirm("Delete this event permanently?")) return;
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/delete_event.php`, {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ requester_id: +myId, event_id: eventId }),
+    setConfirmDialog({
+      message: "Delete this event permanently?",
+      onConfirm: async () => {
+        setConfirmDialog(null);
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/delete_event.php`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ requester_id: +myId, event_id: eventId }),
+        });
+        setEvents(prev => prev.filter(e => e.id !== eventId));
+      }
     });
-    setEvents(prev => prev.filter(e => e.id !== eventId));
   };
 
   const filteredEvents = events.filter(e =>
@@ -221,12 +234,17 @@ export default function AdminPage() {
   };
 
   const deleteTicket = async (ticketId: number) => {
-    if (!confirm("Delete this ticketed event permanently?")) return;
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/delete_ticket_event.php`, {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id: +myId, id: ticketId }),
+    setConfirmDialog({
+      message: "Delete this ticketed event permanently?",
+      onConfirm: async () => {
+        setConfirmDialog(null);
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/delete_ticket_event.php`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id: +myId, id: ticketId }),
+        });
+        setTickets(prev => prev.filter(t => t.id !== ticketId));
+      }
     });
-    setTickets(prev => prev.filter(t => t.id !== ticketId));
   };
 
   const filteredTickets = tickets.filter(t => ticketStatusFilter === "all" || t.status === ticketStatusFilter);
@@ -254,26 +272,31 @@ export default function AdminPage() {
   useEffect(() => { if (myId && tab === "marketplace") fetchMarketplace(); }, [myId, tab, fetchMarketplace]);
 
   const updateMarketplaceStatus = async (itemId: number, action: string) => {
-    if (!confirm(`Are you sure you want to ${action} this item?`)) return;
-    try {
-      const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin_delete_marketplace_item.php`, {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ item_id: itemId, user_id: +myId, action })
-      });
-      const d = await r.json();
-      if (d.success) {
-        if (action === "delete") {
-          setMarketplaceItems(prev => prev.filter(i => i.id !== itemId));
-        } else {
-          const newStatus = action === "approve" ? "active" : action === "reject" ? "rejected" : "hidden";
-          setMarketplaceItems(prev => prev.map(i => i.id === itemId ? { ...i, status: newStatus } : i));
+    setConfirmDialog({
+      message: `Are you sure you want to ${action} this item?`,
+      onConfirm: async () => {
+        setConfirmDialog(null);
+        try {
+          const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin_delete_marketplace_item.php`, {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ item_id: itemId, user_id: +myId, action })
+          });
+          const d = await r.json();
+          if (d.success) {
+            if (action === "delete") {
+              setMarketplaceItems(prev => prev.filter(i => i.id !== itemId));
+            } else {
+              const newStatus = action === "approve" ? "active" : action === "reject" ? "rejected" : "hidden";
+              setMarketplaceItems(prev => prev.map(i => i.id === itemId ? { ...i, status: newStatus } : i));
+            }
+          } else {
+            setAlertMessage(d.message);
+          }
+        } catch (e) {
+          setAlertMessage("Error updating marketplace item.");
         }
-      } else {
-        alert(d.message);
       }
-    } catch (e) {
-      alert("Error updating marketplace item.");
-    }
+    });
   };
 
   /* ── Lost & Found Tab ──────────────────────────────────────────── */
@@ -293,21 +316,26 @@ export default function AdminPage() {
   useEffect(() => { if (myId && tab === "lost-found") fetchLostFound(); }, [myId, tab, fetchLostFound]);
 
   const deleteLostFoundItem = async (itemId: number) => {
-    if (!confirm("Are you sure you want to permanently delete this report?")) return;
-    try {
-      const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/delete_lost_found.php`, {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: itemId, user_id: +myId })
-      });
-      const d = await r.json();
-      if (d.success) {
-        setLostFoundItems(prev => prev.filter(i => i.id !== itemId));
-      } else {
-        alert(d.message);
+    setConfirmDialog({
+      message: "Are you sure you want to permanently delete this report?",
+      onConfirm: async () => {
+        setConfirmDialog(null);
+        try {
+          const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/delete_lost_found.php`, {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: itemId, user_id: +myId })
+          });
+          const d = await r.json();
+          if (d.success) {
+            setLostFoundItems(prev => prev.filter(i => i.id !== itemId));
+          } else {
+            setAlertMessage(d.message);
+          }
+        } catch (e) {
+          setAlertMessage("Error deleting item.");
+        }
       }
-    } catch (e) {
-      alert("Error deleting item.");
-    }
+    });
   };
 
   /* ── Info Hub Tab ────────────────────────────────────────────── */
@@ -328,21 +356,26 @@ export default function AdminPage() {
   useEffect(() => { if (myId && tab === "info-hub") fetchInfoHub(); }, [myId, tab, fetchInfoHub]);
 
   const deleteInfoHubItem = async (itemId: number) => {
-    if (!confirm("Are you sure you want to delete this Info Hub item?")) return;
-    try {
-      const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/delete_info_hub.php`, {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: itemId, user_id: +myId })
-      });
-      const d = await r.json();
-      if (d.success) {
-        setInfoHubItems(prev => prev.filter(i => i.id !== itemId));
-      } else {
-        alert(d.message);
+    setConfirmDialog({
+      message: "Are you sure you want to delete this Info Hub item?",
+      onConfirm: async () => {
+        setConfirmDialog(null);
+        try {
+          const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/delete_info_hub.php`, {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: itemId, user_id: +myId })
+          });
+          const d = await r.json();
+          if (d.success) {
+            setInfoHubItems(prev => prev.filter(i => i.id !== itemId));
+          } else {
+            setAlertMessage(d.message);
+          }
+        } catch (e) {
+          setAlertMessage("Error deleting item.");
+        }
       }
-    } catch (e) {
-      alert("Error deleting item.");
-    }
+    });
   };
 
   /* ── Render ───────────────────────────────────────────────── */
@@ -1022,6 +1055,31 @@ export default function AdminPage() {
           }}
         />
       )}
+
+      {/* Custom Alert Modal */}
+      {alertMessage && (
+        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "1.5rem", backdropFilter: "blur(5px)" }}>
+          <div className="card" style={{ maxWidth: "400px", width: "100%", textAlign: "center", padding: "2rem" }}>
+            <h3 style={{ fontSize: "1.25rem", fontWeight: "bold", marginBottom: "1rem" }}>Notice</h3>
+            <p style={{ marginBottom: "1.5rem", color: "var(--muted)" }}>{alertMessage}</p>
+            <button onClick={() => setAlertMessage("")} className="btn btn-primary w-full justify-center">OK</button>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Confirm Modal */}
+      {confirmDialog && (
+        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "1.5rem", backdropFilter: "blur(5px)" }}>
+          <div className="card" style={{ maxWidth: "400px", width: "100%", padding: "2rem" }}>
+            <h3 style={{ fontSize: "1.25rem", fontWeight: "bold", marginBottom: "1rem" }}>Confirm Action</h3>
+            <p style={{ marginBottom: "1.5rem", color: "var(--muted)" }}>{confirmDialog.message}</p>
+            <div style={{ display: "flex", gap: "1rem", justifyContent: "flex-end" }}>
+              <button onClick={() => setConfirmDialog(null)} className="btn btn-secondary">Cancel</button>
+              <button onClick={confirmDialog.onConfirm} className="btn btn-primary" style={{ backgroundColor: "var(--danger)", color: "white", border: "none" }}>Confirm</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1109,7 +1167,7 @@ function EventFormModal({ myId, initialData, onClose, onSaved }: { myId: string;
             </label>
             {imagePreview && (
               <div style={{ position: "relative", height: "160px", marginTop: "0.5rem", borderRadius: "0.5rem", overflow: "hidden" }}>
-                <img src={imagePreview} alt="preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <img src={imagePreview} alt="preview" style={{ width: "100%", height: "100%", objectFit: "contain", backgroundColor: "#f8fafc" }} />
                 <button type="button" onClick={() => { setImageFile(null); setImagePreview(""); }}
                   style={{ position: "absolute", top: "0.5rem", right: "0.5rem", backgroundColor: "rgba(0,0,0,0.7)", border: "none", borderRadius: "50%", width: "28px", height: "28px", cursor: "pointer", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <X size={14} />
@@ -1249,7 +1307,7 @@ function TicketFormModal({ myId, initialData, onClose, onSaved }: { myId: string
             </label>
             {imagePreview && (
               <div style={{ position: "relative", height: "160px", marginTop: "0.5rem", borderRadius: "0.5rem", overflow: "hidden" }}>
-                <img src={imagePreview} alt="preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <img src={imagePreview} alt="preview" style={{ width: "100%", height: "100%", objectFit: "contain", backgroundColor: "#f8fafc" }} />
                 <button type="button" onClick={() => { setImageFile(null); setImagePreview(""); }}
                   style={{ position: "absolute", top: "0.5rem", right: "0.5rem", backgroundColor: "rgba(0,0,0,0.7)", border: "none", borderRadius: "50%", width: "28px", height: "28px", cursor: "pointer", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}><X size={14} /></button>
               </div>

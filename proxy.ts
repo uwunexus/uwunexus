@@ -18,7 +18,7 @@ export function proxy(request: NextRequest) {
 
   // Protect all module routes — must be logged in
   if (!isAuthenticated) {
-    return NextResponse.redirect(new URL('/signup', request.url));
+    return NextResponse.redirect(new URL('/?auth=login', request.url));
   }
 
   return NextResponse.next();

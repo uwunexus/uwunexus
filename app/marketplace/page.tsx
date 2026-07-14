@@ -24,6 +24,7 @@ interface Item {
   contact_email: string;
   status: string;
   images: string[];
+  seller_id?: number;
 }
 
 export default function MarketplacePage() {
@@ -43,6 +44,11 @@ export default function MarketplacePage() {
   const [formLoading, setFormLoading] = useState(false);
   const [myId, setMyId] = useState("");
   const [contactProduct, setContactProduct] = useState<Item | null>(null);
+  const [detailProduct, setDetailProduct] = useState<Item | null>(null);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+
+  const [alertMessage, setAlertMessage] = useState("");
+  const [confirmDialog, setConfirmDialog] = useState<{ message: string, onConfirm: () => void } | null>(null);
 
   const [form, setForm] = useState({
     title: "",
@@ -104,30 +110,38 @@ export default function MarketplacePage() {
   };
 
   const handleUpdateStatus = async (itemId: number, newStatus: string) => {
-    if (!confirm(`Are you sure you want to mark this as ${newStatus}?`)) return;
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/update_marketplace_item.php`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: itemId, seller_id: +myId, status: newStatus })
-      });
-      const data = await res.json();
-      if (data.success) {
-        setMyItems(prev => prev.map(i => i.id === itemId ? { ...i, status: newStatus } : i));
-        if (newStatus !== 'active') {
-          setItems(prev => prev.filter(i => i.id !== itemId));
+    setConfirmDialog({
+      message: `Are you sure you want to mark this as ${newStatus}?`,
+      onConfirm: async () => {
+        setConfirmDialog(null);
+        try {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/update_marketplace_item.php`, {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ item_id: itemId, status: newStatus, user_id: +myId }),
+          });
+          const data = await res.json();
+          if (data.success) {
+            if (newStatus === "sold") {
+              setMyItems(prev => prev.map(i => i.id === itemId ? { ...i, status: 'sold' } : i));
+            } else {
+              setMyItems(prev => prev.filter(i => i.id !== itemId));
+            }
+          } else {
+            setAlertMessage(data.message);
+          }
+        } catch (e) {
+          setAlertMessage("Error updating status.");
         }
-      } else {
-        alert(data.message);
       }
-    } catch (e) {
-      alert("Error updating status.");
-    }
+    });
   };
 
   const handleSaveListing = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!myId) return alert("You must be logged in.");
+    if (!myId) {
+      setAlertMessage("You must be logged in.");
+      return;
+    }
     setFormLoading(true);
 
     try {
@@ -156,16 +170,16 @@ export default function MarketplacePage() {
 
       const data = await res.json();
       if (data.success) {
-        alert(data.message || (editingItem ? "Listing updated successfully! It is pending approval." : "Listing created successfully! It is pending approval."));
+        setAlertMessage(data.message || (editingItem ? "Listing updated successfully! It is pending approval." : "Listing created successfully! It is pending approval."));
         setShowModal(false);
         // Refresh My Items
         const myRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/get_marketplace_items.php?seller_id=${myId}`).then(r => r.json());
         if (myRes.success) setMyItems(myRes.items);
       } else {
-        alert(data.message);
+        setAlertMessage(data.message);
       }
     } catch (err: any) {
-      alert(err.message || "An error occurred");
+      setAlertMessage(err.message || "An error occurred");
     } finally {
       setFormLoading(false);
     }
@@ -361,7 +375,7 @@ export default function MarketplacePage() {
             };
 
             return (
-              <div key={product.id} className="event-card">
+              <div key={product.id} className="event-card" onClick={() => { setDetailProduct(product); setActiveImageIndex(0); }} style={{ cursor: "pointer" }}>
                 {/* Image visual wrapper with aspect ratio matching mockup */}
                 <div className="event-card-image-wrapper">
                   {product.images && product.images.length > 0 ? (
@@ -418,7 +432,7 @@ export default function MarketplacePage() {
                   <div style={{ display: "flex", justifyContent: "center", width: "100%", marginTop: "auto" }}>
                     {tab === "browse" ? (
                       <button
-                        onClick={() => setContactProduct(product)}
+                        className="event-card-btn"
                         style={{
                           backgroundColor: "#0d0e4aff",
                           color: "#ffffff",
@@ -438,8 +452,8 @@ export default function MarketplacePage() {
                           whiteSpace: "nowrap"
                         }}
                       >
-                        <span className="material-symbols-outlined" style={{ fontSize: "18px", color: "inherit", display: "inline-block" }}>call</span>
-                        <span>Contact Seller</span>
+                        <span className="material-symbols-outlined" style={{ fontSize: "18px", color: "inherit", display: "inline-block" }}>visibility</span>
+                        <span>View Details</span>
                       </button>
                     ) : (
                       <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", width: "100%" }}>
@@ -459,7 +473,7 @@ export default function MarketplacePage() {
                             gap: "0.5rem",
                             cursor: "pointer"
                           }}
-                          onClick={() => openEditModal(product)}
+                          onClick={(e) => { e.stopPropagation(); openEditModal(product); }}
                         >
                           <Edit size={14} />
                           <span>Edit</span>
@@ -481,7 +495,7 @@ export default function MarketplacePage() {
                               gap: "0.5rem",
                               cursor: "pointer"
                             }}
-                            onClick={() => handleUpdateStatus(product.id, 'sold')}
+                            onClick={(e) => { e.stopPropagation(); handleUpdateStatus(product.id, 'sold'); }}
                           >
                             <Tag size={14} />
                             <span>Sold</span>
@@ -643,8 +657,14 @@ export default function MarketplacePage() {
                   <input
                     type="text"
                     required
+                    maxLength={10}
+                    pattern="[0-9]{10}"
+                    title="Phone number must be exactly 10 digits"
                     value={form.contact_number}
-                    onChange={e => setForm({ ...form, contact_number: e.target.value })}
+                    onChange={e => {
+                      const val = e.target.value.replace(/\D/g, '');
+                      setForm({ ...form, contact_number: val });
+                    }}
                     placeholder="e.g., 0712345678"
                     style={{
                       height: "45px",
@@ -762,6 +782,94 @@ export default function MarketplacePage() {
           </div>
         </div>
       )}
+      {/* Product Detail Modal */}
+      {detailProduct && (
+        <div
+          style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.65)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: "1.5rem", backdropFilter: "blur(5px)" }}
+          onClick={() => setDetailProduct(null)}
+        >
+          <div className="event-detail-modal-container" onClick={e => e.stopPropagation()}>
+            {/* Left Column - Image & Thumbnails */}
+            <div className="event-detail-modal-img-col" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              <div style={{ flex: 1, position: "relative", borderRadius: "1.5rem", overflow: "hidden", backgroundColor: "#f8fafc" }}>
+                {detailProduct.images && detailProduct.images.length > 0 ? (
+                  <img src={detailProduct.images[activeImageIndex]} alt={detailProduct.title} style={{ width: "100%", height: "100%", objectFit: "contain", position: "absolute", inset: 0 }} />
+                ) : (
+                  <div style={{ height: "100%", background: "linear-gradient(135deg, #000c6622, #000c6611)", display: "flex", alignItems: "center", justifyContent: "center", position: "absolute", inset: 0 }}>
+                    <ImageIcon size={80} style={{ color: "#000c66", opacity: 0.4 }} />
+                  </div>
+                )}
+              </div>
+              
+              {/* Thumbnail Gallery */}
+              {detailProduct.images && detailProduct.images.length > 1 && (
+                <div style={{ display: "flex", gap: "0.75rem", height: "80px" }}>
+                  {detailProduct.images.map((img, idx) => (
+                    <div 
+                      key={idx}
+                      onClick={() => setActiveImageIndex(idx)}
+                      style={{ 
+                        flex: 1, 
+                        borderRadius: "0.75rem", 
+                        overflow: "hidden", 
+                        cursor: "pointer",
+                        border: activeImageIndex === idx ? "3px solid #000c66" : "3px solid transparent",
+                        opacity: activeImageIndex === idx ? 1 : 0.6,
+                        transition: "all 0.2s"
+                      }}
+                    >
+                      <img src={img} alt={`${detailProduct.title} - ${idx + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Right Column - Details */}
+            <div className="event-detail-modal-info-col">
+              <h2 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "2.2rem", fontWeight: 800, color: "#000000", marginBottom: "0.5rem", lineHeight: 1.2 }}>{detailProduct.title}</h2>
+              <div style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.5rem", fontWeight: 800, color: "#000c66", marginBottom: "1.25rem" }}>
+                LKR.{parseFloat(detailProduct.price).toFixed(2)}
+              </div>
+
+              {detailProduct.description && (
+                <p style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.05rem", fontWeight: 500, color: "#000000", lineHeight: 1.6, marginBottom: "1.25rem", whiteSpace: "pre-wrap" }}>{detailProduct.description}</p>
+              )}
+              
+              <div style={{ backgroundColor: "#e6e9ec", borderRadius: "1.5rem", padding: "1.25rem 1.5rem", border: "1px solid rgba(0,0,0,0.03)", marginBottom: "1.25rem" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", fontFamily: "var(--font-syne), sans-serif", fontSize: "1rem", fontWeight: 700, color: "#000000" }}>
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}><Tag size={18} style={{ color: "#000000", flexShrink: 0, marginTop: "2px" }} /><span>Condition: {detailProduct.condition_state}</span></div>
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}><Filter size={18} style={{ color: "#000000", flexShrink: 0, marginTop: "2px" }} /><span>Category: {detailProduct.category_name}</span></div>
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}><span className="material-symbols-outlined" style={{ fontSize: "18px", color: "#000000", flexShrink: 0, marginTop: "2px" }}>person</span><span>Seller: {detailProduct.seller_name}</span></div>
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}><span className="material-symbols-outlined" style={{ fontSize: "18px", color: "#000000", flexShrink: 0, marginTop: "2px" }}>call</span><span>Phone: {detailProduct.contact_number}</span></div>
+                  {detailProduct.contact_email && (
+                    <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}><span className="material-symbols-outlined" style={{ fontSize: "18px", color: "#000000", flexShrink: 0, marginTop: "2px" }}>mail</span><span>Email: {detailProduct.contact_email}</span></div>
+                  )}
+                </div>
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: "1rem", marginTop: "auto" }}>
+                <button onClick={() => setDetailProduct(null)} style={{ backgroundColor: "#ffffff", color: "#0d0e4aff", border: "1.5px solid #0d0e4aff", borderRadius: "9999px", padding: "0.6rem 2rem", fontSize: "1rem", fontWeight: 700, fontFamily: "var(--font-syne), sans-serif", cursor: "pointer", transition: "all 0.2s" }}>
+                  Close
+                </button>
+                {myId !== detailProduct.seller_id?.toString() && detailProduct.status !== 'sold' && (
+                  <button 
+                    onClick={() => { 
+                      setContactProduct(detailProduct); 
+                      setDetailProduct(null); 
+                    }} 
+                    style={{ backgroundColor: "#0d0e4aff", color: "#ffffff", border: "none", borderRadius: "9999px", padding: "0.6rem 2.5rem", fontSize: "1rem", fontWeight: 700, fontFamily: "var(--font-syne), sans-serif", cursor: "pointer", transition: "background-color 0.2s", display: "flex", alignItems: "center", gap: "0.5rem" }}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: "18px", color: "inherit", display: "inline-block" }}>call</span>
+                    Contact Seller
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Contact Via Modal */}
       {contactProduct && (
         <div
@@ -883,6 +991,31 @@ export default function MarketplacePage() {
                   Email
                 </span>
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Alert Modal */}
+      {alertMessage && (
+        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "1.5rem", backdropFilter: "blur(5px)" }}>
+          <div className="card" style={{ maxWidth: "400px", width: "100%", textAlign: "center", padding: "2rem" }}>
+            <h3 style={{ fontSize: "1.25rem", fontWeight: "bold", marginBottom: "1rem" }}>Notice</h3>
+            <p style={{ marginBottom: "1.5rem", color: "var(--muted)" }}>{alertMessage}</p>
+            <button onClick={() => setAlertMessage("")} className="btn btn-primary w-full justify-center">OK</button>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Confirm Modal */}
+      {confirmDialog && (
+        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "1.5rem", backdropFilter: "blur(5px)" }}>
+          <div className="card" style={{ maxWidth: "400px", width: "100%", padding: "2rem" }}>
+            <h3 style={{ fontSize: "1.25rem", fontWeight: "bold", marginBottom: "1rem" }}>Confirm Action</h3>
+            <p style={{ marginBottom: "1.5rem", color: "var(--muted)" }}>{confirmDialog.message}</p>
+            <div style={{ display: "flex", gap: "1rem", justifyContent: "flex-end" }}>
+              <button onClick={() => setConfirmDialog(null)} className="btn btn-secondary">Cancel</button>
+              <button onClick={confirmDialog.onConfirm} className="btn btn-primary" style={{ backgroundColor: "var(--danger)", color: "white", border: "none" }}>Confirm</button>
             </div>
           </div>
         </div>
