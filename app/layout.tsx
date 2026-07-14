@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Outfit, Syne, Nobile, Zain, Audiowide, DM_Sans, Inclusive_Sans } from "next/font/google";
+import { Inter, Outfit, Syne, Nobile, Zain, Audiowide, DM_Sans, Inclusive_Sans, Roboto } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
 import { cookies } from "next/headers";
@@ -16,6 +16,7 @@ const zain = Zain({ subsets: ["latin"], weight: ["400", "700"], variable: '--fon
 const audiowide = Audiowide({ subsets: ["latin"], weight: "400", variable: '--font-audiowide' });
 const dmSans = DM_Sans({ subsets: ["latin"], weight: ["400", "500"], variable: '--font-dm-sans' });
 const inclusiveSans = Inclusive_Sans({ subsets: ["latin"], weight: "400", variable: '--font-inclusive-sans' });
+const roboto = Roboto({ subsets: ["latin"], weight: ["400", "500", "700"], variable: '--font-roboto' });
 
 export const metadata: Metadata = {
   title: "UWU-NEXUS",
@@ -37,7 +38,7 @@ export default async function RootLayout({
       <head>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
       </head>
-      <body className={`${inter.variable} ${outfit.variable} ${syne.variable} ${nobile.variable} ${zain.variable} ${audiowide.variable} ${dmSans.variable} ${inclusiveSans.variable} font-sans`}>
+      <body className={`${inter.variable} ${outfit.variable} ${syne.variable} ${nobile.variable} ${zain.variable} ${audiowide.variable} ${dmSans.variable} ${inclusiveSans.variable} ${roboto.variable} font-sans`}>
         <nav className="navbar">
           <div className="container flex justify-between items-center" style={{ gap: '1rem' }}>
             <Link href="/" className="flex items-center gap-3 font-bold text-xl gradient-text">

@@ -158,33 +158,35 @@ export default function AuthModal() {
         borderRadius: "2rem",
         width: "100%",
         maxWidth: "960px",
-        height: "640px",
+        height: "680px",
         display: "flex",
         overflow: "hidden",
         boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
         zIndex: 100
       }}>
-        {/* Close Button */}
+        {/* Close Button (Global to modal, sits top-right over graphic on desktop, shifts to top-right of form on mobile) */}
         <button
           onClick={closeModal}
+          className="auth-close-button"
           style={{
             position: "absolute",
             top: "1.25rem",
-            left: "1.25rem",
+            right: "1.25rem",
             border: "none",
-            backgroundColor: "transparent",
+            backgroundColor: "rgba(15, 23, 42, 0.4)",
             cursor: "pointer",
-            color: "#64748b",
+            color: "#ffffff",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "0.25rem",
+            width: "36px",
+            height: "36px",
             borderRadius: "50%",
-            transition: "background-color 0.2s",
-            zIndex: 10
+            transition: "all 0.2s",
+            zIndex: 110
           }}
-          onMouseEnter={e => e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.05)"}
-          onMouseLeave={e => e.currentTarget.style.backgroundColor = "transparent"}
+          onMouseEnter={e => e.currentTarget.style.backgroundColor = "rgba(15, 23, 42, 0.6)"}
+          onMouseLeave={e => e.currentTarget.style.backgroundColor = "rgba(15, 23, 42, 0.4)"}
         >
           <X size={20} />
         </button>
@@ -194,7 +196,7 @@ export default function AuthModal() {
           width: "100%",
           maxWidth: "400px",
           height: "100%",
-          padding: "3rem 2.5rem",
+          padding: "2.5rem",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
@@ -240,12 +242,12 @@ export default function AuthModal() {
           )}
 
           {/* Form */}
-          <form onSubmit={isLoginView ? handleLoginSubmit : handleSignupSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <form onSubmit={isLoginView ? handleLoginSubmit : handleSignupSubmit} style={{ display: "flex", flexDirection: "column", gap: isLoginView ? "1rem" : "0.75rem" }}>
             
             {/* Full Name field (Signup only) */}
             {!isLoginView && (
               <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
-                <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "#000000" }}>Full Name</label>
+                <label style={{ fontFamily: "var(--font-roboto), sans-serif", fontSize: "0.85rem", fontWeight: 400, color: "#000000" }}>Full Name</label>
                 <div style={{ position: "relative" }}>
                   <User size={18} style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }} />
                   <input
@@ -261,6 +263,8 @@ export default function AuthModal() {
                       border: "none",
                       backgroundColor: "#e6e9ec",
                       outline: "none",
+                      fontFamily: "var(--font-roboto), sans-serif",
+                      fontWeight: 400,
                       fontSize: "0.95rem",
                       color: "#000000"
                     }}
@@ -271,7 +275,7 @@ export default function AuthModal() {
 
             {/* University Email field */}
             <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
-              <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "#000000" }}>University Email</label>
+              <label style={{ fontFamily: "var(--font-roboto), sans-serif", fontSize: "0.85rem", fontWeight: 400, color: "#000000" }}>University Email</label>
               <div style={{ position: "relative" }}>
                 <Mail size={18} style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }} />
                 <input
@@ -287,6 +291,8 @@ export default function AuthModal() {
                     border: "none",
                     backgroundColor: "#e6e9ec",
                     outline: "none",
+                    fontFamily: "var(--font-roboto), sans-serif",
+                    fontWeight: 400,
                     fontSize: "0.95rem",
                     color: "#000000"
                   }}
@@ -296,7 +302,7 @@ export default function AuthModal() {
 
             {/* Password field */}
             <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
-              <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "#000000" }}>Password</label>
+              <label style={{ fontFamily: "var(--font-roboto), sans-serif", fontSize: "0.85rem", fontWeight: 400, color: "#000000" }}>Password</label>
               <div style={{ position: "relative" }}>
                 <Lock size={18} style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }} />
                 <input
@@ -312,6 +318,8 @@ export default function AuthModal() {
                     border: "none",
                     backgroundColor: "#e6e9ec",
                     outline: "none",
+                    fontFamily: "var(--font-roboto), sans-serif",
+                    fontWeight: 400,
                     fontSize: "0.95rem",
                     color: "#000000"
                   }}
@@ -340,7 +348,7 @@ export default function AuthModal() {
             {/* Confirm Password field (Signup only) */}
             {!isLoginView && (
               <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
-                <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "#000000" }}>Confirm Password</label>
+                <label style={{ fontFamily: "var(--font-roboto), sans-serif", fontSize: "0.85rem", fontWeight: 400, color: "#000000" }}>Confirm Password</label>
                 <div style={{ position: "relative" }}>
                   <Lock size={18} style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }} />
                   <input
@@ -356,10 +364,30 @@ export default function AuthModal() {
                       border: "none",
                       backgroundColor: "#e6e9ec",
                       outline: "none",
+                      fontFamily: "var(--font-roboto), sans-serif",
+                      fontWeight: 400,
                       fontSize: "0.95rem",
                       color: "#000000"
                     }}
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{
+                      position: "absolute",
+                      right: "1rem",
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      border: "none",
+                      backgroundColor: "transparent",
+                      cursor: "pointer",
+                      color: "#94a3b8",
+                      display: "flex",
+                      alignItems: "center"
+                    }}
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
                 </div>
               </div>
             )}
@@ -427,7 +455,7 @@ export default function AuthModal() {
             borderTop: "1px solid rgba(0, 0, 0, 0.05)",
             paddingTop: "1.25rem"
           }}>
-            <span style={{ color: "#64748b", fontWeight: 500 }}>
+            <span style={{ fontFamily: "var(--font-roboto), sans-serif", color: "#64748b", fontWeight: 400 }}>
               {isLoginView ? "Don't have an account?" : "Already have an account?"}
             </span>
             <button
@@ -438,8 +466,8 @@ export default function AuthModal() {
                 color: "#000000",
                 borderRadius: "0.75rem",
                 padding: "0.45rem 1.25rem",
-                fontFamily: "var(--font-inclusive-sans), sans-serif",
-                fontWeight: 700,
+                fontFamily: "var(--font-roboto), sans-serif",
+                fontWeight: 500,
                 cursor: "pointer",
                 transition: "all 0.2s"
               }}
@@ -469,11 +497,18 @@ export default function AuthModal() {
           }} 
         />
 
-        {/* Inline CSS to handle responsive display of the graphic pane */}
+        {/* Inline CSS to handle responsive display of the graphic pane and close button */}
         <style>{`
           @media (max-width: 860px) {
             .auth-graphic-pane {
               display: none !important;
+            }
+            .auth-close-button {
+              color: #64748b !important;
+              background-color: transparent !important;
+            }
+            .auth-close-button:hover {
+              background-color: rgba(0, 0, 0, 0.05) !important;
             }
           }
         `}</style>
