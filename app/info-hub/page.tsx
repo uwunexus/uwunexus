@@ -43,14 +43,17 @@ export default function InfoHubPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const filteredItems = items.filter(item =>
-    item.title.toLowerCase().includes(search.toLowerCase()) ||
-    item.description.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredItems = Array.isArray(items) ? items.filter(item => {
+    if (!item) return false;
+    const title = (item.title || "").toLowerCase();
+    const description = (item.description || "").toLowerCase();
+    const q = (search || "").toLowerCase();
+    return title.includes(q) || description.includes(q);
+  }) : [];
 
-  const procedures = filteredItems.filter(i => i.category === 'procedure');
-  const hotlines = filteredItems.filter(i => i.category === 'hotline');
-  const contacts = filteredItems.filter(i => i.category === 'contact');
+  const procedures = filteredItems.filter(i => i && i.category === 'procedure');
+  const hotlines = filteredItems.filter(i => i && i.category === 'hotline');
+  const contacts = filteredItems.filter(i => i && i.category === 'contact');
 
   return (
     <div style={{ maxWidth: "1210px", margin: "1.5rem auto", padding: "0 1rem", minHeight: "100vh", position: "relative" }}>
