@@ -59,6 +59,7 @@ export default function LostAndFoundPage() {
   const [formLoading, setFormLoading] = useState(false);
   const [myId, setMyId] = useState("");
   const [contactReport, setContactReport] = useState<Report | null>(null);
+  const [copiedEmail, setCopiedEmail] = useState(false);
 
   // Split date/time states (Option B: Remove Year)
   const [selectedMonth, setSelectedMonth] = useState("jan");
@@ -875,7 +876,11 @@ export default function LostAndFoundPage() {
               {/* Email Button */}
               <button
                 onClick={() => {
-                  window.location.href = `mailto:${contactReport.contact_email || contactReport.reporter_email}`;
+                  const email = contactReport.contact_email || contactReport.reporter_email;
+                  const subject = `Inquiry regarding your ${contactReport.type} report: ${contactReport.title} on UWU-nexus`;
+                  const body = `Hi ${contactReport.reporter_name || "Reporter"},\n\nI saw your report about "${contactReport.title}" on UWU-nexus Lost & Found. I would like to inquire about it.\n\nRegards`;
+                  const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                  window.open(gmailUrl, "_blank");
                 }}
                 style={{
                   width: "100%",
