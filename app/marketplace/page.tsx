@@ -43,6 +43,7 @@ export default function MarketplacePage() {
   const [formLoading, setFormLoading] = useState(false);
   const [myId, setMyId] = useState("");
   const [contactProduct, setContactProduct] = useState<Item | null>(null);
+  const [copiedEmail, setCopiedEmail] = useState(false);
 
   const [form, setForm] = useState({
     title: "",
@@ -857,7 +858,11 @@ export default function MarketplacePage() {
               {/* Email Button */}
               <button
                 onClick={() => {
-                  window.location.href = `mailto:${contactProduct.contact_email || contactProduct.email}`;
+                  const email = contactProduct.contact_email || contactProduct.email;
+                  const subject = `Inquiry regarding your listing: ${contactProduct.title} on UWU-nexus`;
+                  const body = `Hi ${contactProduct.seller_name || "Seller"},\n\nI am interested in your item "${contactProduct.title}" listed on UWU-nexus marketplace. Is it still available?\n\nRegards`;
+                  const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                  window.open(gmailUrl, "_blank");
                 }}
                 style={{
                   width: "100%",
