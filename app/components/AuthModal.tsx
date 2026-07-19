@@ -136,10 +136,12 @@ export default function AuthModal() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Failed to sign up");
 
-      // Auto login
-      await loginAction(data.user.role, String(data.user.id));
-      closeModal();
-      window.location.reload();
+      // Show success message
+      setResendSuccess(data.message || "Account created! Please check your email to verify.");
+      setFullName("");
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
     } catch (err: any) {
       setError(err.message || "An error occurred during sign up.");
     } finally {
