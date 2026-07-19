@@ -11,6 +11,14 @@ if (file_exists(__DIR__ . '/config-prod.php')) {
     include __DIR__ . '/config-prod.php';
 }
 
+$backend_env_file = __DIR__ . '/.env';
+if (file_exists($backend_env_file)) {
+    $backend_env = parse_ini_file($backend_env_file);
+    if ($backend_env && isset($backend_env['RESEND_API_KEY'])) {
+        $resend_api_key = trim($backend_env['RESEND_API_KEY']);
+    }
+}
+
 header('Access-Control-Allow-Origin: ' . $allowed_origin);
 header('Access-Control-Allow-Credentials: true');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');

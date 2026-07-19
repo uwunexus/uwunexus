@@ -32,7 +32,6 @@ try {
     $fullName = $user['full_name'];
     $verification_token = $user['verification_token'];
 
-    $resend_api_key = 're_HWngWxwB_BfYbrzeKMU6D1tUayXzoVs1v';
     $verify_link = rtrim($frontend_url, '/') . "/verify-email?token=" . $verification_token;
     
     $email_html = "

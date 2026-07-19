@@ -29,7 +29,6 @@ try {
         $updateStmt->execute([$reset_token, $user['id']]);
 
         // Send reset email via Resend
-        $resend_api_key = 're_HWngWxwB_BfYbrzeKMU6D1tUayXzoVs1v';
         $reset_link = rtrim($frontend_url, '/') . "/reset-password?token=" . $reset_token;
         
         $email_html = "

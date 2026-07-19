@@ -82,7 +82,6 @@ try {
     $new_id = $pdo->lastInsertId();
 
     // Send verification email using Resend API (cURL)
-    $resend_api_key = 're_HWngWxwB_BfYbrzeKMU6D1tUayXzoVs1v';
     
     // We use a verified domain sender if possible, or fallback. The user requested onboarding@resend.dev but typically that only allows sending TO the verified account holder.
     // For this demonstration, we'll try sending it. 
