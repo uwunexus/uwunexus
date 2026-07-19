@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import { Shield, Users, Calendar, Search, RefreshCw, CheckCircle, XCircle, Trash2, PlusCircle, Clock, MapPin, X, Upload, ChevronDown, Ticket, Store, EyeOff, BookOpen, Edit, AlertTriangle } from "lucide-react";
+import { Shield, Users, Calendar, Search, RefreshCw, CheckCircle, XCircle, Trash2, PlusCircle, Clock, MapPin, X, Upload, ChevronDown, Ticket, Store, EyeOff, BookOpen, Edit, AlertTriangle, Calculator, GraduationCap, ToggleLeft, ToggleRight, ChevronRight } from "lucide-react";
 import { uploadToCloudinary } from "../lib/cloudinary";
 
 /* ─── Types ──────────────────────────────────────────────────── */
@@ -58,7 +58,7 @@ function formatTime(t: string) {
 
 /* ─── Main Component ────────────────────────────────────────── */
 export default function AdminPage() {
-  const [tab, setTab] = useState<"users" | "events" | "tickets" | "marketplace" | "lost-found" | "info-hub">("users");
+  const [tab, setTab] = useState<"users" | "events" | "tickets" | "marketplace" | "lost-found" | "info-hub" | "gpa-manager">("users");
 
   /* auth from cookie */
   const [myId, setMyId] = useState("");
@@ -503,7 +503,8 @@ export default function AdminPage() {
             { key: "tickets", label: "Tickets", icon: <Ticket size={16} /> },
             { key: "marketplace", label: "Marketplace", icon: <Store size={16} />, adminOnly: true },
             { key: "lost-found", label: "Lost & Found", icon: <Search size={16} />, adminOnly: true },
-            { key: "info-hub", label: "Info Hub", icon: <BookOpen size={16} />, adminOnly: true }
+            { key: "info-hub", label: "Info Hub", icon: <BookOpen size={16} />, adminOnly: true },
+            { key: "gpa-manager", label: "GPA Manager", icon: <Calculator size={16} />, adminOnly: true }
           ].filter(t => myRole === "superadmin" || !t.adminOnly).map(t => (
             <button 
               key={t.key} 
@@ -1865,6 +1866,11 @@ export default function AdminPage() {
         </>
       )}
 
+      {/* ── GPA MANAGER TAB ── */}
+      {tab === "gpa-manager" && (
+        <GPAManagerTab myId={myId} apiUrl={process.env.NEXT_PUBLIC_API_URL || ""} />
+      )}
+
       {/* ── Event Form Modal ── */}
       {showEventModal && (
         <EventFormModal
@@ -2904,6 +2910,364 @@ function InfoHubFormModal({ myId, initialData, onClose, onSaved }: { myId: strin
           </button>
         </form>
       </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   GPA MANAGER TAB COMPONENT
+══════════════════════════════════════════════════════════════════ */
+interface GpaModule { id: number; module_code: string; module_name: string; credits: number; is_gpa: number; is_mandatory?: number; group_id?: number; }
+interface GpaDegree { id: number; degree_code: string; degree_name: string; }
+interface GpaGroup { id: number; academic_year: number; semester: number; group_type: string; group_name: string; min_credits_required: number; module_count: number; }
+
+function GPAManagerTab({ myId, apiUrl }: { myId: string; apiUrl: string }) {
+  const [degrees, setDegrees] = useState<GpaDegree[]>([]);
+  const [selectedDegree, setSelectedDegree] = useState<GpaDegree | null>(null);
+  const [groups, setGroups] = useState<GpaGroup[]>([]);
+  const [expandedGroup, setExpandedGroup] = useState<number | null>(null);
+  const [groupModules, setGroupModules] = useState<Record<number, GpaModule[]>>({});
+  const [loading, setLoading] = useState(false);
+  const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
+  const [search, setSearch] = useState("");
+
+  // Edit module modal
+  const [editingMod, setEditingMod] = useState<(GpaModule & { group_id: number }) | null>(null);
+  // Add module modal
+  const [addingToGroup, setAddingToGroup] = useState<GpaGroup | null>(null);
+  const [addForm, setAddForm] = useState({ module_code: "", module_name: "", credits: "3.0", is_gpa: "1", is_mandatory: "1" });
+  const [addSubmitting, setAddSubmitting] = useState(false);
+  // Edit group modal
+  const [editingGroup, setEditingGroup] = useState<GpaGroup | null>(null);
+  const [groupForm, setGroupForm] = useState({ group_name: "", group_type: "CORE", min_credits_required: "0" });
+
+  const showMsg = (text: string, ok = true) => { setMsg({ text, ok }); setTimeout(() => setMsg(null), 3000); };
+
+  // Fetch degrees on mount
+  useEffect(() => {
+    fetch(`${apiUrl}/admin_gpa.php?action=degrees`)
+      .then(r => r.json()).then(d => { if (d.success) setDegrees(d.degrees); });
+  }, [apiUrl]);
+
+  const selectDegree = async (deg: GpaDegree) => {
+    setSelectedDegree(deg); setExpandedGroup(null); setGroupModules({});
+    setLoading(true);
+    const r = await fetch(`${apiUrl}/admin_gpa.php?action=groups&degree_id=${deg.id}`);
+    const d = await r.json();
+    if (d.success) setGroups(d.groups);
+    setLoading(false);
+  };
+
+  const loadGroupModules = async (groupId: number) => {
+    if (groupModules[groupId]) return;
+    const r = await fetch(`${apiUrl}/admin_gpa.php?action=group_modules&group_id=${groupId}`);
+    const d = await r.json();
+    if (d.success) setGroupModules(prev => ({ ...prev, [groupId]: d.modules }));
+  };
+
+  const toggleGroup = async (g: GpaGroup) => {
+    if (expandedGroup === g.id) { setExpandedGroup(null); return; }
+    setExpandedGroup(g.id);
+    await loadGroupModules(g.id);
+  };
+
+  // Update module
+  const saveModuleEdit = async () => {
+    if (!editingMod) return;
+    const r = await fetch(`${apiUrl}/admin_gpa.php?action=update_module`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: editingMod.id, module_code: editingMod.module_code, module_name: editingMod.module_name, credits: editingMod.credits, is_gpa: editingMod.is_gpa })
+    });
+    const d = await r.json();
+    if (d.success) {
+      setGroupModules(prev => {
+        const updated = { ...prev };
+        const gid = editingMod.group_id;
+        if (updated[gid]) updated[gid] = updated[gid].map(m => m.id === editingMod.id ? { ...editingMod } : m);
+        return updated;
+      });
+      showMsg("Module updated successfully!");
+      setEditingMod(null);
+    } else { showMsg(d.message, false); }
+  };
+
+  // Delete module from group
+  const removeModule = async (moduleId: number, groupId: number) => {
+    if (!confirm("Remove this module from the group?")) return;
+    const r = await fetch(`${apiUrl}/admin_gpa.php?action=remove_from_group`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ module_id: moduleId, group_id: groupId })
+    });
+    const d = await r.json();
+    if (d.success) {
+      setGroupModules(prev => ({ ...prev, [groupId]: (prev[groupId] || []).filter(m => m.id !== moduleId) }));
+      setGroups(prev => prev.map(g => g.id === groupId ? { ...g, module_count: g.module_count - 1 } : g));
+      showMsg("Module removed.");
+    } else { showMsg(d.message, false); }
+  };
+
+  // Add module to group
+  const submitAddModule = async () => {
+    if (!addingToGroup) return;
+    setAddSubmitting(true);
+    const r = await fetch(`${apiUrl}/admin_gpa.php?action=add_module`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...addForm, credits: parseFloat(addForm.credits), is_gpa: parseInt(addForm.is_gpa), is_mandatory: parseInt(addForm.is_mandatory), group_id: addingToGroup.id })
+    });
+    const d = await r.json();
+    if (d.success) {
+      // Refresh the group's modules
+      setGroupModules(prev => { const copy = { ...prev }; delete copy[addingToGroup.id]; return copy; });
+      await loadGroupModules(addingToGroup.id);
+      setGroups(prev => prev.map(g => g.id === addingToGroup.id ? { ...g, module_count: g.module_count + 1 } : g));
+      showMsg("Module added!");
+      setAddingToGroup(null);
+      setAddForm({ module_code: "", module_name: "", credits: "3.0", is_gpa: "1", is_mandatory: "1" });
+    } else { showMsg(d.message, false); }
+    setAddSubmitting(false);
+  };
+
+  // Update group
+  const saveGroupEdit = async () => {
+    if (!editingGroup) return;
+    const r = await fetch(`${apiUrl}/admin_gpa.php?action=update_group`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: editingGroup.id, ...groupForm, min_credits_required: parseFloat(groupForm.min_credits_required) })
+    });
+    const d = await r.json();
+    if (d.success) {
+      setGroups(prev => prev.map(g => g.id === editingGroup.id ? { ...g, group_name: groupForm.group_name, group_type: groupForm.group_type, min_credits_required: parseFloat(groupForm.min_credits_required) } : g));
+      showMsg("Group updated!"); setEditingGroup(null);
+    } else { showMsg(d.message, false); }
+  };
+
+  const sectionStyle = (year: number, sem: number) => `Year ${year} — Semester ${sem === 1 ? "I" : "II"}`;
+  const groupedBySem = groups.reduce<Record<string, GpaGroup[]>>((acc, g) => {
+    const k = `${g.academic_year}-${g.semester}`;
+    if (!acc[k]) acc[k] = [];
+    acc[k].push(g); return acc;
+  }, {});
+
+  const inputStyle: React.CSSProperties = { width: "100%", padding: "0.6rem 1rem", border: "1.5px solid #d1d5db", borderRadius: "0.75rem", fontFamily: "var(--font-roboto), sans-serif", fontSize: "0.9rem", outline: "none", boxSizing: "border-box" };
+  const labelStyle: React.CSSProperties = { fontFamily: "var(--font-syne), sans-serif", fontSize: "0.85rem", fontWeight: 700, color: "#374151", marginBottom: "0.25rem", display: "block" };
+
+  return (
+    <div>
+      {/* Header */}
+      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.5rem" }}>
+        <Calculator size={28} style={{ color: "#000c66" }} />
+        <h2 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.8rem", fontWeight: 700, color: "#000c66", margin: 0 }}>GPA Calculator Manager</h2>
+      </div>
+
+      {/* Status message */}
+      {msg && (
+        <div style={{ padding: "0.75rem 1.25rem", borderRadius: "0.75rem", marginBottom: "1rem", backgroundColor: msg.ok ? "rgba(34,197,94,0.1)" : "rgba(239,68,68,0.1)", color: msg.ok ? "#166534" : "#991b1b", border: `1px solid ${msg.ok ? "rgba(34,197,94,0.3)" : "rgba(239,68,68,0.3)"}`, fontWeight: 600, fontFamily: "var(--font-syne), sans-serif" }}>
+          {msg.text}
+        </div>
+      )}
+
+      {/* Degree Selector */}
+      {!selectedDegree ? (
+        <div>
+          <p style={{ color: "#64748b", marginBottom: "1rem", fontFamily: "var(--font-roboto), sans-serif" }}>Select a degree programme to manage its curriculum modules:</p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "1rem" }}>
+            {degrees.map(deg => (
+              <button key={deg.id} onClick={() => selectDegree(deg)} style={{ backgroundColor: "#ffffff", border: "1.5px solid rgba(0,12,102,0.15)", borderRadius: "1.2rem", padding: "1.25rem 1.5rem", cursor: "pointer", textAlign: "left", transition: "all 0.2s", display: "flex", alignItems: "center", gap: "1rem" }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = "#000c66"; e.currentTarget.style.backgroundColor = "#f0f4ff"; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(0,12,102,0.15)"; e.currentTarget.style.backgroundColor = "#ffffff"; }}>
+                <div style={{ backgroundColor: "rgba(0,12,102,0.08)", borderRadius: "0.75rem", padding: "0.75rem", flexShrink: 0 }}>
+                  <GraduationCap size={22} style={{ color: "#000c66" }} />
+                </div>
+                <div>
+                  <div style={{ fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, color: "#000c66", fontSize: "1.05rem" }}>{deg.degree_code}</div>
+                  <div style={{ fontFamily: "var(--font-roboto), sans-serif", fontSize: "0.82rem", color: "#64748b", marginTop: "0.2rem" }}>{deg.degree_name}</div>
+                </div>
+                <ChevronRight size={18} style={{ color: "#94a3b8", marginLeft: "auto" }} />
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div>
+          {/* Back + Degree Title */}
+          <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.5rem", flexWrap: "wrap" }}>
+            <button onClick={() => setSelectedDegree(null)} style={{ backgroundColor: "#f1f5f9", border: "1.5px solid #d1d5db", borderRadius: "9999px", padding: "0.5rem 1.25rem", cursor: "pointer", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, color: "#374151", display: "flex", alignItems: "center", gap: "0.4rem" }}>
+              ← Back
+            </button>
+            <div>
+              <span style={{ fontFamily: "var(--font-syne), sans-serif", fontWeight: 800, fontSize: "1.3rem", color: "#000c66" }}>{selectedDegree.degree_code}</span>
+              <span style={{ fontFamily: "var(--font-roboto), sans-serif", fontSize: "0.9rem", color: "#64748b", marginLeft: "0.75rem" }}>{selectedDegree.degree_name}</span>
+            </div>
+          </div>
+
+          {loading ? (
+            <div style={{ textAlign: "center", padding: "3rem", color: "#64748b" }}>Loading curriculum...</div>
+          ) : (
+            Object.entries(groupedBySem).sort().map(([semKey, semGroups]) => {
+              const [yr, sem] = semKey.split("-").map(Number);
+              return (
+                <div key={semKey} style={{ marginBottom: "2rem" }}>
+                  {/* Semester Header */}
+                  <div style={{ backgroundColor: "#000c66", color: "#ffffff", borderRadius: "9999px", padding: "0.7rem 1.5rem", marginBottom: "1rem", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "1rem" }}>
+                    {sectionStyle(yr, sem)}
+                  </div>
+
+                  {semGroups.map(grp => (
+                    <div key={grp.id} style={{ border: "1.5px solid rgba(0,12,102,0.12)", borderRadius: "1.2rem", overflow: "hidden", marginBottom: "0.75rem", backgroundColor: "#ffffff" }}>
+                      {/* Group Row */}
+                      <div style={{ display: "flex", alignItems: "center", padding: "1rem 1.25rem", gap: "0.75rem", cursor: "pointer", backgroundColor: expandedGroup === grp.id ? "#f0f4ff" : "#ffffff" }} onClick={() => toggleGroup(grp)}>
+                        <div style={{ flex: 1 }}>
+                          <span style={{ fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, color: "#000c66", fontSize: "1rem" }}>{grp.group_name}</span>
+                          <span style={{ fontFamily: "var(--font-roboto), sans-serif", fontSize: "0.8rem", color: "#64748b", marginLeft: "0.75rem" }}>
+                            {grp.group_type} · {grp.module_count} modules · {grp.min_credits_required > 0 ? `${grp.min_credits_required} cr req.` : "no min credits"}
+                          </span>
+                        </div>
+                        <button onClick={e => { e.stopPropagation(); setEditingGroup(grp); setGroupForm({ group_name: grp.group_name, group_type: grp.group_type, min_credits_required: String(grp.min_credits_required) }); }} style={{ backgroundColor: "rgba(0,12,102,0.08)", border: "none", borderRadius: "0.5rem", padding: "0.4rem 0.8rem", cursor: "pointer", color: "#000c66", fontWeight: 700, fontFamily: "var(--font-syne), sans-serif", fontSize: "0.8rem", display: "flex", alignItems: "center", gap: "0.3rem" }}>
+                          <Edit size={14} /> Edit Group
+                        </button>
+                        <button onClick={e => { e.stopPropagation(); setAddingToGroup(grp); }} style={{ backgroundColor: "#000c66", color: "#ffffff", border: "none", borderRadius: "0.5rem", padding: "0.4rem 0.8rem", cursor: "pointer", fontWeight: 700, fontFamily: "var(--font-syne), sans-serif", fontSize: "0.8rem", display: "flex", alignItems: "center", gap: "0.3rem" }}>
+                          <PlusCircle size={14} /> Add Module
+                        </button>
+                        {expandedGroup === grp.id ? <ChevronDown size={18} style={{ color: "#000c66", flexShrink: 0 }} /> : <ChevronRight size={18} style={{ color: "#94a3b8", flexShrink: 0 }} />}
+                      </div>
+
+                      {/* Expanded module list */}
+                      {expandedGroup === grp.id && (
+                        <div style={{ borderTop: "1px solid rgba(0,12,102,0.08)", overflowX: "auto" }}>
+                          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                            <thead style={{ backgroundColor: "#f8fafc" }}>
+                              <tr>
+                                {["Module Code", "Module Name", "Credits", "GPA Type", "Mandatory", "Actions"].map(h => (
+                                  <th key={h} style={{ padding: "0.6rem 1rem", textAlign: "left", fontFamily: "var(--font-syne), sans-serif", fontSize: "0.8rem", fontWeight: 700, color: "#64748b", whiteSpace: "nowrap" }}>{h}</th>
+                                ))}
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {(groupModules[grp.id] || []).length === 0 ? (
+                                <tr><td colSpan={6} style={{ padding: "1.5rem", textAlign: "center", color: "#94a3b8", fontFamily: "var(--font-roboto), sans-serif" }}>No modules in this group</td></tr>
+                              ) : (groupModules[grp.id] || []).map(mod => (
+                                <tr key={mod.id} style={{ borderTop: "1px solid rgba(0,0,0,0.04)" }}>
+                                  <td style={{ padding: "0.7rem 1rem", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, color: "#000c66", fontSize: "0.9rem", whiteSpace: "nowrap" }}>{mod.module_code}</td>
+                                  <td style={{ padding: "0.7rem 1rem", fontFamily: "var(--font-roboto), sans-serif", fontSize: "0.9rem", color: "#374151" }}>{mod.module_name}</td>
+                                  <td style={{ padding: "0.7rem 1rem", textAlign: "center", fontWeight: 700, fontFamily: "var(--font-syne), sans-serif", color: "#000c66" }}>{Number(mod.credits).toFixed(1)}</td>
+                                  <td style={{ padding: "0.7rem 1rem", textAlign: "center" }}>
+                                    <span style={{ display: "inline-flex", alignItems: "center", gap: "0.3rem", backgroundColor: mod.is_gpa ? "rgba(0,12,102,0.08)" : "rgba(234,179,8,0.15)", color: mod.is_gpa ? "#000c66" : "#b45309", borderRadius: "9999px", padding: "0.25rem 0.75rem", fontSize: "0.78rem", fontWeight: 700, fontFamily: "var(--font-syne), sans-serif" }}>
+                                      {mod.is_gpa ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
+                                      {mod.is_gpa ? "GPA" : "Non-GPA"}
+                                    </span>
+                                  </td>
+                                  <td style={{ padding: "0.7rem 1rem", textAlign: "center" }}>
+                                    <span style={{ backgroundColor: mod.is_mandatory ? "rgba(34,197,94,0.12)" : "rgba(148,163,184,0.15)", color: mod.is_mandatory ? "#166534" : "#64748b", borderRadius: "9999px", padding: "0.2rem 0.65rem", fontSize: "0.78rem", fontWeight: 700, fontFamily: "var(--font-syne), sans-serif" }}>
+                                      {mod.is_mandatory ? "Mandatory" : "Optional"}
+                                    </span>
+                                  </td>
+                                  <td style={{ padding: "0.7rem 1rem", textAlign: "right", whiteSpace: "nowrap" }}>
+                                    <button onClick={() => setEditingMod({ ...mod, group_id: grp.id })} style={{ backgroundColor: "rgba(0,12,102,0.08)", color: "#000c66", border: "none", borderRadius: "0.5rem", padding: "0.35rem 0.7rem", cursor: "pointer", marginRight: "0.4rem", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: "0.25rem", fontSize: "0.8rem" }}>
+                                      <Edit size={13} /> Edit
+                                    </button>
+                                    <button onClick={() => removeModule(mod.id, grp.id)} style={{ backgroundColor: "rgba(211,47,47,0.08)", color: "#d32f2f", border: "none", borderRadius: "0.5rem", padding: "0.35rem 0.7rem", cursor: "pointer", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: "0.25rem", fontSize: "0.8rem" }}>
+                                      <Trash2 size={13} /> Remove
+                                    </button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              );
+            })
+          )}
+        </div>
+      )}
+
+      {/* ── Edit Module Modal ── */}
+      {editingMod && (
+        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)", zIndex: 300, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={() => setEditingMod(null)}>
+          <div style={{ backgroundColor: "#ffffff", borderRadius: "1.5rem", padding: "2rem", maxWidth: "480px", width: "100%", boxShadow: "0 25px 50px rgba(0,0,0,0.15)" }} onClick={e => e.stopPropagation()}>
+            <h3 style={{ fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "1.3rem", color: "#000c66", marginBottom: "1.5rem" }}>Edit Module</h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              <div><label style={labelStyle}>Module Code</label><input style={inputStyle} value={editingMod.module_code} onChange={e => setEditingMod({ ...editingMod, module_code: e.target.value })} /></div>
+              <div><label style={labelStyle}>Module Name</label><input style={inputStyle} value={editingMod.module_name} onChange={e => setEditingMod({ ...editingMod, module_name: e.target.value })} /></div>
+              <div><label style={labelStyle}>Credits</label>
+                <input style={inputStyle} type="number" step="0.5" min="0.5" value={editingMod.credits} onChange={e => setEditingMod({ ...editingMod, credits: parseFloat(e.target.value) })} />
+              </div>
+              <div>
+                <label style={labelStyle}>GPA / Non-GPA</label>
+                <div style={{ display: "flex", gap: "0.75rem" }}>
+                  {[{ v: 1, label: "GPA" }, { v: 0, label: "Non-GPA" }].map(opt => (
+                    <button key={opt.v} onClick={() => setEditingMod({ ...editingMod, is_gpa: opt.v })} style={{ flex: 1, padding: "0.6rem", borderRadius: "0.75rem", border: `2px solid ${editingMod.is_gpa === opt.v ? "#000c66" : "#d1d5db"}`, backgroundColor: editingMod.is_gpa === opt.v ? "#000c66" : "#ffffff", color: editingMod.is_gpa === opt.v ? "#ffffff" : "#374151", fontWeight: 700, cursor: "pointer", fontFamily: "var(--font-syne), sans-serif", transition: "all 0.15s" }}>
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: "0.75rem", marginTop: "1.5rem" }}>
+              <button onClick={() => setEditingMod(null)} style={{ flex: 1, padding: "0.7rem", borderRadius: "9999px", border: "1.5px solid #d1d5db", backgroundColor: "#ffffff", cursor: "pointer", fontWeight: 700, fontFamily: "var(--font-syne), sans-serif" }}>Cancel</button>
+              <button onClick={saveModuleEdit} style={{ flex: 1, padding: "0.7rem", borderRadius: "9999px", border: "none", backgroundColor: "#000c66", color: "#ffffff", cursor: "pointer", fontWeight: 700, fontFamily: "var(--font-syne), sans-serif" }}>Save Changes</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Add Module Modal ── */}
+      {addingToGroup && (
+        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)", zIndex: 300, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={() => setAddingToGroup(null)}>
+          <div style={{ backgroundColor: "#ffffff", borderRadius: "1.5rem", padding: "2rem", maxWidth: "500px", width: "100%", boxShadow: "0 25px 50px rgba(0,0,0,0.15)" }} onClick={e => e.stopPropagation()}>
+            <h3 style={{ fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "1.3rem", color: "#000c66", marginBottom: "0.25rem" }}>Add New Module</h3>
+            <p style={{ color: "#64748b", fontSize: "0.85rem", marginBottom: "1.5rem", fontFamily: "var(--font-roboto), sans-serif" }}>Adding to: <strong>{addingToGroup.group_name}</strong></p>
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              <div><label style={labelStyle}>Module Code *</label><input style={inputStyle} placeholder="e.g. IIT 321-3" value={addForm.module_code} onChange={e => setAddForm({ ...addForm, module_code: e.target.value })} /></div>
+              <div><label style={labelStyle}>Module Name *</label><input style={inputStyle} placeholder="e.g. Database Systems" value={addForm.module_name} onChange={e => setAddForm({ ...addForm, module_name: e.target.value })} /></div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+                <div><label style={labelStyle}>Credits *</label><input type="number" step="0.5" min="0.5" style={inputStyle} value={addForm.credits} onChange={e => setAddForm({ ...addForm, credits: e.target.value })} /></div>
+                <div><label style={labelStyle}>GPA Type</label>
+                  <select style={inputStyle} value={addForm.is_gpa} onChange={e => setAddForm({ ...addForm, is_gpa: e.target.value })}>
+                    <option value="1">GPA</option><option value="0">Non-GPA</option>
+                  </select>
+                </div>
+              </div>
+              <div><label style={labelStyle}>Mandatory?</label>
+                <select style={inputStyle} value={addForm.is_mandatory} onChange={e => setAddForm({ ...addForm, is_mandatory: e.target.value })}>
+                  <option value="1">Mandatory</option><option value="0">Optional</option>
+                </select>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: "0.75rem", marginTop: "1.5rem" }}>
+              <button onClick={() => setAddingToGroup(null)} style={{ flex: 1, padding: "0.7rem", borderRadius: "9999px", border: "1.5px solid #d1d5db", backgroundColor: "#ffffff", cursor: "pointer", fontWeight: 700, fontFamily: "var(--font-syne), sans-serif" }}>Cancel</button>
+              <button onClick={submitAddModule} disabled={addSubmitting} style={{ flex: 1, padding: "0.7rem", borderRadius: "9999px", border: "none", backgroundColor: "#000c66", color: "#ffffff", cursor: "pointer", fontWeight: 700, fontFamily: "var(--font-syne), sans-serif", opacity: addSubmitting ? 0.7 : 1 }}>
+                {addSubmitting ? "Adding..." : "Add Module"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Edit Group Modal ── */}
+      {editingGroup && (
+        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)", zIndex: 300, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={() => setEditingGroup(null)}>
+          <div style={{ backgroundColor: "#ffffff", borderRadius: "1.5rem", padding: "2rem", maxWidth: "460px", width: "100%", boxShadow: "0 25px 50px rgba(0,0,0,0.15)" }} onClick={e => e.stopPropagation()}>
+            <h3 style={{ fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "1.3rem", color: "#000c66", marginBottom: "1.5rem" }}>Edit Group</h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              <div><label style={labelStyle}>Group Name</label><input style={inputStyle} value={groupForm.group_name} onChange={e => setGroupForm({ ...groupForm, group_name: e.target.value })} /></div>
+              <div><label style={labelStyle}>Group Type</label>
+                <select style={inputStyle} value={groupForm.group_type} onChange={e => setGroupForm({ ...groupForm, group_type: e.target.value })}>
+                  {["CORE", "ESD", "BGE", "ELECTIVE", "OPTIONAL", "BASKET"].map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+              <div><label style={labelStyle}>Min Credits Required</label><input type="number" step="0.5" min="0" style={inputStyle} value={groupForm.min_credits_required} onChange={e => setGroupForm({ ...groupForm, min_credits_required: e.target.value })} /></div>
+            </div>
+            <div style={{ display: "flex", gap: "0.75rem", marginTop: "1.5rem" }}>
+              <button onClick={() => setEditingGroup(null)} style={{ flex: 1, padding: "0.7rem", borderRadius: "9999px", border: "1.5px solid #d1d5db", backgroundColor: "#ffffff", cursor: "pointer", fontWeight: 700, fontFamily: "var(--font-syne), sans-serif" }}>Cancel</button>
+              <button onClick={saveGroupEdit} style={{ flex: 1, padding: "0.7rem", borderRadius: "9999px", border: "none", backgroundColor: "#000c66", color: "#ffffff", cursor: "pointer", fontWeight: 700, fontFamily: "var(--font-syne), sans-serif" }}>Save Changes</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
