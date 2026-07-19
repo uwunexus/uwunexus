@@ -66,7 +66,7 @@ export default function Home() {
             <div className="hero-tag">
               <IconlyLocation size={30} color="var(--primary)" /> Uva Wellassa University Sri Lanka
             </div>
-            <h1 className="text-5xl mb-6 hero-title" style={{ fontFamily: 'var(--font-syne), sans-serif', fontWeight: 800, textAlign: 'left', lineHeight: '1.1' }}>
+            <h1 className="text-5xl mb-6" style={{ fontFamily: 'var(--font-syne), sans-serif', fontWeight: 800, textAlign: 'left', lineHeight: '1.1', fontSize: '3.5rem' }}>
               Centralized Digital<br />
               Platform<br />
               <span style={{ color: 'var(--primary)' }}>for Student Life</span>
@@ -87,12 +87,16 @@ export default function Home() {
 
           <div>
             {/* Note: Source can be replaced with custom hero-image.png, logo.png acts as fallback placeholder */}
-            <div className="hero-image-container" style={{ width: '100%', minHeight: '280px', height: '100%', maxHeight: '450px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              <img
-                src="/hero-image-container.gif"
-                alt="Students studying at Uva Wellassa University"
-                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+            <div className="hero-image-container" style={{ width: '100%', height: '450px' }}>
+              <video
+                src="/hero-image-container.webm"
+                autoPlay
+                loop
+                muted
+                playsInline
+                style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '2.2rem' }}
               />
+
             </div>
           </div>
         </section>
