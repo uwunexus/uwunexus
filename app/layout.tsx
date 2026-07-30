@@ -45,9 +45,9 @@ export default async function RootLayout({
               <img src="/logo.png" alt="UWU-NEXUS Logo" style={{ height: '50px', width: 'auto' }} />
             </Link>
 
-            <NavLinks />
+            <NavLinks isAuthenticated={isAuthenticated} isAdmin={isAdmin} logoutAction={logoutAction} />
 
-            <div className="flex gap-3 items-center">
+            <div className="flex gap-3 items-center desktop-auth-buttons">
               {isAuthenticated ? (
                 <>
                   {isAdmin && (
@@ -80,13 +80,13 @@ export default async function RootLayout({
         {!isAuthenticated && <AuthModal />}
         <footer className="footer">
           <div className="container">
-            <div className="flex justify-between items-center" style={{ flexWrap: 'wrap', gap: '2rem', paddingBottom: '1.5rem' }}>
-              <div className="flex gap-8" style={{ flexWrap: 'wrap' }}>
+            <div className="footer-top-row flex justify-between items-center" style={{ flexWrap: 'wrap', gap: '2rem', paddingBottom: '1.5rem' }}>
+              <div className="footer-links-group flex gap-8" style={{ flexWrap: 'wrap' }}>
                 <Link href="/about" className="text-muted font-semibold hover:text-primary">About us</Link>
                 <Link href="/services" className="text-muted font-semibold hover:text-primary">Services</Link>
                 <Link href="/explore" className="text-muted font-semibold hover:text-primary">Explore</Link>
               </div>
-              <div className="flex gap-4 items-center">
+              <div className="footer-social-group flex gap-4 items-center">
                 {/* Facebook custom SVG */}
                 <a href="#" className="text-muted hover:text-primary">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
@@ -115,16 +115,16 @@ export default async function RootLayout({
               </div>
             </div>
 
-            <hr style={{ border: 0, borderTop: '1px solid var(--border)', margin: '1.5rem 0' }} />
+            <hr className="footer-hr" style={{ border: 0, borderTop: '1px solid var(--border)', margin: '1.5rem 0' }} />
 
-            <div className="flex justify-between items-center" style={{ flexWrap: 'wrap', gap: '1rem', fontSize: '0.875rem' }}>
-              <p className="text-muted">© 2026 UWU - Nexus. All rights reserved.</p>
+            <div className="footer-bottom-row flex justify-between items-center" style={{ flexWrap: 'wrap', gap: '1rem', fontSize: '0.875rem' }}>
+              <p className="text-muted copyright-text">© 2026 UWU - Nexus. All rights reserved.</p>
 
-              <div className="flex items-center justify-center">
+              <div className="footer-logo-center flex items-center justify-center">
                 <img src="/logo.png" alt="UWU-NEXUS Icon" style={{ height: '32px', width: 'auto' }} />
               </div>
 
-              <div className="flex gap-6">
+              <div className="footer-legal-links flex gap-6">
                 <Link href="/terms" className="text-muted hover:text-primary">Terms of Service</Link>
                 <Link href="/privacy" className="text-muted hover:text-primary">Privacy Policy</Link>
               </div>
