@@ -11,6 +11,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 $show_all = isset($_GET['all']) && $_GET['all'] === 'true';
 
 try {
+    // Automatically remove expired ticketed events from the database
+    $pdo->exec("DELETE FROM ticketed_events WHERE event_date < CURRENT_DATE()");
+
     if ($show_all) {
         // Admin view - get all ticketed events
         $stmt = $pdo->query("SELECT * FROM ticketed_events ORDER BY created_at DESC");
