@@ -500,7 +500,7 @@ html {
   background-color: #f8fafc;
   border-top: 1px solid var(--border);
   padding: 3rem 0;
-  margin-top: 4rem;
+  margin-top: 0;
   color: #64748b;
 }
 
