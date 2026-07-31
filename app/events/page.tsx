@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { Calendar, MapPin, Clock, Users, Search, Filter, X } from "lucide-react";
+import { Calendar, MapPin, Clock, Users, Search, Filter, X, ChevronDown } from "lucide-react";
 
 interface Event {
   id: number;
@@ -66,6 +66,7 @@ export default function EventsPage() {
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
   useEffect(() => {
@@ -111,13 +112,13 @@ export default function EventsPage() {
       </div>
 
       {/* Search & Filter Bar */}
-      <div className="flex flex-wrap gap-4 items-center mb-10" style={{ width: '100%', marginTop: '1rem', paddingBottom: '1.5rem' }}>
+      <div className="flex flex-wrap gap-4 items-center mb-10 events-controls-row" style={{ width: '100%', marginTop: '1rem', paddingBottom: '1.5rem' }}>
         {/* Search bar wrapper matching mockup design */}
         <div className="events-search-wrapper">
           <input
             type="text"
             className="form-input"
-            placeholder="Search the event..."
+            placeholder="Search events..."
             style={{
               paddingLeft: "1.25rem",
               paddingRight: "2.5rem",
@@ -136,8 +137,8 @@ export default function EventsPage() {
           <Search size={18} style={{ position: "absolute", right: "1.25rem", top: "50%", transform: "translateY(-50%)", color: "#64748b" }} />
         </div>
 
-        {/* Filter buttons */}
-        <div className="flex gap-2 flex-wrap">
+        {/* Desktop Filter Buttons */}
+        <div className="desktop-filter-buttons flex gap-2 flex-wrap">
           {CATEGORIES.map(cat => {
             const isActive = category === cat;
             return (
@@ -146,11 +147,11 @@ export default function EventsPage() {
                 onClick={() => setCategory(cat)}
                 style={{
                   height: "43px",
-                  padding: "0 1.25rem", // Set vertical padding to 0, horizontal padding to 1.25rem
-                  display: "inline-flex", // Center text vertically inside the 43px height
+                  padding: "0 1.25rem",
+                  display: "inline-flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  whiteSpace: "nowrap", // Prevent text wrapping inside the button
+                  whiteSpace: "nowrap",
                   borderRadius: "9999px",
                   backgroundColor: isActive ? "#000c66" : "#ffffff",
                   color: isActive ? "#ffffff" : "#000c66",
@@ -166,6 +167,104 @@ export default function EventsPage() {
               </button>
             );
           })}
+        </div>
+
+        {/* Mobile Category Custom Dropdown */}
+        <div className="mobile-category-select" style={{ position: "relative" }}>
+          <button
+            type="button"
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            style={{
+              height: "36px",
+              paddingLeft: "0.85rem",
+              paddingRight: "0.75rem",
+              borderRadius: "9999px",
+              border: "1.5px solid #000c66",
+              backgroundColor: "#000c66",
+              color: "#ffffff",
+              fontSize: "0.8rem",
+              fontWeight: 600,
+              fontFamily: "var(--font-inter), sans-serif",
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              cursor: "pointer",
+              gap: "0.4rem"
+            }}
+          >
+            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {category === "All" ? "All Categories" : category}
+            </span>
+            <ChevronDown
+              size={15}
+              style={{
+                color: "#ffffff",
+                transition: "transform 0.2s ease",
+                transform: isDropdownOpen ? "rotate(180deg)" : "rotate(0deg)",
+                flexShrink: 0
+              }}
+            />
+          </button>
+
+          {/* Custom Floating Popup Menu */}
+          {isDropdownOpen && (
+            <>
+              <div
+                style={{ position: "fixed", inset: 0, zIndex: 40 }}
+                onClick={() => setIsDropdownOpen(false)}
+              />
+              <div
+                style={{
+                  position: "absolute",
+                  top: "calc(100% + 6px)",
+                  right: 0,
+                  width: "170px",
+                  backgroundColor: "#ffffff",
+                  borderRadius: "1.2rem",
+                  padding: "0.5rem",
+                  boxShadow: "0 12px 30px rgba(0, 12, 102, 0.18), 0 4px 10px rgba(0,0,0,0.08)",
+                  border: "1px solid #e2e8f0",
+                  zIndex: 50,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "2px"
+                }}
+              >
+                {CATEGORIES.map(cat => {
+                  const isSelected = category === cat;
+                  return (
+                    <button
+                      key={cat}
+                      onClick={() => {
+                        setCategory(cat);
+                        setIsDropdownOpen(false);
+                      }}
+                      style={{
+                        width: "100%",
+                        padding: "0.5rem 0.85rem",
+                        borderRadius: "0.75rem",
+                        fontSize: "0.82rem",
+                        fontWeight: isSelected ? 700 : 500,
+                        fontFamily: "var(--font-inter), sans-serif",
+                        color: isSelected ? "#ffffff" : "#000c66",
+                        backgroundColor: isSelected ? "#000c66" : "transparent",
+                        textAlign: "left",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        transition: "all 0.15s ease",
+                        cursor: "pointer"
+                      }}
+                    >
+                      <span>{cat === "All" ? "All Categories" : cat}</span>
+                      {isSelected && <span style={{ fontSize: "0.75rem" }}>✓</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -193,11 +292,11 @@ export default function EventsPage() {
       {!loading && Object.entries(grouped).map(([month, monthEvents]) => (
         <div key={month} style={{ marginBottom: '3rem' }}>
           {/* Monthly group header divider */}
-          <div className="flex items-center gap-3 mb-8" style={{ width: '100%' }}>
-            <h2 style={{ fontFamily: 'var(--font-audiowide), sans-serif', fontWeight: 400, fontSize: '1.6rem', color: '#000000', margin: 0, whiteSpace: 'nowrap' }}>
+          <div className="flex items-center gap-3 mb-8 month-group-divider" style={{ width: '100%' }}>
+            <h2 className="month-group-title">
               {month}
             </h2>
-            <span style={{ backgroundColor: '#000c66', color: '#ffffff', borderRadius: '9999px', padding: '0.15rem 0.65rem', fontSize: '0.85rem', fontWeight: 700 }}>
+            <span className="month-group-badge">
               {monthEvents.length}
             </span>
             <div style={{ flex: 1, height: '1.5px', backgroundColor: '#cbd5e1' }}></div>
