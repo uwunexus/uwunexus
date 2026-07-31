@@ -889,6 +889,50 @@ html {
 }
 
 /* Event Page Redesign Card & Spacing Styles */
+.events-container {
+  max-width: 1210px;
+  margin-top: 1.25rem;
+  margin-bottom: 3rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 769px) {
+  .events-container {
+    margin-top: 2.5rem;
+    margin-bottom: 4rem;
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+.events-header {
+  margin-top: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+.events-title {
+  font-family: var(--font-syne), sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.15rem, 5.2vw, 2.5rem);
+  color: #000000;
+  letter-spacing: 0.01em;
+}
+
+@media (max-width: 480px) {
+  .events-title {
+    font-size: 1.25rem;
+    white-space: nowrap;
+  }
+}
+
+.events-search-wrapper {
+  flex: 1 1 300px;
+  max-width: 475px;
+  width: 100%;
+  position: relative;
+}
+
 .event-card {
   background-color: #e6e9ec; /* Match mockup silver-gray card background exactly */
   border-radius: 2.2rem;

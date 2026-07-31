@@ -102,18 +102,18 @@ export default function EventsPage() {
   });
 
   return (
-    <div className="container" style={{ maxWidth: '1210px', marginTop: '4rem', marginBottom: '4rem', paddingLeft: '0', paddingRight: '0' }}>
+    <div className="container events-container">
       {/* Header */}
-      <div className="mb-4 text-left" style={{ marginTop: '1.5rem' }}>
-        <h1 className="text-4xl mb-2" style={{ fontFamily: 'var(--font-syne), sans-serif', fontWeight: 700, fontSize: '2.5rem', color: '#000000', letterSpacing: '0.02em' }}>
-          University Event Calender
+      <div className="events-header text-left">
+        <h1 className="events-title mb-2">
+          University Event Calendar
         </h1>
       </div>
 
       {/* Search & Filter Bar */}
-      <div className="flex flex-wrap gap-4 items-center mb-10" style={{ width: '100%', marginTop: '2rem', paddingBottom: '2rem' }}>
+      <div className="flex flex-wrap gap-4 items-center mb-10" style={{ width: '100%', marginTop: '1rem', paddingBottom: '1.5rem' }}>
         {/* Search bar wrapper matching mockup design */}
-        <div style={{ flex: "0 0 475px", position: "relative" }}>
+        <div className="events-search-wrapper">
           <input
             type="text"
             className="form-input"
