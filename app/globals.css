@@ -500,7 +500,7 @@ html {
   background-color: #f8fafc;
   border-top: 1px solid var(--border);
   padding: 3rem 0;
-  margin-top: 4rem;
+  margin-top: 0;
   color: #64748b;
 }
 
@@ -755,7 +755,7 @@ html {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 4rem auto;
+  margin: 1.5rem auto 0 auto;
   box-shadow: 0 20px 25px -5px rgba(0, 12, 102, 0.2);
   flex-wrap: wrap;
   gap: 2rem;

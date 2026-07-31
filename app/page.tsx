@@ -133,7 +133,7 @@ export default function Home() {
       </div>
 
       {/* Features Grid Section */}
-      <section className="container py-16">
+      <section className="container" style={{ paddingTop: '4rem', paddingBottom: '1rem' }}>
         <div className="text-center mb-12" style={{ marginBottom: '2rem' }}>
           <div className="uppercase mb-2" style={{ fontFamily: 'var(--font-zain), sans-serif', fontWeight: 400, color: '#000000', letterSpacing: '0.1em', fontSize: '1.2rem' }}>
             Platform Services
@@ -163,7 +163,7 @@ export default function Home() {
       </section>
 
       {/* Curved Divider & Lightest Purple Subscription Section Wrapper */}
-      <div className="subscribe-wrapper" style={{ backgroundColor: '#faf5ff', marginTop: '0.1rem', paddingBottom: '0' }}>
+      <div className="subscribe-wrapper" style={{ backgroundColor: '#faf5ff', marginTop: '0.1rem', paddingBottom: '2rem' }}>
         <div style={{ width: '100%', overflow: 'hidden', lineHeight: 0 }}>
           <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: 'block', width: '100%', height: 'auto', backgroundColor: '#ffffff' }}>
             <path d="M0 80 Q 720 0 1440 80 L 1440 80 L 0 80 Z" fill="#faf5ff" />
@@ -171,7 +171,7 @@ export default function Home() {
         </div>
 
         {/* Subscription Banner Section */}
-        <section className="container subscribe-section" style={{ paddingTop: '1rem', paddingBottom: '1rem' }}>
+        <section className="container subscribe-section" style={{ paddingTop: '0.5rem', paddingBottom: '0' }}>
           <div className="subscribe-banner">
             <div className="subscribe-title">Subscribe UWU-Nexus</div>
             <div className="subscribe-form-container">
