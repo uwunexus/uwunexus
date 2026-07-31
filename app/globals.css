@@ -893,9 +893,22 @@ html {
 .events-container {
   max-width: 1210px;
   margin-top: 1.25rem;
-  margin-bottom: 3rem;
+  margin-bottom: 1.25rem;
   padding-left: 1rem;
   padding-right: 1rem;
+}
+
+.month-group-wrapper {
+  margin-bottom: 3rem;
+}
+
+@media (max-width: 768px) {
+  main {
+    min-height: auto !important;
+  }
+  .month-group-wrapper {
+    margin-bottom: 1.25rem !important;
+  }
 }
 
 @media (min-width: 769px) {
@@ -1024,6 +1037,91 @@ html {
     font-size: 0.8rem !important;
     padding-left: 0.75rem !important;
     padding-right: 1.8rem !important;
+  }
+}
+
+/* Responsive Cards Grid for Events Page */
+.events-cards-grid {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+}
+
+@media (max-width: 768px) {
+  .events-cards-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.75rem !important;
+  }
+
+  .event-card {
+    border-radius: 1.4rem !important;
+    padding: 10px !important;
+  }
+
+  .event-card-image-wrapper {
+    border-radius: 1rem !important;
+  }
+
+  .event-card-cat-badge {
+    top: 8px !important;
+    left: 8px !important;
+    padding: 0.25rem 0.65rem !important;
+    font-size: 0.65rem !important;
+  }
+
+  .event-card-date-badge {
+    top: 8px !important;
+    right: 8px !important;
+    padding: 0.3rem 0.45rem !important;
+    border-radius: 0.6rem !important;
+    min-width: 36px !important;
+  }
+
+  .event-card-date-month {
+    font-size: 0.65rem !important;
+    margin-bottom: 2px !important;
+  }
+
+  .event-card-date-day {
+    font-size: 1rem !important;
+  }
+
+  .event-card-content {
+    padding: 0.75rem 0.2rem 0.2rem 0.2rem !important;
+  }
+
+  .event-card-title {
+    font-size: 0.9rem !important;
+    margin-bottom: 0.6rem !important;
+    height: 2.3rem !important;
+    line-height: 1.25 !important;
+  }
+
+  .event-card-info-stack {
+    gap: 0.4rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .event-card-info-row {
+    gap: 0.4rem !important;
+    font-size: 0.72rem !important;
+  }
+
+  .event-card-info-row span {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  .event-card-info-row svg {
+    width: 13px !important;
+    height: 13px !important;
+    margin-top: 1px !important;
+  }
+
+  .event-card-btn {
+    padding: 0.5rem 0.5rem !important;
+    font-size: 0.78rem !important;
   }
 }
 
@@ -1225,13 +1323,52 @@ html {
   }
 
   .event-detail-modal-img-col {
-    flex: 0 0 220px;
-    min-height: 220px;
+    flex: 0 0 200px;
+    min-height: 200px;
   }
 
   .event-detail-modal-info-col {
-    padding: 1.5rem 1.75rem;
+    padding: 1.25rem 1rem !important;
   }
+
+  .event-detail-modal-meta-card {
+    border-radius: 1.2rem !important;
+    padding: 1rem !important;
+  }
+
+  .event-detail-modal-meta-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.85rem !important;
+    font-size: 0.88rem !important;
+  }
+}
+
+.event-detail-modal-title {
+  font-family: var(--font-syne), sans-serif;
+  font-size: clamp(1.3rem, 5vw, 2.2rem);
+  font-weight: 800;
+  color: #000000;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.event-detail-modal-meta-card {
+  background-color: #e6e9ec;
+  border-radius: 1.8rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  margin-bottom: 1.25rem;
+}
+
+.event-detail-modal-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem 1.5rem;
+  font-family: var(--font-syne), sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #000000;
 }
 
 /* Side-by-Side Checkout Modal Popup Styles */

@@ -290,7 +290,7 @@ export default function EventsPage() {
 
       {/* Events grouped by month */}
       {!loading && Object.entries(grouped).map(([month, monthEvents]) => (
-        <div key={month} style={{ marginBottom: '3rem' }}>
+        <div key={month} className="month-group-wrapper">
           {/* Monthly group header divider */}
           <div className="flex items-center gap-3 mb-8 month-group-divider" style={{ width: '100%' }}>
             <h2 className="month-group-title">
@@ -303,7 +303,7 @@ export default function EventsPage() {
           </div>
 
           {/* Cards Grid */}
-          <div className="grid gap-8" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))" }}>
+          <div className="events-cards-grid">
             {monthEvents.map(event => {
               const themeColor = CATEGORY_COLORS[event.category] ?? "#64748b";
               const dateObj = new Date(event.event_date + "T00:00:00");
@@ -410,47 +410,33 @@ export default function EventsPage() {
 
             {/* Right Column - Details */}
             <div className="event-detail-modal-info-col">
-              <h2 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "2.2rem", fontWeight: 800, color: "#000000", marginBottom: "1rem", lineHeight: 1.2 }}>
+              <h2 className="event-detail-modal-title">
                 {selectedEvent.title}
               </h2>
               
               {selectedEvent.description && (
-                <p style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.05rem", fontWeight: 500, color: "#000000", lineHeight: 1.6, marginBottom: "1.25rem" }}>
+                <p style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1rem", fontWeight: 500, color: "#000000", lineHeight: 1.5, marginBottom: "1rem" }}>
                   {selectedEvent.description}
                 </p>
               )}
 
               {/* Nested Silver Metadata Card */}
-              <div style={{ 
-                backgroundColor: "#e6e9ec", 
-                borderRadius: "1.8rem", 
-                padding: "1.25rem 1.5rem", 
-                border: "1px solid rgba(0, 0, 0, 0.03)",
-                marginBottom: "1.25rem"
-              }}>
-                <div style={{ 
-                  display: "grid", 
-                  gridTemplateColumns: "1fr 1fr", 
-                  gap: "1rem 1.5rem", 
-                  fontFamily: "var(--font-syne), sans-serif", 
-                  fontSize: "1rem", 
-                  fontWeight: 700, 
-                  color: "#000000" 
-                }}>
-                  <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}>
-                    <Calendar size={20} style={{ color: "#000000", flexShrink: 0, marginTop: "2px" }} />
+              <div className="event-detail-modal-meta-card">
+                <div className="event-detail-modal-meta-grid">
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
+                    <Calendar size={18} style={{ color: "#000000", flexShrink: 0, marginTop: "2px" }} />
                     <span style={{ lineHeight: "1.3" }}>{formatDate(selectedEvent.event_date)}</span>
                   </div>
-                  <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}>
-                    <Clock size={20} style={{ color: "#000000", flexShrink: 0, marginTop: "2px" }} />
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
+                    <Clock size={18} style={{ color: "#000000", flexShrink: 0, marginTop: "2px" }} />
                     <span style={{ lineHeight: "1.3" }}>{formatTime(selectedEvent.event_time)}</span>
                   </div>
-                  <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}>
-                    <MapPin size={20} style={{ color: "#000000", flexShrink: 0, marginTop: "2px" }} />
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
+                    <MapPin size={18} style={{ color: "#000000", flexShrink: 0, marginTop: "2px" }} />
                     <span style={{ lineHeight: "1.3" }}>{selectedEvent.location}</span>
                   </div>
-                  <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}>
-                    <Iconlyuser size={20} color="#000000" style={{ flexShrink: 0, marginTop: "2px" }} />
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
+                    <Iconlyuser size={18} color="#000000" style={{ flexShrink: 0, marginTop: "2px" }} />
                     <span style={{ wordBreak: "break-word", lineHeight: "1.3" }}>
                       {selectedEvent.organized_by}
                     </span>
