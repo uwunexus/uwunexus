@@ -169,7 +169,7 @@ export default function EventsPage() {
           })}
         </div>
 
-        {/* Mobile Category Custom Dropdown */}
+        {/* Mobile Category Connected Navy Dropdown */}
         <div className="mobile-category-select" style={{ position: "relative" }}>
           <button
             type="button"
@@ -178,7 +178,7 @@ export default function EventsPage() {
               height: "36px",
               paddingLeft: "0.85rem",
               paddingRight: "0.75rem",
-              borderRadius: "9999px",
+              borderRadius: isDropdownOpen ? "1rem 1rem 0 0" : "9999px",
               border: "1.5px solid #000c66",
               backgroundColor: "#000c66",
               color: "#ffffff",
@@ -190,7 +190,8 @@ export default function EventsPage() {
               alignItems: "center",
               justifyContent: "space-between",
               cursor: "pointer",
-              gap: "0.4rem"
+              gap: "0.4rem",
+              transition: "border-radius 0.2s ease"
             }}
           >
             <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -207,7 +208,7 @@ export default function EventsPage() {
             />
           </button>
 
-          {/* Custom Floating Popup Menu */}
+          {/* Connected Navy Dropdown Menu */}
           {isDropdownOpen && (
             <>
               <div
@@ -217,14 +218,15 @@ export default function EventsPage() {
               <div
                 style={{
                   position: "absolute",
-                  top: "calc(100% + 6px)",
+                  top: "100%",
+                  left: 0,
                   right: 0,
-                  width: "170px",
-                  backgroundColor: "#ffffff",
-                  borderRadius: "1.2rem",
-                  padding: "0.5rem",
-                  boxShadow: "0 12px 30px rgba(0, 12, 102, 0.18), 0 4px 10px rgba(0,0,0,0.08)",
-                  border: "1px solid #e2e8f0",
+                  backgroundColor: "#000c66",
+                  borderRadius: "0 0 1rem 1rem",
+                  padding: "0.4rem 0.5rem 0.5rem 0.5rem",
+                  boxShadow: "0 12px 25px rgba(0, 12, 102, 0.25)",
+                  border: "1.5px solid #000c66",
+                  borderTop: "none",
                   zIndex: 50,
                   display: "flex",
                   flexDirection: "column",
@@ -242,13 +244,13 @@ export default function EventsPage() {
                       }}
                       style={{
                         width: "100%",
-                        padding: "0.5rem 0.85rem",
-                        borderRadius: "0.75rem",
-                        fontSize: "0.82rem",
+                        padding: "0.45rem 0.75rem",
+                        borderRadius: "0.6rem",
+                        fontSize: "0.8rem",
                         fontWeight: isSelected ? 700 : 500,
                         fontFamily: "var(--font-inter), sans-serif",
-                        color: isSelected ? "#ffffff" : "#000c66",
-                        backgroundColor: isSelected ? "#000c66" : "transparent",
+                        color: "#ffffff",
+                        backgroundColor: isSelected ? "rgba(255, 255, 255, 0.2)" : "transparent",
                         textAlign: "left",
                         display: "flex",
                         alignItems: "center",
@@ -258,7 +260,7 @@ export default function EventsPage() {
                       }}
                     >
                       <span>{cat === "All" ? "All Categories" : cat}</span>
-                      {isSelected && <span style={{ fontSize: "0.75rem" }}>✓</span>}
+                      {isSelected && <span style={{ fontSize: "0.75rem", color: "#ffffff" }}>✓</span>}
                     </button>
                   );
                 })}
