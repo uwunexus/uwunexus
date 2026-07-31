@@ -42,7 +42,7 @@ export default async function RootLayout({
         <nav className="navbar">
           <div className="container flex justify-between items-center" style={{ gap: '1rem' }}>
             <Link href="/" className="flex items-center gap-3 font-bold text-xl gradient-text">
-              <img src="/logo.png" alt="UWU-NEXUS Logo" style={{ height: '50px', width: 'auto' }} />
+              <img src="/logo.png" alt="UWU-NEXUS Logo" style={{ height: '42px', width: 'auto', margin: '0' }} />
             </Link>
 
             <NavLinks isAuthenticated={isAuthenticated} isAdmin={isAdmin} logoutAction={logoutAction} />

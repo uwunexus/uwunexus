@@ -102,7 +102,7 @@ export default function EventsPage() {
   });
 
   return (
-    <div className="container" style={{ maxWidth: '1210px', marginTop: '4rem', paddingLeft: '0', paddingRight: '0' }}>
+    <div className="container" style={{ maxWidth: '1210px', marginTop: '4rem', marginBottom: '4rem', paddingLeft: '0', paddingRight: '0' }}>
       {/* Header */}
       <div className="mb-4 text-left" style={{ marginTop: '1.5rem' }}>
         <h1 className="text-4xl mb-2" style={{ fontFamily: 'var(--font-syne), sans-serif', fontWeight: 700, fontSize: '2.5rem', color: '#000000', letterSpacing: '0.02em' }}>
@@ -191,7 +191,7 @@ export default function EventsPage() {
 
       {/* Events grouped by month */}
       {!loading && Object.entries(grouped).map(([month, monthEvents]) => (
-        <div key={month} className="mb-12">
+        <div key={month} style={{ marginBottom: '3rem' }}>
           {/* Monthly group header divider */}
           <div className="flex items-center gap-3 mb-8" style={{ width: '100%' }}>
             <h2 style={{ fontFamily: 'var(--font-audiowide), sans-serif', fontWeight: 400, fontSize: '1.6rem', color: '#000000', margin: 0, whiteSpace: 'nowrap' }}>
