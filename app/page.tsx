@@ -76,12 +76,12 @@ export default function Home() {
               digitize the core aspects of your student life at Uva Wellassa University.
             </p>
             <div className="hero-cta-wrapper">
-              <Link href="/events" className="btn btn-primary text-lg" style={{ fontFamily: 'var(--font-nobile), sans-serif', fontWeight: 700, padding: '0.75rem 2.25rem', display: 'inline-flex', alignItems: 'center', gap: '0.75rem' }}>
+              <a href="#services" className="btn btn-primary text-lg" style={{ fontFamily: 'var(--font-nobile), sans-serif', fontWeight: 700, padding: '0.75rem 2.25rem', display: 'inline-flex', alignItems: 'center', gap: '0.75rem' }}>
                 <span>Explore Platform</span>
                 <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: '50%', padding: '0.25rem' }}>
                   <ArrowRight size={16} />
                 </span>
-              </Link>
+              </a>
             </div>
           </div>
 
@@ -133,7 +133,7 @@ export default function Home() {
       </div>
 
       {/* Features Grid Section */}
-      <section className="container" style={{ paddingTop: '4rem', paddingBottom: '1rem' }}>
+      <section id="services" className="container" style={{ paddingTop: '4rem', paddingBottom: '1rem' }}>
         <div className="text-center mb-12" style={{ marginBottom: '2rem' }}>
           <div className="uppercase mb-2" style={{ fontFamily: 'var(--font-zain), sans-serif', fontWeight: 400, color: '#000000', letterSpacing: '0.1em', fontSize: '1.2rem' }}>
             Platform Services
