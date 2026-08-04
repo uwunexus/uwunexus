@@ -74,7 +74,7 @@ export default async function RootLayout({
             </div>
           </div>
         </nav>
-        <main style={{ flex: '1 0 auto' }}>
+        <main style={{ flex: 1 }}>
           {children}
         </main>
         {!isAuthenticated && <AuthModal />}
