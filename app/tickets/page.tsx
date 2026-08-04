@@ -115,16 +115,16 @@ export default function TicketsPage() {
   };
 
   return (
-    <div className="container" style={{ maxWidth: '1210px', marginTop: '1.5rem', paddingLeft: '0', paddingRight: '0', minHeight: '100vh', paddingBottom: '1rem' }}>
+    <div className="container events-container" style={{ maxWidth: '1210px', marginTop: '1.5rem' }}>
       {/* Header */}
-      <div className="mb-4 text-center" style={{ marginTop: '0' }}>
-        <h1 style={{ fontFamily: 'var(--font-syne), sans-serif', fontWeight: 700, fontSize: '3rem', color: '#000000', letterSpacing: '0.02em', marginBottom: '0.5rem' }}>
+      <div className="tickets-page-header events-header mb-4 text-center" style={{ marginTop: '0' }}>
+        <h1 className="tickets-page-title" style={{ fontFamily: 'var(--font-syne), sans-serif', fontWeight: 700, fontSize: '3rem', color: '#000000', letterSpacing: '0.02em', marginBottom: '0.5rem' }}>
           Event Tickets
         </h1>
-        <p style={{ fontFamily: 'var(--font-audiowide), sans-serif', fontSize: '1.25rem', color: '#0d0e4aff', fontWeight: 400, letterSpacing: '0.05em', textTransform: 'lowercase' }}>
+        <p className="tickets-page-subtitle" style={{ fontFamily: 'var(--font-audiowide), sans-serif', fontSize: '1.25rem', color: '#0d0e4aff', fontWeight: 400, letterSpacing: '0.05em', textTransform: 'lowercase' }}>
           securely purchase your tickets online
         </p>
-        <hr style={{ border: 'none', borderTop: '1.5px solid #cbd5e1', marginTop: '2rem', marginBottom: '3rem', width: '100%' }} />
+        <hr className="tickets-page-hr" style={{ border: 'none', borderTop: '1.5px solid #cbd5e1', marginTop: '1.5rem', marginBottom: '1rem', width: '100%' }} />
       </div>
 
       {error && !selectedEvent && (
@@ -137,13 +137,13 @@ export default function TicketsPage() {
       {loading ? (
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "5rem 0", color: "#64748b", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700 }}>Loading events...</div>
       ) : events.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "5rem 0", color: "#64748b", maxWidth: "600px", margin: "0 auto", fontFamily: "var(--font-syne), sans-serif" }}>
-          <Ticket size={48} style={{ margin: "0 auto 1rem auto", opacity: 0.3 }} />
-          <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: "#000000", marginBottom: "0.5rem" }}>No Upcoming Events</h2>
-          <p style={{ fontWeight: 500 }}>There are currently no active ticketed events available. Please check back later!</p>
+        <div className="no-events-container" style={{ textAlign: "center", padding: "5rem 0", color: "#64748b", maxWidth: "600px", margin: "0 auto", fontFamily: "var(--font-syne), sans-serif" }}>
+          <Ticket size={48} className="no-events-icon" style={{ margin: "0 auto 1rem auto", opacity: 0.3 }} />
+          <h2 className="no-events-title" style={{ fontSize: "1.5rem", fontWeight: 800, color: "#000000", marginBottom: "0.5rem" }}>No Upcoming Events</h2>
+          <p className="no-events-desc" style={{ fontWeight: 500 }}>There are currently no active ticketed events available. Please check back later!</p>
         </div>
       ) : (
-        <div className="grid gap-8" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(270px, 1fr))" }}>
+        <div className="grid gap-8 tickets-events-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(270px, 1fr))" }}>
           {events.map((event) => {
             return (
               <div key={event.id} className="event-card">
@@ -178,7 +178,7 @@ export default function TicketsPage() {
                   </div>
 
                   {/* Tickets Left Row */}
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem", fontFamily: "var(--font-syne), sans-serif", fontSize: "1rem", color: "#000000", fontWeight: 500 }}>
+                  <div className="event-card-tickets-left-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem", fontFamily: "var(--font-syne), sans-serif", fontSize: "1rem", color: "#000000", fontWeight: 500 }}>
                     <span style={{ opacity: 0.8 }}>Tickets left:</span>
                     <span style={{ fontWeight: 800 }}>
                       {event.available_tickets} / {event.total_tickets}
@@ -247,13 +247,13 @@ export default function TicketsPage() {
 
             {/* Right Column - Checkout Form */}
             <div className="checkout-modal-info-col">
-              <h2 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "2.2rem", fontWeight: 800, color: "#000000", marginBottom: "1.75rem", lineHeight: 1.2 }}>
+              <h2 className="checkout-modal-title" style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "2.2rem", fontWeight: 800, color: "#000000", marginBottom: "1.75rem", lineHeight: 1.2 }}>
                 Checkout details
               </h2>
 
               {/* Item Summary Row */}
               <div style={{ marginBottom: "1.5rem" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", fontFamily: "var(--font-syne), sans-serif", fontSize: "1.25rem", fontWeight: 800, color: "#000000", paddingBottom: "0.5rem" }}>
+                <div className="checkout-summary-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", fontFamily: "var(--font-syne), sans-serif", fontSize: "1.25rem", fontWeight: 800, color: "#000000", paddingBottom: "0.5rem" }}>
                   <span>{selectedEvent.title}</span>
                   <span>LKR.{selectedEvent.price}</span>
                 </div>
@@ -267,7 +267,7 @@ export default function TicketsPage() {
               )}
 
               <form onSubmit={handleCheckout} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                <div className="responsive-form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
                   <div>
                     <label style={{ display: "block", fontFamily: "var(--font-syne), sans-serif", fontSize: "0.95rem", fontWeight: 700, marginBottom: "0.5rem", color: "#000000" }}>First Name</label>
                     <input 
