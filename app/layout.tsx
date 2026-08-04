@@ -38,7 +38,7 @@ export default async function RootLayout({
       <head>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
       </head>
-      <body className={`${inter.variable} ${outfit.variable} ${syne.variable} ${nobile.variable} ${zain.variable} ${audiowide.variable} ${dmSans.variable} ${inclusiveSans.variable} ${roboto.variable} font-sans`}>
+      <body className={`${inter.variable} ${outfit.variable} ${syne.variable} ${nobile.variable} ${zain.variable} ${audiowide.variable} ${dmSans.variable} ${inclusiveSans.variable} ${roboto.variable} font-sans`} style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <nav className="navbar">
           <div className="container flex justify-between items-center" style={{ gap: '1rem' }}>
             <Link href="/" className="flex items-center gap-3 font-bold text-xl gradient-text">
@@ -74,7 +74,7 @@ export default async function RootLayout({
             </div>
           </div>
         </nav>
-        <main style={{ minHeight: 'calc(100vh - 200px)' }}>
+        <main style={{ flex: '1 0 auto' }}>
           {children}
         </main>
         {!isAuthenticated && <AuthModal />}
