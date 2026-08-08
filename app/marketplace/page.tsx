@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, Filter, Phone, X, Upload, Image as ImageIcon, Edit, Tag, Plus, Store } from "lucide-react";
+import { Search, Filter, Phone, X, Upload, Image as ImageIcon, Edit, Tag, Plus, Store, ChevronDown } from "lucide-react";
 import { uploadToCloudinary } from "../lib/cloudinary";
 
 interface Category {
@@ -36,6 +36,7 @@ export default function MarketplacePage() {
   // Filters
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   // Modal State
   const [showModal, setShowModal] = useState(false);
@@ -179,18 +180,19 @@ export default function MarketplacePage() {
   });
 
   return (
-    <div className="container" style={{ maxWidth: '1210px', marginTop: '1.5rem', paddingLeft: '0', paddingRight: '0', minHeight: '100vh', paddingBottom: '4rem' }}>
+    <div className="container marketplace-container" style={{ maxWidth: '1210px', marginTop: '1.5rem', paddingLeft: '0', paddingRight: '0', minHeight: '100vh', paddingBottom: '3.5rem' }}>
       {/* Header */}
-      <div className="flex justify-between items-center mb-6 flex-wrap gap-4" style={{ marginTop: '1.5rem' }}>
+      <div className="flex justify-between items-center mb-6 flex-wrap gap-4 marketplace-header" style={{ marginTop: '1.5rem' }}>
         <div>
-          <h1 style={{ fontFamily: 'var(--font-syne), sans-serif', fontWeight: 700, fontSize: '3rem', color: '#000000', letterSpacing: '0.02em', marginBottom: '0.25rem' }}>
+          <h1 className="marketplace-page-title" style={{ fontFamily: 'var(--font-syne), sans-serif', fontWeight: 700, fontSize: '3rem', color: '#000000', letterSpacing: '0.02em', marginBottom: '0.25rem' }}>
             University Marketplace
           </h1>
-          <p style={{ fontFamily: 'var(--font-inclusive-sans), sans-serif', fontSize: '1.15rem', color: '#64748b', fontWeight: 500 }}>
+          <p className="marketplace-page-subtitle" style={{ fontFamily: 'var(--font-inclusive-sans), sans-serif', fontSize: '1.15rem', color: '#64748b', fontWeight: 500 }}>
             The smarter way to trade on campus
           </p>
         </div>
         <button
+          className="marketplace-list-btn"
           style={{
             backgroundColor: '#000c66',
             color: '#ffffff',
@@ -215,16 +217,16 @@ export default function MarketplacePage() {
       </div>
 
       {/* Search & Categories Bar */}
-      <div className="flex flex-wrap gap-4 items-center mb-8" style={{ width: '100%', marginTop: '2rem' }}>
+      <div className="flex flex-wrap gap-4 items-center mb-8 marketplace-filter-bar" style={{ width: '100%', marginTop: '2rem' }}>
         {/* Search Input Box */}
-        <div style={{ flex: "0 0 280px", position: "relative" }}>
+        <div className="marketplace-search-wrapper" style={{ flex: "0 0 280px", position: "relative" }}>
           <input
             type="text"
-            placeholder="Search the product"
-            className="form-input"
+            placeholder="Search items..."
+            className="form-input marketplace-search-input"
             style={{
               paddingLeft: '1.25rem',
-              paddingRight: '3.5rem',
+              paddingRight: '2.5rem',
               borderRadius: '9999px',
               border: '2px solid rgba(0, 0, 0, 0.2)',
               height: '43px',
@@ -238,13 +240,14 @@ export default function MarketplacePage() {
           />
           <div style={{ position: 'absolute', right: '1.25rem', top: '50%', transform: 'translateY(-50%)', display: 'flex', gap: '0.5rem', alignItems: 'center', color: '#64748b' }}>
             {search && <X size={16} style={{ cursor: 'pointer' }} onClick={() => setSearch("")} />}
-            <Filter size={16} />
+            <Search size={18} />
           </div>
         </div>
 
-        {/* Category Buttons Row */}
-        <div className="flex gap-2 flex-wrap">
+        {/* Category Buttons Row for Desktop */}
+        <div className="flex gap-2 flex-wrap marketplace-categories-row desktop-filter-buttons">
           <button
+            className="marketplace-cat-btn"
             onClick={() => setSelectedCategory(null)}
             style={{
               height: "43px",
@@ -271,6 +274,7 @@ export default function MarketplacePage() {
             return (
               <button
                 key={c.id}
+                className="marketplace-cat-btn"
                 onClick={() => setSelectedCategory(c.id)}
                 style={{
                   height: "43px",
@@ -295,12 +299,146 @@ export default function MarketplacePage() {
             );
           })}
         </div>
+
+        {/* Mobile Category Connected Navy Dropdown */}
+        <div className="mobile-category-select" style={{ position: "relative" }}>
+          <button
+            type="button"
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            style={{
+              height: "38px",
+              paddingLeft: "0.85rem",
+              paddingRight: "0.75rem",
+              borderRadius: isDropdownOpen ? "1rem 1rem 0 0" : "9999px",
+              border: "1.5px solid #000c66",
+              backgroundColor: "#000c66",
+              color: "#ffffff",
+              fontSize: "0.8rem",
+              fontWeight: 600,
+              fontFamily: "var(--font-inter), sans-serif",
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              cursor: "pointer",
+              gap: "0.4rem",
+              whiteSpace: "nowrap",
+              transition: "border-radius 0.2s ease"
+            }}
+          >
+            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {selectedCategory === null ? "All Categories" : (categories.find(c => c.id === selectedCategory)?.name || "All Categories")}
+            </span>
+            <ChevronDown
+              size={15}
+              style={{
+                color: "#ffffff",
+                transition: "transform 0.2s ease",
+                transform: isDropdownOpen ? "rotate(180deg)" : "rotate(0deg)",
+                flexShrink: 0
+              }}
+            />
+          </button>
+
+          {isDropdownOpen && (
+            <>
+              <div
+                style={{ position: "fixed", inset: 0, zIndex: 40 }}
+                onClick={() => setIsDropdownOpen(false)}
+              />
+              <div
+                style={{
+                  position: "absolute",
+                  top: "100%",
+                  left: 0,
+                  right: 0,
+                  backgroundColor: "#000c66",
+                  borderRadius: "0 0 1rem 1rem",
+                  padding: "0.4rem 0.5rem 0.5rem 0.5rem",
+                  boxShadow: "0 12px 25px rgba(0, 12, 102, 0.25)",
+                  border: "1.5px solid #000c66",
+                  borderTop: "none",
+                  zIndex: 50,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "2px",
+                  maxHeight: "220px",
+                  overflowY: "auto"
+                }}
+              >
+                <button
+                  onClick={() => {
+                    setSelectedCategory(null);
+                    setIsDropdownOpen(false);
+                  }}
+                  style={{
+                    width: "100%",
+                    padding: "0.45rem 0.75rem",
+                    borderRadius: "0.6rem",
+                    fontSize: "0.8rem",
+                    fontWeight: selectedCategory === null ? 700 : 500,
+                    fontFamily: "var(--font-inter), sans-serif",
+                    color: "#ffffff",
+                    backgroundColor: selectedCategory === null ? "rgba(255, 255, 255, 0.15)" : "transparent",
+                    border: "none",
+                    textAlign: "left",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    whiteSpace: "nowrap"
+                  }}
+                >
+                  <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, marginRight: "0.25rem" }}>
+                    All Categories
+                  </span>
+                  {selectedCategory === null && <span style={{ fontSize: "0.8rem", fontWeight: 700, flexShrink: 0 }}>✓</span>}
+                </button>
+                {categories.map(c => {
+                  const isSelected = selectedCategory === c.id;
+                  return (
+                    <button
+                      key={c.id}
+                      onClick={() => {
+                        setSelectedCategory(c.id);
+                        setIsDropdownOpen(false);
+                      }}
+                      style={{
+                        width: "100%",
+                        padding: "0.45rem 0.75rem",
+                        borderRadius: "0.6rem",
+                        fontSize: "0.8rem",
+                        fontWeight: isSelected ? 700 : 500,
+                        fontFamily: "var(--font-inter), sans-serif",
+                        color: "#ffffff",
+                        backgroundColor: isSelected ? "rgba(255, 255, 255, 0.15)" : "transparent",
+                        border: "none",
+                        textAlign: "left",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        whiteSpace: "nowrap"
+                      }}
+                    >
+                      <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, marginRight: "0.25rem" }}>
+                        {c.name}
+                      </span>
+                      {isSelected && <span style={{ fontSize: "0.8rem", fontWeight: 700, flexShrink: 0 }}>✓</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Sub-tabs Row */}
       {myId && (
-        <div className="flex gap-2 mb-8">
+        <div className="flex gap-2 mb-8 marketplace-tabs-row">
           <button
+            className="marketplace-tab-btn"
             onClick={() => setTab("browse")}
             style={{
               height: '38px',
@@ -322,6 +460,7 @@ export default function MarketplacePage() {
             Browse Items
           </button>
           <button
+            className="marketplace-tab-btn"
             onClick={() => setTab("my-items")}
             style={{
               height: '38px',
@@ -348,13 +487,13 @@ export default function MarketplacePage() {
       {loading ? (
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "5rem 0", color: "#64748b", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700 }}>Loading marketplace items...</div>
       ) : filteredItems.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "5rem 0", color: "#64748b", maxWidth: "600px", margin: "0 auto", fontFamily: "var(--font-syne), sans-serif" }}>
-          <Store size={48} style={{ margin: "0 auto 1rem auto", opacity: 0.3 }} />
-          <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: "#000000", marginBottom: "0.5rem" }}>No Items Found</h2>
-          <p style={{ fontWeight: 500 }}>{tab === "my-items" ? "You haven't listed any items yet." : "No listings match your search criteria."}</p>
+        <div className="no-events-container" style={{ textAlign: "center", padding: "5rem 0", color: "#64748b", maxWidth: "600px", margin: "0 auto", fontFamily: "var(--font-syne), sans-serif" }}>
+          <Store size={48} className="no-events-icon" style={{ margin: "0 auto 1rem auto", opacity: 0.3 }} />
+          <h2 className="no-events-title" style={{ fontSize: "1.5rem", fontWeight: 800, color: "#000000", marginBottom: "0.5rem" }}>No Items Found</h2>
+          <p className="no-events-desc" style={{ fontWeight: 500 }}>{tab === "my-items" ? "You haven't listed any items yet." : "No listings match your search criteria."}</p>
         </div>
       ) : (
-        <div className="grid gap-8" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))" }}>
+        <div className="grid gap-8 marketplace-items-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))" }}>
           {filteredItems.map((product) => {
             const formatPrice = (priceStr: string) => {
               const num = parseFloat(priceStr);
@@ -362,7 +501,7 @@ export default function MarketplacePage() {
             };
 
             return (
-              <div key={product.id} className="event-card">
+              <div key={product.id} className="event-card marketplace-item-card">
                 {/* Image visual wrapper with aspect ratio matching mockup */}
                 <div className="event-card-image-wrapper">
                   {product.images && product.images.length > 0 ? (
@@ -394,17 +533,17 @@ export default function MarketplacePage() {
                 {/* Content block stack */}
                 <div className="event-card-content">
                   {/* Title & Price Row */}
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "0.5rem", marginBottom: "1rem" }}>
-                    <h3 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.25rem", fontWeight: 700, color: "#000000", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
+                  <div className="marketplace-item-header-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "0.5rem", marginBottom: "1rem" }}>
+                    <h3 className="marketplace-item-title" style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.25rem", fontWeight: 700, color: "#000000", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
                       {product.title}
                     </h3>
-                    <span style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.25rem", fontWeight: 700, color: "#000000", whiteSpace: "nowrap" }}>
+                    <span className="marketplace-item-price" style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.25rem", fontWeight: 700, color: "#000000", whiteSpace: "nowrap" }}>
                       LKR.{formatPrice(product.price)}
                     </span>
                   </div>
 
                   {/* Metadata List */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: "0.55rem", marginBottom: "1.5rem", fontFamily: "var(--font-syne), sans-serif", fontSize: "0.95rem", color: "#000000", fontWeight: 700 }}>
+                  <div className="marketplace-item-metadata" style={{ display: "flex", flexDirection: "column", gap: "0.55rem", marginBottom: "1.5rem", fontFamily: "var(--font-syne), sans-serif", fontSize: "0.95rem", color: "#000000", fontWeight: 700 }}>
                     <div>Condition: {product.condition_state}</div>
                     <div>Category: {product.category_name}</div>
                     {tab === "browse" ? (
@@ -416,10 +555,11 @@ export default function MarketplacePage() {
                   </div>
 
                   {/* Actions Button */}
-                  <div style={{ display: "flex", justifyContent: "center", width: "100%", marginTop: "auto" }}>
+                  <div className="marketplace-item-actions" style={{ display: "flex", justifyContent: "center", width: "100%", marginTop: "auto" }}>
                     {tab === "browse" ? (
                       <button
                         onClick={() => setContactProduct(product)}
+                        className="marketplace-item-btn"
                         style={{
                           backgroundColor: "#0d0e4aff",
                           color: "#ffffff",
@@ -445,6 +585,7 @@ export default function MarketplacePage() {
                     ) : (
                       <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", width: "100%" }}>
                         <button
+                          className="marketplace-item-btn marketplace-item-btn-secondary"
                           style={{
                             backgroundColor: "#ffffff",
                             color: "#0d0e4aff",
@@ -467,6 +608,7 @@ export default function MarketplacePage() {
                         </button>
                         {product.status !== 'sold' && (
                           <button
+                            className="marketplace-item-btn marketplace-item-btn-success"
                             style={{
                               backgroundColor: "rgba(34,197,94,0.1)",
                               color: "var(--success)",
@@ -498,9 +640,19 @@ export default function MarketplacePage() {
         </div>
       )}
 
+      {/* Mobile Floating Action Button (+ List Item) */}
+      <button
+        className="marketplace-fab"
+        onClick={openCreateModal}
+      >
+        <Plus size={20} />
+        <span>List Item</span>
+      </button>
+
       {/* Create / Edit Listing Modal */}
       {showModal && (
         <div
+          className="marketplace-modal-overlay"
           style={{
             position: "fixed",
             inset: 0,
@@ -515,6 +667,7 @@ export default function MarketplacePage() {
           onClick={() => setShowModal(false)}
         >
           <div
+            className="marketplace-modal-card"
             style={{
               maxWidth: "600px",
               width: "100%",
@@ -528,13 +681,13 @@ export default function MarketplacePage() {
             onClick={e => e.stopPropagation()}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
-              <h2 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.75rem", fontWeight: 800, color: "#000000" }}>
+              <h2 className="marketplace-modal-title" style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.75rem", fontWeight: 800, color: "#000000" }}>
                 {editingItem ? "Edit Listing" : "Create Listing"}
               </h2>
               <button onClick={() => setShowModal(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "#000000" }}><X size={22} /></button>
             </div>
 
-            <form onSubmit={handleSaveListing} style={{ fontFamily: "var(--font-syne), sans-serif", display: "flex", flexDirection: "column", gap: "1rem" }}>
+            <form onSubmit={handleSaveListing} className="marketplace-modal-form" style={{ fontFamily: "var(--font-syne), sans-serif", display: "flex", flexDirection: "column", gap: "1rem" }}>
               <div>
                 <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Item Title *</label>
                 <input
@@ -543,6 +696,7 @@ export default function MarketplacePage() {
                   value={form.title}
                   onChange={e => setForm({ ...form, title: e.target.value })}
                   placeholder="e.g., Casio fx-991EX Calculator"
+                  className="marketplace-modal-input"
                   style={{
                     height: "45px",
                     backgroundColor: "#f1f3f5",
@@ -569,6 +723,7 @@ export default function MarketplacePage() {
                     value={form.price}
                     onChange={e => setForm({ ...form, price: e.target.value })}
                     placeholder="2500"
+                    className="marketplace-modal-input"
                     style={{
                       height: "45px",
                       backgroundColor: "#f1f3f5",
@@ -589,6 +744,7 @@ export default function MarketplacePage() {
                   <select
                     value={form.condition_state}
                     onChange={e => setForm({ ...form, condition_state: e.target.value })}
+                    className="marketplace-modal-input"
                     style={{
                       height: "45px",
                       backgroundColor: "#f1f3f5",
@@ -617,6 +773,7 @@ export default function MarketplacePage() {
                   required
                   value={form.category_id}
                   onChange={e => setForm({ ...form, category_id: e.target.value })}
+                  className="marketplace-modal-input"
                   style={{
                     height: "45px",
                     backgroundColor: "#f1f3f5",
@@ -647,6 +804,7 @@ export default function MarketplacePage() {
                     value={form.contact_number}
                     onChange={e => setForm({ ...form, contact_number: e.target.value })}
                     placeholder="e.g., 0712345678"
+                    className="marketplace-modal-input"
                     style={{
                       height: "45px",
                       backgroundColor: "#f1f3f5",
@@ -669,6 +827,7 @@ export default function MarketplacePage() {
                     value={form.contact_email}
                     onChange={e => setForm({ ...form, contact_email: e.target.value })}
                     placeholder="Optional"
+                    className="marketplace-modal-input"
                     style={{
                       height: "45px",
                       backgroundColor: "#f1f3f5",
@@ -689,11 +848,12 @@ export default function MarketplacePage() {
               <div>
                 <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Description *</label>
                 <textarea
-                  rows={4}
+                  rows={3}
                   required
                   value={form.description}
                   onChange={e => setForm({ ...form, description: e.target.value })}
                   placeholder="Describe your item, any flaws, and preferred meetup location..."
+                  className="marketplace-modal-textarea"
                   style={{
                     backgroundColor: "#f1f3f5",
                     border: "1px solid rgba(0, 0, 0, 0.1)",
@@ -741,6 +901,7 @@ export default function MarketplacePage() {
               <button
                 type="submit"
                 disabled={formLoading}
+                className="marketplace-modal-submit-btn"
                 style={{
                   width: "100%",
                   backgroundColor: "#000c66",
@@ -766,6 +927,7 @@ export default function MarketplacePage() {
       {/* Contact Via Modal */}
       {contactProduct && (
         <div
+          className="marketplace-modal-overlay"
           style={{
             position: "fixed",
             inset: 0,
@@ -780,6 +942,7 @@ export default function MarketplacePage() {
           onClick={() => setContactProduct(null)}
         >
           <div
+            className="marketplace-contact-modal-card"
             style={{
               maxWidth: "400px",
               width: "100%",

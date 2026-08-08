@@ -256,11 +256,14 @@ export default function EventsPage() {
                         alignItems: "center",
                         justifyContent: "space-between",
                         transition: "all 0.15s ease",
-                        cursor: "pointer"
+                        cursor: "pointer",
+                        whiteSpace: "nowrap"
                       }}
                     >
-                      <span>{cat === "All" ? "All Categories" : cat}</span>
-                      {isSelected && <span style={{ fontSize: "0.75rem", color: "#ffffff" }}>✓</span>}
+                      <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, marginRight: "0.25rem" }}>
+                        {cat === "All" ? "All Categories" : cat}
+                      </span>
+                      {isSelected && <span style={{ fontSize: "0.75rem", color: "#ffffff", flexShrink: 0 }}>✓</span>}
                     </button>
                   );
                 })}
