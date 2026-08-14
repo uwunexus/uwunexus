@@ -501,7 +501,7 @@ export default function MarketplacePage() {
             };
 
             return (
-              <div key={product.id} className="event-card marketplace-item-card">
+              <div key={product.id} className="event-card marketplace-item-card" style={{ cursor: "pointer" }} onClick={() => tab === "browse" ? setContactProduct(product) : openEditModal(product)}>
                 {/* Image visual wrapper with aspect ratio matching mockup */}
                 <div className="event-card-image-wrapper">
                   {product.images && product.images.length > 0 ? (

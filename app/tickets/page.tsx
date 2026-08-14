@@ -146,7 +146,7 @@ export default function TicketsPage() {
         <div className="grid gap-8 tickets-events-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(270px, 1fr))" }}>
           {events.map((event) => {
             return (
-              <div key={event.id} className="event-card">
+              <div key={event.id} className="event-card" style={{ cursor: "pointer" }} onClick={() => { setSelectedEvent(event); setProcessing(false); setError(""); }}>
                 {/* Image wrapper matching the visual layout */}
                 <div className="event-card-image-wrapper">
                   {event.image_url ? (
