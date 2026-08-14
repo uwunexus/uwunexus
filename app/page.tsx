@@ -23,35 +23,35 @@ export default function Home() {
     {
       title: "Ticket Booking",
       description: "Securely purchase tickets online for premium campus events without the hassle of cash.",
-      icon: "/ticket_booking_bg.png",
+      icon: "/ticket_booking_bg.jpg",
       link: "/tickets",
       color: "var(--accent)"
     },
     {
       title: "Sarasawi Alewisala",
       description: "A trusted student-to-student e-commerce platform for buying and selling goods.",
-      icon: "/sarasawi_alewisala_bg.png",
+      icon: "/sarasawi_alewisala_bg.jpg",
       link: "/marketplace",
       color: "var(--success)"
     },
     {
       title: "Lost & Found",
       description: "Report misplaced belongings and locate items discovered on campus easily.",
-      icon: "/lost_found_bg.png",
+      icon: "/lost_found_bg.jpg",
       link: "/lost-and-found",
       color: "var(--warning)"
     },
     {
       title: "GPA Calculator",
       description: "Automatically compute your GPA with your pre-loaded degree curriculum.",
-      icon: "/gpa_calculator_bg.png",
+      icon: "/gpa_calculator_bg.jpg",
       link: "/gpa-calculator",
       color: "var(--danger)"
     },
     {
       title: "Information Hub",
       description: "Verified directory of university procedures, lecturer contacts, and hotlines.",
-      icon: "/info_hub_bg.png",
+      icon: "/info_hub_bg.jpg",
       link: "/info-hub",
       color: "#ec4899"
     }

@@ -553,7 +553,7 @@ export default function AuthModal() {
           className="auth-graphic-pane"
           style={{
             flex: 1,
-            backgroundImage: "url('/login&signup.png')",
+            backgroundImage: "url('/login&signup.jpg')",
             backgroundSize: "cover",
             backgroundPosition: "center center",
             backgroundColor: "#000c66"
