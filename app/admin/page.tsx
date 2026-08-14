@@ -495,7 +495,10 @@ export default function AdminPage() {
           padding: "4px",
           gap: "4px",
           boxSizing: "border-box",
-          border: "1.5px solid rgba(0, 12, 102, 0.2)"
+          border: "1.5px solid rgba(0, 12, 102, 0.2)",
+          overflowX: "auto",
+          whiteSpace: "nowrap",
+          WebkitOverflowScrolling: "touch"
         }}>
           {[
             { key: "users", label: "Users", icon: <Users size={16} />, adminOnly: true }, 
@@ -520,6 +523,8 @@ export default function AdminPage() {
                 fontWeight: 500,
                 fontSize: "0.9rem",
                 cursor: "pointer",
+                flexShrink: 0,
+                whiteSpace: "nowrap",
                 display: "flex",
                 alignItems: "center",
                 gap: "0.5rem",

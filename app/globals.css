@@ -167,6 +167,10 @@ button {
   display: flex;
 }
 
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
 .flex-col {
   flex-direction: column;
 }
@@ -2444,5 +2448,20 @@ html {
 @media (min-width: 991px) {
   .mobile-only {
     display: none !important;
+  }
+}
+
+.page-main-title {
+  font-family: var(--font-syne), sans-serif;
+  font-size: 3rem;
+  font-weight: 700;
+  color: #000000;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.25rem;
+}
+
+@media (max-width: 768px) {
+  .page-main-title {
+    font-size: 2rem;
   }
 }

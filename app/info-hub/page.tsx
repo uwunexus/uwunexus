@@ -44,13 +44,7 @@ export default function InfoHubPage() {
     <div style={{ maxWidth: "1210px", margin: "1.5rem auto", padding: "0 1rem", minHeight: "100vh", position: "relative" }}>
       {/* Title & Subtitle */}
       <div style={{ textAlign: "left", marginBottom: "2rem" }}>
-        <h1 style={{
-          fontFamily: "var(--font-syne), sans-serif",
-          fontSize: "3rem",
-          fontWeight: 700,
-          color: "#000000",
-          margin: "0 0 0.5rem 0"
-        }}>
+        <h1 className="page-main-title">
           Information Hub
         </h1>
         <p style={{

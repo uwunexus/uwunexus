@@ -231,7 +231,7 @@ export default function LostAndFoundPage() {
       {/* Header */}
       <div className="flex justify-between items-center mb-6 flex-wrap gap-4" style={{ marginTop: '1.5rem' }}>
         <div>
-          <h1 className="page-title" style={{ fontFamily: 'var(--font-syne), sans-serif', fontWeight: 700, color: '#000000', letterSpacing: '0.02em', marginBottom: '0.25rem' }}>
+          <h1 className="page-main-title">
             Lost & Found Items
           </h1>
           <p style={{ fontFamily: 'var(--font-inclusive-sans), sans-serif', fontSize: '1.15rem', color: '#64748b', fontWeight: 500 }}>

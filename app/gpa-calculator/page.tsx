@@ -220,7 +220,7 @@ export default function GPACalculatorPage() {
     return (
       <div className="container" style={{ maxWidth: '1210px', marginTop: '1.5rem', paddingBottom: '4rem' }}>
         <div className="mb-10 text-center">
-          <h1 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "3rem", fontWeight: 700, color: "#000000" }}>
+          <h1 className="page-main-title">
             Smart GPA Calculator
           </h1>
           <p style={{ fontFamily: "var(--font-inclusive-sans), sans-serif", fontSize: "1.15rem", color: "#64748b", fontWeight: 500, marginTop: "0.5rem" }}>
@@ -313,7 +313,7 @@ export default function GPACalculatorPage() {
       {/* Title Section */}
       <div className="flex justify-between items-start mb-8 flex-wrap gap-4" style={{ marginTop: '1.5rem' }}>
         <div>
-          <h1 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "3rem", fontWeight: 700, color: "#000000", letterSpacing: "0.02em", marginBottom: "0.25rem" }}>
+          <h1 className="page-main-title">
             Smart GPA Calculator
           </h1>
           <p style={{ fontFamily: "var(--font-inclusive-sans), sans-serif", fontSize: "1.15rem", color: "#64748b", fontWeight: 500, marginBottom: "1rem" }}>
