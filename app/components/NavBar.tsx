@@ -103,7 +103,7 @@ export default function NavBar({ isAuthenticated, isAdmin }: NavBarProps) {
           className="mobile-menu-overlay"
           onClick={() => setOpen(false)}
         >
-          <div className="mobile-menu-panel" onClick={e => e.stopPropagation()}>
+          <div className="mobile-menu-drawer" onClick={e => e.stopPropagation()}>
 
             {/* Nav links */}
             <div className="mobile-menu-links">

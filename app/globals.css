@@ -2434,3 +2434,15 @@ html {
   color: #ffffff;
   border: none;
 }
+/* Responsive Nav Utility Classes */
+@media (max-width: 990px) {
+  .desktop-only {
+    display: none !important;
+  }
+}
+
+@media (min-width: 991px) {
+  .mobile-only {
+    display: none !important;
+  }
+}
