@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Mail, KeyRound } from "lucide-react";
+import { Mail, KeyRound, Loader } from "lucide-react";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -36,41 +36,117 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="container py-16 flex justify-center items-center" style={{ minHeight: 'calc(100vh - 200px)' }}>
-      <div className="card w-full max-w-md" style={{ padding: '2.5rem' }}>
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <div className="p-3 rounded-full" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)' }}>
-              <KeyRound size={40} className="text-accent" />
-            </div>
+    <div style={{
+      minHeight: "calc(100vh - 120px)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "2rem 1rem",
+      backgroundColor: "transparent"
+    }}>
+      <div style={{
+        width: "100%",
+        maxWidth: "480px",
+        backgroundColor: "#ffffff",
+        borderRadius: "2rem",
+        padding: "3rem 2.5rem",
+        boxShadow: "0 20px 40px -15px rgba(0, 0, 0, 0.12)",
+        border: "1.5px solid rgba(0, 12, 102, 0.08)",
+        display: "flex",
+        flexDirection: "column"
+      }}>
+        {/* Top Header emblem */}
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: "1.5rem" }}>
+          <div style={{
+            padding: "1.25rem",
+            borderRadius: "50%",
+            backgroundColor: "#edf4fe",
+            color: "#000c66",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          }}>
+            <KeyRound size={36} />
           </div>
-          <h1 className="text-3xl font-bold mb-2">Forgot Password</h1>
-          <p className="text-muted text-sm">Enter your email to receive a reset link.</p>
         </div>
 
+        {/* Title and details */}
+        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+          <h1 style={{
+            fontFamily: "var(--font-syne), sans-serif",
+            fontSize: "2.25rem",
+            fontWeight: 700,
+            color: "#000c66",
+            margin: "0 0 0.5rem 0",
+            letterSpacing: "-0.01em"
+          }}>
+            Forgot Password
+          </h1>
+          <p style={{
+            fontFamily: "var(--font-roboto), sans-serif",
+            fontSize: "0.95rem",
+            color: "#64748b",
+            margin: 0
+          }}>
+            Enter your email to receive a secure password reset link.
+          </p>
+        </div>
+
+        {/* Status messages */}
         {status === "error" && (
-          <div className="mb-6 p-3 rounded text-sm text-center" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+          <div style={{
+            backgroundColor: "rgba(239, 68, 68, 0.08)",
+            border: "1px solid rgba(239, 68, 68, 0.2)",
+            color: "var(--danger)",
+            borderRadius: "0.75rem",
+            padding: "0.75rem 1rem",
+            fontSize: "0.85rem",
+            marginBottom: "1.5rem",
+            fontWeight: 600,
+            textAlign: "center",
+            lineHeight: "1.4"
+          }}>
             {message}
           </div>
         )}
 
         {status === "success" && (
-          <div className="mb-6 p-4 rounded text-sm text-center" style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)', color: 'var(--success, #10b981)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+          <div style={{
+            backgroundColor: "rgba(16, 185, 129, 0.08)",
+            border: "1px solid rgba(16, 185, 129, 0.2)",
+            color: "#10b981",
+            borderRadius: "0.75rem",
+            padding: "1rem",
+            fontSize: "0.9rem",
+            marginBottom: "1.5rem",
+            fontWeight: 600,
+            textAlign: "center",
+            lineHeight: "1.5"
+          }}>
             {message}
           </div>
         )}
 
         {status !== "success" && (
-          <form onSubmit={handleSubmit}>
-            <div className="form-group mb-6">
-              <label className="form-label text-sm">University Email</label>
-              <div style={{ position: 'relative' }}>
-                <Mail size={18} className="text-muted" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
+          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+              <label style={{ fontFamily: "var(--font-roboto), sans-serif", fontSize: "0.85rem", fontWeight: 500, color: "#000000" }}>University Email</label>
+              <div style={{ position: "relative" }}>
+                <Mail size={18} style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }} />
                 <input 
                   type="email" 
-                  className="form-input" 
-                  style={{ paddingLeft: '2.5rem' }} 
-                  placeholder="index@uwu.ac.lk" 
+                  style={{
+                    width: "100%",
+                    padding: "0.85rem 1rem 0.85rem 2.75rem",
+                    borderRadius: "0.75rem",
+                    border: "none",
+                    backgroundColor: "#e6e9ec",
+                    outline: "none",
+                    fontFamily: "var(--font-roboto), sans-serif",
+                    fontSize: "0.95rem",
+                    color: "#000000"
+                  }}
+                  placeholder="index@std.uwu.ac.lk" 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required 
@@ -78,14 +154,49 @@ export default function ForgotPasswordPage() {
               </div>
             </div>
 
-            <button type="submit" disabled={status === "loading"} className="btn btn-primary w-full text-lg justify-center mb-6" style={{ padding: '0.75rem', backgroundColor: 'var(--accent)', opacity: status === "loading" ? 0.7 : 1 }}>
-              {status === "loading" ? "Sending..." : "Send Reset Link"}
+            <button 
+              type="submit" 
+              disabled={status === "loading"} 
+              style={{
+                width: "100%",
+                height: "50px",
+                borderRadius: "9999px",
+                border: "none",
+                backgroundColor: "#000c66",
+                color: "#ffffff",
+                fontFamily: "var(--font-syne), sans-serif",
+                fontSize: "1.1rem",
+                fontWeight: 700,
+                cursor: status === "loading" ? "not-allowed" : "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "0.5rem",
+                marginTop: "0.5rem",
+                opacity: status === "loading" ? 0.8 : 1,
+                transition: "opacity 0.2s"
+              }}
+            >
+              {status === "loading" ? "Sending link..." : "Send Reset Link"}
             </button>
           </form>
         )}
 
-        <div className="text-center text-sm text-muted">
-          Remember your password? <Link href="/login" className="font-semibold" style={{ color: 'var(--accent)' }}>Back to Login</Link>
+        <div style={{
+          textAlign: "center",
+          marginTop: "2rem",
+          fontSize: "0.9rem",
+          fontFamily: "var(--font-roboto), sans-serif",
+          color: "#64748b",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "0.4rem"
+        }}>
+          <span>Remember your password?</span>
+          <Link href="/login" style={{ color: "#000c66", fontWeight: 700, textDecoration: "underline" }}>
+            Back to Login
+          </Link>
         </div>
       </div>
     </div>

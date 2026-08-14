@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Phone, FileText, UserCircle, Search as SearchIcon, ExternalLink, Mail, Award, Loader } from "lucide-react";
+import { BookOpen, Phone, FileText, UserCircle, Search as SearchIcon, ExternalLink, Mail, Smartphone, Award } from "lucide-react";
 
 interface InfoItem {
   id: number;
@@ -16,44 +16,29 @@ interface InfoItem {
 export default function InfoHubPage() {
   const [items, setItems] = useState<InfoItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState<"procedure" | "hotline" | "contact">("procedure");
 
   useEffect(() => {
-    setError(null);
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || '/api/backend'}/get_info_hub.php`)
-      .then(res => {
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
-        return res.json();
-      })
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/get_info_hub.php`)
+      .then(res => res.json())
       .then(data => {
-        if (data.success && Array.isArray(data.items)) {
+        if (data.success) {
           setItems(data.items);
-        } else {
-          setError(data.message || "Failed to load information from the server.");
         }
       })
-      .catch(err => {
-        console.error("Fetch error on Info Hub:", err);
-        setError(err.message || "Could not connect to the backend server. Please verify the backend is running.");
-      })
+      .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
 
-  const filteredItems = Array.isArray(items) ? items.filter(item => {
-    if (!item) return false;
-    const title = (item.title || "").toLowerCase();
-    const description = (item.description || "").toLowerCase();
-    const q = (search || "").toLowerCase();
-    return title.includes(q) || description.includes(q);
-  }) : [];
+  const filteredItems = items.filter(item => 
+    item.title.toLowerCase().includes(search.toLowerCase()) || 
+    item.description.toLowerCase().includes(search.toLowerCase())
+  );
 
-  const procedures = filteredItems.filter(i => i && i.category === 'procedure');
-  const hotlines = filteredItems.filter(i => i && i.category === 'hotline');
-  const contacts = filteredItems.filter(i => i && i.category === 'contact');
+  const procedures = filteredItems.filter(i => i.category === 'procedure');
+  const hotlines = filteredItems.filter(i => i.category === 'hotline');
+  const contacts = filteredItems.filter(i => i.category === 'contact');
 
   return (
     <div style={{ maxWidth: "1210px", margin: "1.5rem auto", padding: "0 1rem", minHeight: "100vh", position: "relative" }}>
@@ -186,24 +171,9 @@ export default function InfoHubPage() {
 
       {/* Main Content Area */}
       <div style={{ marginTop: "2rem", paddingBottom: "3rem" }}>
-        {error && (
-          <div style={{
-            backgroundColor: "rgba(239, 68, 68, 0.08)",
-            border: "1.5px solid rgba(239, 68, 68, 0.2)",
-            color: "#ef4444",
-            borderRadius: "1rem",
-            padding: "1.25rem",
-            marginBottom: "1.5rem",
-            fontFamily: "var(--font-roboto), sans-serif",
-            fontWeight: 500,
-            textAlign: "center"
-          }}>
-            {error}
-          </div>
-        )}
         {loading ? (
-          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "200px" }}>
-            <Loader size={40} className="text-muted" style={{ animation: "spin 1s linear infinite" }} />
+          <div style={{ textAlign: "center", padding: "4rem 0", color: "#64748b", fontFamily: "var(--font-roboto), sans-serif" }}>
+            Loading information...
           </div>
         ) : (
           <>
@@ -335,29 +305,27 @@ export default function InfoHubPage() {
                         </div>
 
                         {/* Phone Dialer Link Pill */}
-                        {hotline.contact_info && (
-                          <a 
-                            href={`tel:${hotline.contact_info}`}
-                            style={{
-                              backgroundColor: "#ffffff",
-                              border: "1.5px solid rgba(0, 12, 102, 0.05)",
-                              borderRadius: "9999px",
-                              padding: "0.5rem 1rem",
-                              fontSize: "0.95rem",
-                              fontWeight: 700,
-                              fontFamily: "var(--font-syne), sans-serif",
-                              color: "#000000",
-                              textDecoration: "none",
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "0.5rem",
-                              whiteSpace: "nowrap"
-                            }}
-                          >
-                            <Phone size={14} style={{ color: "#000c66" }} />
-                            {hotline.contact_info}
-                          </a>
-                        )}
+                        <a 
+                          href={`tel:${hotline.contact_info}`}
+                          style={{
+                            backgroundColor: "#ffffff",
+                            border: "1.5px solid rgba(0, 12, 102, 0.05)",
+                            borderRadius: "9999px",
+                            padding: "0.5rem 1rem",
+                            fontSize: "0.95rem",
+                            fontWeight: 700,
+                            fontFamily: "var(--font-syne), sans-serif",
+                            color: "#000000",
+                            textDecoration: "none",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.5rem",
+                            whiteSpace: "nowrap"
+                          }}
+                        >
+                          <Phone size={14} style={{ color: "#000c66" }} />
+                          {hotline.contact_info}
+                        </a>
                       </div>
                     </div>
                   ))
@@ -415,7 +383,7 @@ export default function InfoHubPage() {
                         <span>{contact.description}</span>
                       </div>
 
-                      {/* Details row: Contact Link */}
+                      {/* Details row: Email Link */}
                       {contact.contact_info && (
                         <div style={{
                           display: "flex",
@@ -424,13 +392,9 @@ export default function InfoHubPage() {
                           fontSize: "0.95rem",
                           fontFamily: "var(--font-roboto), sans-serif"
                         }}>
-                          {contact.contact_info.includes('@') ? (
-                            <Mail size={20} style={{ color: "#000c66", flexShrink: 0 }} />
-                          ) : (
-                            <Phone size={20} style={{ color: "#000c66", flexShrink: 0 }} />
-                          )}
+                          <Mail size={20} style={{ color: "#000c66", flexShrink: 0 }} />
                           <a 
-                            href={contact.contact_info.includes('@') ? `mailto:${contact.contact_info}` : `tel:${contact.contact_info}`} 
+                            href={`mailto:${contact.contact_info}`} 
                             style={{ 
                               color: "#000000", 
                               textDecoration: "none",
@@ -450,14 +414,6 @@ export default function InfoHubPage() {
           </>
         )}
       </div>
-      
-      {/* Styles for spinner rotation */}
-      <style>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   );
 }

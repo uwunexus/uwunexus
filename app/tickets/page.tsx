@@ -43,7 +43,6 @@ export default function TicketsPage() {
 
   // Checkout Modal State
   const [selectedEvent, setSelectedEvent] = useState<TicketedEvent | null>(null);
-  const [detailEvent, setDetailEvent] = useState<TicketedEvent | null>(null);
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "" });
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState(searchParams.get("canceled") ? "Payment was canceled." : "");
@@ -116,16 +115,16 @@ export default function TicketsPage() {
   };
 
   return (
-    <div className="container" style={{ maxWidth: '1210px', marginTop: '1.5rem', minHeight: '100vh', paddingBottom: '1rem' }}>
+    <div className="container events-container" style={{ maxWidth: '1210px', marginTop: '1.5rem' }}>
       {/* Header */}
-      <div className="mb-4 text-center" style={{ marginTop: '0' }}>
-        <h1 className="page-title" style={{ fontFamily: 'var(--font-syne), sans-serif', fontWeight: 700, color: '#000000', letterSpacing: '0.02em', marginBottom: '0.5rem' }}>
+      <div className="tickets-page-header events-header mb-4 text-center" style={{ marginTop: '0' }}>
+        <h1 className="tickets-page-title" style={{ fontFamily: 'var(--font-syne), sans-serif', fontWeight: 700, fontSize: '3rem', color: '#000000', letterSpacing: '0.02em', marginBottom: '0.5rem' }}>
           Event Tickets
         </h1>
-        <p style={{ fontFamily: 'var(--font-audiowide), sans-serif', fontSize: '1.25rem', color: '#0d0e4aff', fontWeight: 400, letterSpacing: '0.05em', textTransform: 'lowercase' }}>
+        <p className="tickets-page-subtitle" style={{ fontFamily: 'var(--font-audiowide), sans-serif', fontSize: '1.25rem', color: '#0d0e4aff', fontWeight: 400, letterSpacing: '0.05em', textTransform: 'lowercase' }}>
           securely purchase your tickets online
         </p>
-        <hr className="page-divider" style={{ border: 'none', borderTop: '1.5px solid #cbd5e1', width: '100%' }} />
+        <hr className="tickets-page-hr" style={{ border: 'none', borderTop: '1.5px solid #cbd5e1', marginTop: '1.5rem', marginBottom: '1rem', width: '100%' }} />
       </div>
 
       {error && !selectedEvent && (
@@ -138,16 +137,16 @@ export default function TicketsPage() {
       {loading ? (
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "5rem 0", color: "#64748b", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700 }}>Loading events...</div>
       ) : events.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "5rem 0", color: "#64748b", maxWidth: "600px", margin: "0 auto", fontFamily: "var(--font-syne), sans-serif" }}>
-          <Ticket size={48} style={{ margin: "0 auto 1rem auto", opacity: 0.3 }} />
-          <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: "#000000", marginBottom: "0.5rem" }}>No Upcoming Events</h2>
-          <p style={{ fontWeight: 500 }}>There are currently no active ticketed events available. Please check back later!</p>
+        <div className="no-events-container" style={{ textAlign: "center", padding: "5rem 0", color: "#64748b", maxWidth: "600px", margin: "0 auto", fontFamily: "var(--font-syne), sans-serif" }}>
+          <Ticket size={48} className="no-events-icon" style={{ margin: "0 auto 1rem auto", opacity: 0.3 }} />
+          <h2 className="no-events-title" style={{ fontSize: "1.5rem", fontWeight: 800, color: "#000000", marginBottom: "0.5rem" }}>No Upcoming Events</h2>
+          <p className="no-events-desc" style={{ fontWeight: 500 }}>There are currently no active ticketed events available. Please check back later!</p>
         </div>
       ) : (
-        <div className="grid gap-8" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(270px, 1fr))" }}>
+        <div className="grid gap-8 tickets-events-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(270px, 1fr))" }}>
           {events.map((event) => {
             return (
-              <div key={event.id} className="event-card" onClick={() => setDetailEvent(event)} style={{ cursor: "pointer" }}>
+              <div key={event.id} className="event-card">
                 {/* Image wrapper matching the visual layout */}
                 <div className="event-card-image-wrapper">
                   {event.image_url ? (
@@ -179,15 +178,16 @@ export default function TicketsPage() {
                   </div>
 
                   {/* Tickets Left Row */}
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem", fontFamily: "var(--font-syne), sans-serif", fontSize: "1rem", color: "#000000", fontWeight: 500 }}>
+                  <div className="event-card-tickets-left-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem", fontFamily: "var(--font-syne), sans-serif", fontSize: "1rem", color: "#000000", fontWeight: 500 }}>
                     <span style={{ opacity: 0.8 }}>Tickets left:</span>
                     <span style={{ fontWeight: 800 }}>
                       {event.available_tickets} / {event.total_tickets}
                     </span>
                   </div>
 
-                  {/* View Details Button */}
+                  {/* Book Now Button */}
                   <button
+                    onClick={() => { setSelectedEvent(event); setProcessing(false); setError(""); }}
                     disabled={event.available_tickets <= 0}
                     className="event-card-btn"
                     style={{
@@ -199,75 +199,12 @@ export default function TicketsPage() {
                     }}
                   >
                     <Ticket size={18} />
-                    <span>{event.available_tickets <= 0 ? "Sold Out" : "View Details"}</span>
+                    <span>{event.available_tickets <= 0 ? "Sold Out" : "Book Now"}</span>
                   </button>
                 </div>
               </div>
             );
           })}
-        </div>
-      )}
-
-      {/* Event Detail Modal */}
-      {detailEvent && (
-        <div
-          style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.65)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: "1.5rem", backdropFilter: "blur(5px)" }}
-          onClick={() => setDetailEvent(null)}
-        >
-          <div className="event-detail-modal-container" onClick={e => e.stopPropagation()}>
-            {/* Left Column - Image */}
-            <div className="event-detail-modal-img-col">
-              {detailEvent.image_url ? (
-                <img src={detailEvent.image_url} alt={detailEvent.title} style={{ width: "100%", height: "100%", objectFit: "contain", position: "absolute", inset: 0 }} />
-              ) : (
-                <div style={{ height: "100%", background: "linear-gradient(135deg, #000c6622, #000c6611)", display: "flex", alignItems: "center", justifyContent: "center", position: "absolute", inset: 0 }}>
-                  <Ticket size={80} style={{ color: "#000c66", opacity: 0.4 }} />
-                </div>
-              )}
-            </div>
-
-            {/* Right Column - Details */}
-            <div className="event-detail-modal-info-col">
-              <h2 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "2.2rem", fontWeight: 800, color: "#000000", marginBottom: "1rem", lineHeight: 1.2 }}>{detailEvent.title}</h2>
-              {detailEvent.description && (
-                <p style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.05rem", fontWeight: 500, color: "#000000", lineHeight: 1.6, marginBottom: "1.25rem", whiteSpace: "pre-wrap" }}>{detailEvent.description}</p>
-              )}
-              
-              <div style={{ backgroundColor: "#e6e9ec", borderRadius: "1.8rem", padding: "1.25rem 1.5rem", border: "1px solid rgba(0,0,0,0.03)", marginBottom: "1.25rem" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem 1.5rem", fontFamily: "var(--font-syne), sans-serif", fontSize: "1rem", fontWeight: 700, color: "#000000" }}>
-                  <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}><Calendar size={20} style={{ color: "#000000", flexShrink: 0, marginTop: "2px" }} /><span style={{ lineHeight: "1.3" }}>{formatDate(detailEvent.event_date)}</span></div>
-                  <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}><Clock size={20} style={{ color: "#000000", flexShrink: 0, marginTop: "2px" }} /><span style={{ lineHeight: "1.3" }}>{formatTime(detailEvent.event_time)}</span></div>
-                  <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}><MapPin size={20} style={{ color: "#000000", flexShrink: 0, marginTop: "2px" }} /><span style={{ lineHeight: "1.3" }}>{detailEvent.venue}</span></div>
-                  <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}>
-                    <Ticket size={20} style={{ color: "#000000", flexShrink: 0, marginTop: "2px" }} />
-                    <div style={{ display: "flex", flexDirection: "column" }}>
-                      <span style={{ lineHeight: "1.3" }}>LKR.{detailEvent.price}</span>
-                      <span style={{ fontSize: "0.85rem", opacity: 0.8 }}>{detailEvent.available_tickets} / {detailEvent.total_tickets} left</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: "1rem", marginTop: "auto" }}>
-                <button onClick={() => setDetailEvent(null)} style={{ backgroundColor: "#ffffff", color: "#000c66", border: "1.5px solid #000c66", borderRadius: "9999px", padding: "0.6rem 2rem", fontSize: "1rem", fontWeight: 700, fontFamily: "var(--font-syne), sans-serif", cursor: "pointer", transition: "all 0.2s" }}>
-                  Close
-                </button>
-                <button 
-                  disabled={detailEvent.available_tickets <= 0}
-                  onClick={() => { 
-                    setSelectedEvent(detailEvent); 
-                    setProcessing(false); 
-                    setError(""); 
-                    setDetailEvent(null); 
-                  }} 
-                  style={{ backgroundColor: "#000c66", color: "#ffffff", border: "none", borderRadius: "9999px", padding: "0.6rem 2.5rem", fontSize: "1rem", fontWeight: 700, fontFamily: "var(--font-syne), sans-serif", cursor: detailEvent.available_tickets <= 0 ? "not-allowed" : "pointer", transition: "background-color 0.2s", opacity: detailEvent.available_tickets <= 0 ? 0.5 : 1, display: "flex", alignItems: "center", gap: "0.5rem" }}
-                >
-                  <Ticket size={18} />
-                  {detailEvent.available_tickets <= 0 ? "Sold Out" : "Book Now"}
-                </button>
-              </div>
-            </div>
-          </div>
         </div>
       )}
 
@@ -299,7 +236,7 @@ export default function TicketsPage() {
                 <img 
                   src={selectedEvent.image_url} 
                   alt={selectedEvent.title} 
-                  style={{ width: "100%", height: "100%", objectFit: "contain", position: "absolute", inset: 0 }} 
+                  style={{ width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: 0 }} 
                 />
               ) : (
                 <div style={{ height: "100%", background: "linear-gradient(135deg, #000c6622, #000c6611)", display: "flex", alignItems: "center", justifyContent: "center", position: "absolute", inset: 0 }}>
@@ -310,13 +247,13 @@ export default function TicketsPage() {
 
             {/* Right Column - Checkout Form */}
             <div className="checkout-modal-info-col">
-              <h2 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "2.2rem", fontWeight: 800, color: "#000000", marginBottom: "1.75rem", lineHeight: 1.2 }}>
+              <h2 className="checkout-modal-title" style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "2.2rem", fontWeight: 800, color: "#000000", marginBottom: "1.75rem", lineHeight: 1.2 }}>
                 Checkout details
               </h2>
 
               {/* Item Summary Row */}
               <div style={{ marginBottom: "1.5rem" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", fontFamily: "var(--font-syne), sans-serif", fontSize: "1.25rem", fontWeight: 800, color: "#000000", paddingBottom: "0.5rem" }}>
+                <div className="checkout-summary-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", fontFamily: "var(--font-syne), sans-serif", fontSize: "1.25rem", fontWeight: 800, color: "#000000", paddingBottom: "0.5rem" }}>
                   <span>{selectedEvent.title}</span>
                   <span>LKR.{selectedEvent.price}</span>
                 </div>
@@ -330,7 +267,7 @@ export default function TicketsPage() {
               )}
 
               <form onSubmit={handleCheckout} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                <div className="responsive-form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
                   <div>
                     <label style={{ display: "block", fontFamily: "var(--font-syne), sans-serif", fontSize: "0.95rem", fontWeight: 700, marginBottom: "0.5rem", color: "#000000" }}>First Name</label>
                     <input 

@@ -60,34 +60,34 @@ export default function Home() {
   return (
     <div>
       {/* Hero Section Wrapper with Full-Width Gradient */}
-      <div style={{ background: 'linear-gradient(to bottom, #faf5ff 0%, #ffffff 100%)', paddingTop: '2rem', paddingBottom: '1.5rem' }}>
+      <div className="hero-section-wrapper" style={{ background: 'linear-gradient(to bottom, #faf5ff 0%, #ffffff 100%)', paddingTop: '2rem', paddingBottom: '1.5rem' }}>
         <section className="container grid md-grid-cols-2 gap-8 items-center">
-          <div>
+          <div className="hero-text-content">
             <div className="hero-tag">
               <IconlyLocation size={30} color="var(--primary)" /> Uva Wellassa University Sri Lanka
             </div>
-            <h1 className="text-5xl mb-6" style={{ fontFamily: 'var(--font-syne), sans-serif', fontWeight: 800, textAlign: 'left', lineHeight: '1.1', fontSize: '3.5rem' }}>
+            <h1 className="hero-title text-5xl mb-6" style={{ fontFamily: 'var(--font-syne), sans-serif', fontWeight: 800, lineHeight: '1.1' }}>
               Centralized Digital<br />
               Platform<br />
               <span style={{ color: 'var(--primary)' }}>for Student Life</span>
             </h1>
-            <p className="text-lg text-muted mb-8" style={{ fontFamily: 'var(--font-nobile), sans-serif', fontWeight: 400, textAlign: 'left', maxWidth: '520px', fontSize: '1.05rem', lineHeight: '1.6' }}>
+            <p className="hero-subtitle text-lg text-muted mb-8" style={{ fontFamily: 'var(--font-nobile), sans-serif', fontWeight: 400, maxWidth: '520px', lineHeight: '1.6' }}>
               UWU-NEXUS is a comprehensive, university-exclusive platform designed to
               digitize the core aspects of your student life at Uva Wellassa University.
             </p>
-            <div style={{ textAlign: 'left' }}>
-              <Link href="/events" className="btn btn-primary text-lg" style={{ fontFamily: 'var(--font-nobile), sans-serif', fontWeight: 700, padding: '0.75rem 2.25rem', display: 'inline-flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div className="hero-cta-wrapper">
+              <a href="#services" className="btn btn-primary text-lg" style={{ fontFamily: 'var(--font-nobile), sans-serif', fontWeight: 700, padding: '0.75rem 2.25rem', display: 'inline-flex', alignItems: 'center', gap: '0.75rem' }}>
                 <span>Explore Platform</span>
                 <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: '50%', padding: '0.25rem' }}>
                   <ArrowRight size={16} />
                 </span>
-              </Link>
+              </a>
             </div>
           </div>
 
           <div>
             {/* Note: Source can be replaced with custom hero-image.png, logo.png acts as fallback placeholder */}
-            <div className="hero-image-container" style={{ width: '100%', height: '450px' }}>
+            <div className="hero-image-container">
               <video
                 src="/hero-image-container.webm"
                 autoPlay
@@ -133,20 +133,20 @@ export default function Home() {
       </div>
 
       {/* Features Grid Section */}
-      <section className="container py-16">
+      <section id="services" className="container" style={{ paddingTop: '4rem', paddingBottom: '1rem' }}>
         <div className="text-center mb-12" style={{ marginBottom: '2rem' }}>
           <div className="uppercase mb-2" style={{ fontFamily: 'var(--font-zain), sans-serif', fontWeight: 400, color: '#000000', letterSpacing: '0.1em', fontSize: '1.2rem' }}>
             Platform Services
           </div>
-          <h2 className="text-4xl mb-4" style={{ fontFamily: 'var(--font-syne), sans-serif', fontWeight: 800, fontSize: '2.5rem' }}>
-            Everything You Need <br /> In One Place
+          <h2 className="section-title text-4xl mb-4" style={{ fontFamily: 'var(--font-syne), sans-serif', fontWeight: 800 }}>
+            Everything You Need <br className="desktop-br" /> In One Place
           </h2>
-          <p className="text-muted max-w-2xl mx-auto" style={{ fontFamily: 'var(--font-syne), sans-serif', fontWeight: 700, textAlign: 'center', margin: '0 auto', maxWidth: '600px', fontSize: '1.05rem', color: '#000000' }}>
-            Six integrated modules addressing every aspect of <br /> student life at UWU.
+          <p className="section-subtitle text-muted max-w-2xl mx-auto" style={{ fontFamily: 'var(--font-syne), sans-serif', fontWeight: 700, margin: '0 auto', maxWidth: '600px', color: '#000000' }}>
+            Six integrated modules addressing every aspect of <br className="desktop-br" /> student life at UWU.
           </p>
         </div>
 
-        <div className="grid md-grid-cols-2 lg-grid-cols-3 gap-6">
+        <div className="services-grid grid md-grid-cols-2 lg-grid-cols-3 gap-6">
           {features.map((feature, index) => (
             <Link href={feature.link} key={index} className="service-card group">
               <img
@@ -163,7 +163,7 @@ export default function Home() {
       </section>
 
       {/* Curved Divider & Lightest Purple Subscription Section Wrapper */}
-      <div style={{ backgroundColor: '#faf5ff', marginTop: '0.1rem', paddingBottom: '2rem' }}>
+      <div className="subscribe-wrapper" style={{ backgroundColor: '#faf5ff', marginTop: '0.1rem', paddingBottom: '2rem' }}>
         <div style={{ width: '100%', overflow: 'hidden', lineHeight: 0 }}>
           <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: 'block', width: '100%', height: 'auto', backgroundColor: '#ffffff' }}>
             <path d="M0 80 Q 720 0 1440 80 L 1440 80 L 0 80 Z" fill="#faf5ff" />
@@ -171,7 +171,7 @@ export default function Home() {
         </div>
 
         {/* Subscription Banner Section */}
-        <section className="container py-8">
+        <section className="container subscribe-section" style={{ paddingTop: '0.5rem', paddingBottom: '0' }}>
           <div className="subscribe-banner">
             <div className="subscribe-title">Subscribe UWU-Nexus</div>
             <div className="subscribe-form-container">

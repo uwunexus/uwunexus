@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Lock, CheckCircle } from "lucide-react";
 
@@ -54,54 +54,201 @@ function ResetPasswordContent() {
 
   if (!token) {
     return (
-      <div className="container py-16 flex justify-center items-center" style={{ minHeight: 'calc(100vh - 200px)' }}>
-        <div className="card w-full max-w-md text-center" style={{ padding: '2.5rem' }}>
-          <h1 className="text-2xl font-bold mb-4 text-danger">Invalid Link</h1>
-          <p className="text-muted mb-6">No password reset token was provided in the URL.</p>
-          <Link href="/forgot-password" className="btn btn-primary">Request New Link</Link>
+      <div style={{
+        minHeight: "calc(100vh - 120px)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "2rem 1rem",
+        backgroundColor: "transparent"
+      }}>
+        <div style={{
+          width: "100%",
+          maxWidth: "480px",
+          backgroundColor: "#ffffff",
+          borderRadius: "2rem",
+          padding: "3rem 2.5rem",
+          boxShadow: "0 20px 40px -15px rgba(0, 0, 0, 0.12)",
+          border: "1.5px solid rgba(0, 12, 102, 0.08)",
+          textAlign: "center"
+        }}>
+          <h1 style={{
+            fontFamily: "var(--font-syne), sans-serif",
+            fontSize: "2.25rem",
+            fontWeight: 700,
+            color: "var(--danger)",
+            margin: "0 0 0.5rem 0",
+            letterSpacing: "-0.01em"
+          }}>
+            Invalid Link
+          </h1>
+          <p style={{
+            fontFamily: "var(--font-roboto), sans-serif",
+            fontSize: "0.95rem",
+            color: "#64748b",
+            margin: "0 0 2rem 0"
+          }}>
+            No password reset token was provided in the URL or the link has expired.
+          </p>
+          <Link 
+            href="/forgot-password" 
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "100%",
+              height: "50px",
+              borderRadius: "9999px",
+              border: "none",
+              backgroundColor: "#000c66",
+              color: "#ffffff",
+              fontFamily: "var(--font-syne), sans-serif",
+              fontSize: "1.1rem",
+              fontWeight: 700,
+              cursor: "pointer",
+              textDecoration: "none"
+            }}
+          >
+            Request New Link
+          </Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container py-16 flex justify-center items-center" style={{ minHeight: 'calc(100vh - 200px)' }}>
-      <div className="card w-full max-w-md" style={{ padding: '2.5rem' }}>
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <div className="p-3 rounded-full" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)' }}>
-              {status === "success" ? <CheckCircle size={40} className="text-success" /> : <Lock size={40} className="text-accent" />}
-            </div>
+    <div style={{
+      minHeight: "calc(100vh - 120px)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "2rem 1rem",
+      backgroundColor: "transparent"
+    }}>
+      <div style={{
+        width: "100%",
+        maxWidth: "480px",
+        backgroundColor: "#ffffff",
+        borderRadius: "2rem",
+        padding: "3rem 2.5rem",
+        boxShadow: "0 20px 40px -15px rgba(0, 0, 0, 0.12)",
+        border: "1.5px solid rgba(0, 12, 102, 0.08)",
+        display: "flex",
+        flexDirection: "column"
+      }}>
+        {/* Top Header emblem */}
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: "1.5rem" }}>
+          <div style={{
+            padding: "1.25rem",
+            borderRadius: "50%",
+            backgroundColor: status === "success" ? "rgba(16, 185, 129, 0.1)" : "#edf4fe",
+            color: status === "success" ? "#10b981" : "#000c66",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          }}>
+            {status === "success" ? <CheckCircle size={36} /> : <Lock size={36} />}
           </div>
-          <h1 className="text-3xl font-bold mb-2">Reset Password</h1>
-          <p className="text-muted text-sm">Enter your new password below.</p>
         </div>
 
+        {/* Title and details */}
+        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+          <h1 style={{
+            fontFamily: "var(--font-syne), sans-serif",
+            fontSize: "2.25rem",
+            fontWeight: 700,
+            color: "#000c66",
+            margin: "0 0 0.5rem 0",
+            letterSpacing: "-0.01em"
+          }}>
+            Reset Password
+          </h1>
+          <p style={{
+            fontFamily: "var(--font-roboto), sans-serif",
+            fontSize: "0.95rem",
+            color: "#64748b",
+            margin: 0
+          }}>
+            Enter your new password below to update your account access.
+          </p>
+        </div>
+
+        {/* Status messages */}
         {status === "error" && (
-          <div className="mb-6 p-3 rounded text-sm text-center" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+          <div style={{
+            backgroundColor: "rgba(239, 68, 68, 0.08)",
+            border: "1px solid rgba(239, 68, 68, 0.2)",
+            color: "var(--danger)",
+            borderRadius: "0.75rem",
+            padding: "0.75rem 1rem",
+            fontSize: "0.85rem",
+            marginBottom: "1.5rem",
+            fontWeight: 600,
+            textAlign: "center",
+            lineHeight: "1.4"
+          }}>
             {message}
           </div>
         )}
 
         {status === "success" ? (
-          <div className="text-center">
-            <div className="mb-6 p-4 rounded text-sm" style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)', color: 'var(--success, #10b981)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+          <div style={{ textAlign: "center" }}>
+            <div style={{
+              backgroundColor: "rgba(16, 185, 129, 0.08)",
+              border: "1px solid rgba(16, 185, 129, 0.2)",
+              color: "#10b981",
+              borderRadius: "0.75rem",
+              padding: "1rem",
+              fontSize: "0.9rem",
+              marginBottom: "1.5rem",
+              fontWeight: 600,
+              lineHeight: "1.5"
+            }}>
               {message}
             </div>
-            <Link href="/login" className="btn btn-primary w-full justify-center" style={{ padding: '0.75rem', backgroundColor: 'var(--accent)' }}>
+            <Link 
+              href="/login" 
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "100%",
+                height: "50px",
+                borderRadius: "9999px",
+                border: "none",
+                backgroundColor: "#000c66",
+                color: "#ffffff",
+                fontFamily: "var(--font-syne), sans-serif",
+                fontSize: "1.1rem",
+                fontWeight: 700,
+                cursor: "pointer",
+                textDecoration: "none",
+                marginTop: "0.5rem"
+              }}
+            >
               Go to Login
             </Link>
           </div>
         ) : (
-          <form onSubmit={handleSubmit}>
-            <div className="form-group mb-4">
-              <label className="form-label text-sm">New Password</label>
-              <div style={{ position: 'relative' }}>
-                <Lock size={18} className="text-muted" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
+          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+            {/* New Password input */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+              <label style={{ fontFamily: "var(--font-roboto), sans-serif", fontSize: "0.85rem", fontWeight: 500, color: "#000000" }}>New Password</label>
+              <div style={{ position: "relative" }}>
+                <Lock size={18} style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }} />
                 <input 
                   type="password" 
-                  className="form-input" 
-                  style={{ paddingLeft: '2.5rem' }} 
+                  style={{
+                    width: "100%",
+                    padding: "0.85rem 1rem 0.85rem 2.75rem",
+                    borderRadius: "0.75rem",
+                    border: "none",
+                    backgroundColor: "#e6e9ec",
+                    outline: "none",
+                    fontFamily: "var(--font-roboto), sans-serif",
+                    fontSize: "0.95rem",
+                    color: "#000000"
+                  }}
                   placeholder="Enter new password" 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -111,14 +258,24 @@ function ResetPasswordContent() {
               </div>
             </div>
 
-            <div className="form-group mb-6">
-              <label className="form-label text-sm">Confirm Password</label>
-              <div style={{ position: 'relative' }}>
-                <Lock size={18} className="text-muted" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
+            {/* Confirm Password input */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+              <label style={{ fontFamily: "var(--font-roboto), sans-serif", fontSize: "0.85rem", fontWeight: 500, color: "#000000" }}>Confirm Password</label>
+              <div style={{ position: "relative" }}>
+                <Lock size={18} style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }} />
                 <input 
                   type="password" 
-                  className="form-input" 
-                  style={{ paddingLeft: '2.5rem' }} 
+                  style={{
+                    width: "100%",
+                    padding: "0.85rem 1rem 0.85rem 2.75rem",
+                    borderRadius: "0.75rem",
+                    border: "none",
+                    backgroundColor: "#e6e9ec",
+                    outline: "none",
+                    fontFamily: "var(--font-roboto), sans-serif",
+                    fontSize: "0.95rem",
+                    color: "#000000"
+                  }}
                   placeholder="Confirm new password" 
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
@@ -128,7 +285,29 @@ function ResetPasswordContent() {
               </div>
             </div>
 
-            <button type="submit" disabled={status === "loading"} className="btn btn-primary w-full text-lg justify-center mb-6" style={{ padding: '0.75rem', backgroundColor: 'var(--accent)', opacity: status === "loading" ? 0.7 : 1 }}>
+            <button 
+              type="submit" 
+              disabled={status === "loading"} 
+              style={{
+                width: "100%",
+                height: "50px",
+                borderRadius: "9999px",
+                border: "none",
+                backgroundColor: "#000c66",
+                color: "#ffffff",
+                fontFamily: "var(--font-syne), sans-serif",
+                fontSize: "1.1rem",
+                fontWeight: 700,
+                cursor: status === "loading" ? "not-allowed" : "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "0.5rem",
+                marginTop: "0.5rem",
+                opacity: status === "loading" ? 0.8 : 1,
+                transition: "opacity 0.2s"
+              }}
+            >
               {status === "loading" ? "Resetting..." : "Reset Password"}
             </button>
           </form>
