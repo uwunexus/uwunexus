@@ -12,9 +12,6 @@ $requester_id = isset($_GET['requester_id']) ? intval($_GET['requester_id']) : 0
 $status_filter = isset($_GET['status']) ? $_GET['status'] : 'approved';
 
 try {
-    // Automatically remove expired events from the database
-    $pdo->exec("DELETE FROM events WHERE event_date < CURRENT_DATE()");
-
     // Admin or clubadmin can see all statuses
     if ($requester_id > 0) {
         $stmt = $pdo->prepare("SELECT role FROM users WHERE id = ?");
