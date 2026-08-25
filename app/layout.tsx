@@ -8,15 +8,15 @@ import { Shield, ArrowRight } from "lucide-react";
 import NavLinks from "./components/NavLinks";
 import AuthModal from "./components/AuthModal";
 
-const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
-const outfit = Outfit({ subsets: ["latin"], variable: '--font-outfit' });
-const syne = Syne({ subsets: ["latin"], variable: '--font-syne' });
-const nobile = Nobile({ subsets: ["latin"], weight: ["400", "700"], variable: '--font-nobile' });
-const zain = Zain({ subsets: ["latin"], weight: ["400", "700"], variable: '--font-zain' });
-const audiowide = Audiowide({ subsets: ["latin"], weight: "400", variable: '--font-audiowide' });
-const dmSans = DM_Sans({ subsets: ["latin"], weight: ["400", "500"], variable: '--font-dm-sans' });
-const inclusiveSans = Inclusive_Sans({ subsets: ["latin"], weight: "400", variable: '--font-inclusive-sans' });
-const roboto = Roboto({ subsets: ["latin"], weight: ["400", "500", "700"], variable: '--font-roboto' });
+const inter = Inter({ subsets: ["latin"], variable: '--font-inter', display: 'swap' });
+const outfit = Outfit({ subsets: ["latin"], variable: '--font-outfit', display: 'swap' });
+const syne = Syne({ subsets: ["latin"], variable: '--font-syne', display: 'swap' });
+const nobile = Nobile({ subsets: ["latin"], weight: ["400", "700"], variable: '--font-nobile', display: 'swap' });
+const zain = Zain({ subsets: ["latin"], weight: ["400", "700"], variable: '--font-zain', display: 'swap' });
+const audiowide = Audiowide({ subsets: ["latin"], weight: "400", variable: '--font-audiowide', display: 'swap' });
+const dmSans = DM_Sans({ subsets: ["latin"], weight: ["400", "500"], variable: '--font-dm-sans', display: 'swap' });
+const inclusiveSans = Inclusive_Sans({ subsets: ["latin"], weight: "400", variable: '--font-inclusive-sans', display: 'swap' });
+const roboto = Roboto({ subsets: ["latin"], weight: ["400", "500", "700"], variable: '--font-roboto', display: 'swap' });
 
 export const metadata: Metadata = {
   title: "UWU-NEXUS",
@@ -35,9 +35,6 @@ export default async function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
-      </head>
       <body className={`${inter.variable} ${outfit.variable} ${syne.variable} ${nobile.variable} ${zain.variable} ${audiowide.variable} ${dmSans.variable} ${inclusiveSans.variable} ${roboto.variable} font-sans`} style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }} suppressHydrationWarning>
         <nav className="navbar">
           <div className="container flex justify-between items-center" style={{ gap: '1rem' }}>
