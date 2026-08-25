@@ -339,10 +339,12 @@ export default function LostAndFoundPage() {
       {loading ? (
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "5rem 0", color: "#64748b", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700 }}>Loading reports...</div>
       ) : filteredReports.length === 0 ? (
-        <div className="no-events-container" style={{ textAlign: "center", padding: "5rem 0", color: "#64748b", maxWidth: "600px", margin: "0 auto", fontFamily: "var(--font-syne), sans-serif" }}>
-          <Search size={48} className="no-events-icon" style={{ margin: "0 auto 1rem auto", opacity: 0.3 }} />
-          <h2 className="no-events-title" style={{ fontSize: "1.5rem", fontWeight: 800, color: "#000000", marginBottom: "0.5rem" }}>No Reports Found</h2>
-          <p className="no-events-desc" style={{ fontWeight: 500 }}>No listings match your criteria. You can create a report if you lost or found an item.</p>
+        <div className="no-events-container">
+          <div className="no-events-icon-badge">
+            <Search size={26} />
+          </div>
+          <h2 className="no-events-title">No Reports Found</h2>
+          <p className="no-events-desc">No listings match your criteria. You can create a report if you lost or found an item.</p>
         </div>
       ) : (
         <div className="grid gap-8 lost-found-items-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))" }}>

@@ -487,10 +487,12 @@ export default function MarketplacePage() {
       {loading ? (
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "5rem 0", color: "#64748b", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700 }}>Loading marketplace items...</div>
       ) : filteredItems.length === 0 ? (
-        <div className="no-events-container" style={{ textAlign: "center", padding: "5rem 0", color: "#64748b", maxWidth: "600px", margin: "0 auto", fontFamily: "var(--font-syne), sans-serif" }}>
-          <Store size={48} className="no-events-icon" style={{ margin: "0 auto 1rem auto", opacity: 0.3 }} />
-          <h2 className="no-events-title" style={{ fontSize: "1.5rem", fontWeight: 800, color: "#000000", marginBottom: "0.5rem" }}>No Items Found</h2>
-          <p className="no-events-desc" style={{ fontWeight: 500 }}>{tab === "my-items" ? "You haven't listed any items yet." : "No listings match your search criteria."}</p>
+        <div className="no-events-container">
+          <div className="no-events-icon-badge">
+            <Store size={26} />
+          </div>
+          <h2 className="no-events-title">No Items Found</h2>
+          <p className="no-events-desc">{tab === "my-items" ? "You haven't listed any items yet." : "No listings match your search criteria."}</p>
         </div>
       ) : (
         <div className="grid gap-8 marketplace-items-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))" }}>
