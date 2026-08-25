@@ -644,6 +644,7 @@ export default function MarketplacePage() {
       <button
         className="marketplace-fab"
         onClick={openCreateModal}
+        suppressHydrationWarning
       >
         <Plus size={20} />
         <span>List Item</span>
@@ -875,7 +876,7 @@ export default function MarketplacePage() {
                 {editingItem && files.length === 0 && (
                   <p style={{ fontSize: "0.75rem", color: "var(--warning)", marginBottom: "0.5rem", fontWeight: 600 }}>Note: Uploading new images will replace existing ones. Leave blank to keep existing images.</p>
                 )}
-                <div className="border-2 border-dashed border-border rounded-lg p-6 text-center text-muted flex flex-col items-center justify-center cursor-pointer relative hover:border-primary transition-colors" style={{ backgroundColor: "#f1f3f5", borderRadius: "1rem", border: "2px dashed rgba(0,0,0,0.15)" }}>
+                <div className="border-2 border-dashed border-border rounded-lg p-6 text-center text-muted flex flex-col items-center justify-center cursor-pointer relative hover:border-primary transition-colors marketplace-modal-upload-box" style={{ backgroundColor: "#f1f3f5", borderRadius: "1rem", border: "2px dashed rgba(0,0,0,0.15)" }}>
                   <Upload size={24} className="mb-2" />
                   <span style={{ fontWeight: 700, fontSize: "0.9rem" }}>Click to select images</span>
                   <input
