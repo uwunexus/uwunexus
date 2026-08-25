@@ -191,7 +191,13 @@ export default function InfoHubPage() {
             {activeTab === "procedure" && (
               <div className="info-hub-procedures-list" style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
                 {procedures.length === 0 ? (
-                  <div style={{ color: "#64748b", fontStyle: "italic", padding: "2rem 0", fontFamily: "var(--font-roboto), sans-serif" }}>No procedures found.</div>
+                  <div className="no-events-container" style={{ padding: "4rem 1rem" }}>
+                    <div className="no-events-icon-badge">
+                      <FileText size={26} />
+                    </div>
+                    <h2 className="no-events-title">No Procedures Found</h2>
+                    <p className="no-events-desc">No university procedures match your search.</p>
+                  </div>
                 ) : (
                   procedures.map(proc => (
                     <div key={proc.id} className="info-hub-procedure-card" style={{
@@ -268,7 +274,13 @@ export default function InfoHubPage() {
                 gap: "1.5rem"
               }}>
                 {hotlines.length === 0 ? (
-                  <div style={{ color: "#64748b", fontStyle: "italic", padding: "2rem 0", fontFamily: "var(--font-roboto), sans-serif", gridColumn: "1 / -1" }}>No hotlines found.</div>
+                  <div className="no-events-container" style={{ padding: "4rem 1rem", gridColumn: "1 / -1" }}>
+                    <div className="no-events-icon-badge">
+                      <Phone size={26} />
+                    </div>
+                    <h2 className="no-events-title">No Hotlines Found</h2>
+                    <p className="no-events-desc">No emergency hotlines match your search.</p>
+                  </div>
                 ) : (
                   hotlines.map(hotline => (
                     <div key={hotline.id} className="info-hub-hotline-card" style={{
@@ -353,7 +365,13 @@ export default function InfoHubPage() {
                 gap: "1.5rem"
               }}>
                 {contacts.length === 0 ? (
-                  <div style={{ color: "#64748b", fontStyle: "italic", padding: "2rem 0", fontFamily: "var(--font-roboto), sans-serif", gridColumn: "1 / -1" }}>No contacts found.</div>
+                  <div className="no-events-container" style={{ padding: "4rem 1rem", gridColumn: "1 / -1" }}>
+                    <div className="no-events-icon-badge">
+                      <UserCircle size={26} />
+                    </div>
+                    <h2 className="no-events-title">No Contacts Found</h2>
+                    <p className="no-events-desc">No key contacts match your search.</p>
+                  </div>
                 ) : (
                   contacts.map(contact => (
                     <div key={contact.id} className="info-hub-contact-card" style={{
