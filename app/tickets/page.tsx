@@ -137,10 +137,12 @@ export default function TicketsPage() {
       {loading ? (
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "5rem 0", color: "#64748b", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700 }}>Loading events...</div>
       ) : events.length === 0 ? (
-        <div className="no-events-container" style={{ textAlign: "center", padding: "5rem 0", color: "#64748b", maxWidth: "600px", margin: "0 auto", fontFamily: "var(--font-syne), sans-serif" }}>
-          <Ticket size={48} className="no-events-icon" style={{ margin: "0 auto 1rem auto", opacity: 0.3 }} />
-          <h2 className="no-events-title" style={{ fontSize: "1.5rem", fontWeight: 800, color: "#000000", marginBottom: "0.5rem" }}>No Upcoming Events</h2>
-          <p className="no-events-desc" style={{ fontWeight: 500 }}>There are currently no active ticketed events available. Please check back later!</p>
+        <div className="no-events-container">
+          <div className="no-events-icon-badge">
+            <Ticket size={26} />
+          </div>
+          <h2 className="no-events-title">No Upcoming Events</h2>
+          <p className="no-events-desc">There are currently no active ticketed events available. Please check back later!</p>
         </div>
       ) : (
         <div className="grid gap-8 tickets-events-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(270px, 1fr))" }}>

@@ -285,11 +285,49 @@ export default function EventsPage() {
         <div className="text-center py-20 text-muted">Loading events...</div>
       )}
 
-      {/* No Events */}
+      {/* No Events Empty State */}
       {!loading && !error && filtered.length === 0 && (
-        <div className="text-center py-20 text-muted">
-          <Calendar size={48} style={{ margin: "0 auto 1rem", opacity: 0.3 }} />
-          <p>No events found. Check back later!</p>
+        <div className="events-empty-state" style={{
+          textAlign: "center",
+          padding: "4.5rem 1rem",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "0.6rem"
+        }}>
+          <div style={{
+            width: "56px",
+            height: "56px",
+            borderRadius: "50%",
+            backgroundColor: "rgba(0, 12, 102, 0.06)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "#000c66",
+            marginBottom: "0.25rem"
+          }}>
+            <Calendar size={26} />
+          </div>
+          <h3 style={{
+            fontFamily: "var(--font-syne), sans-serif",
+            fontWeight: 700,
+            fontSize: "1.25rem",
+            color: "#0f172a",
+            margin: 0
+          }}>
+            No events found
+          </h3>
+          <p style={{
+            fontFamily: "var(--font-roboto), sans-serif",
+            fontSize: "0.92rem",
+            color: "#64748b",
+            margin: 0,
+            maxWidth: "340px",
+            lineHeight: 1.5
+          }}>
+            There are no upcoming events in this category. Check back later!
+          </p>
         </div>
       )}
 
