@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Calculator, BookOpen, Save, ChevronDown, ChevronRight, AlertCircle, Award, Loader, Eye, GraduationCap, CheckCircle } from "lucide-react";
+import { Calculator, BookOpen, Save, ChevronDown, ChevronRight, AlertCircle, Award, Loader, Eye, GraduationCap, CheckCircle, Check } from "lucide-react";
 
 /* ─── Types ─────────────────────────────────────────────────── */
 interface Module {
@@ -74,12 +74,12 @@ export default function GPACalculatorPage() {
   const [localGrades, setLocalGrades] = useState<Record<number, string>>({});
 
   // UI
-  const [loading, setLoading]     = useState(false);
-  const [saving, setSaving]       = useState(false);
-  const [error, setError]         = useState("");
+  const [loading, setLoading]         = useState(false);
+  const [saving, setSaving]           = useState(false);
+  const [savedSuccess, setSavedSuccess] = useState(false);
+  const [error, setError]             = useState("");
   const [notEligible, setNotEligible] = useState(false);
-  const [saveMsg, setSaveMsg]     = useState("");
-  const [openSems, setOpenSems]   = useState<Record<string, boolean>>({ "1-1": true, "1-2": false, "2-1": true, "2-2": false, "3-1": true, "3-2": false, "4-1": true, "4-2": false });
+  const [openSems, setOpenSems]       = useState<Record<string, boolean>>({ "1-1": true, "1-2": false, "2-1": true, "2-2": false, "3-1": true, "3-2": false, "4-1": true, "4-2": false });
   const [curriculumLoaded, setCurriculumLoaded] = useState(false);
 
   // Selected Level Tab (Option B: Level 100 - 400 Tabs)
@@ -178,7 +178,7 @@ export default function GPACalculatorPage() {
 
   const handleSave = async () => {
     if (previewMode) return;
-    setSaving(true); setSaveMsg(""); setError("");
+    setSaving(true); setError("");
     const gradesToSave: any[] = [];
     for (const [yr, yearData] of Object.entries(curriculum))
       for (const [sem, semData] of Object.entries(yearData))
@@ -195,8 +195,8 @@ export default function GPACalculatorPage() {
       const d = await r.json();
       if (!d.success) throw new Error(d.message);
       setGpaSummary(d.gpa_summary);
-      setSaveMsg("Grades saved successfully!");
-      setTimeout(() => setSaveMsg(""), 3000);
+      setSavedSuccess(true);
+      setTimeout(() => setSavedSuccess(false), 2500);
     } catch (e: any) { setError(e.message || "Failed to save."); }
     finally { setSaving(false); }
   };
@@ -218,23 +218,23 @@ export default function GPACalculatorPage() {
   /* ── Superadmin degree selector ── */
   if (myRole === "superadmin" && !curriculumLoaded) {
     return (
-      <div className="container" style={{ maxWidth: '1210px', marginTop: '1.5rem', paddingBottom: '4rem' }}>
-        <div className="mb-10 text-center">
-          <h1 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "3rem", fontWeight: 700, color: "#000000" }}>
+      <div className="container gpa-container" style={{ maxWidth: '1210px', marginTop: '1.5rem', paddingBottom: '4rem' }}>
+        <div className="mb-10 text-center gpa-header-row">
+          <h1 className="gpa-page-title" style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "3rem", fontWeight: 700, color: "#000000" }}>
             Smart GPA Calculator
           </h1>
-          <p style={{ fontFamily: "var(--font-inclusive-sans), sans-serif", fontSize: "1.15rem", color: "#64748b", fontWeight: 500, marginTop: "0.5rem" }}>
+          <p className="gpa-page-subtitle" style={{ fontFamily: "var(--font-inclusive-sans), sans-serif", fontSize: "1.15rem", color: "#64748b", fontWeight: 500, marginTop: "0.5rem" }}>
             Superadmin Preview Mode — select a degree programme to inspect its curriculum.
           </p>
         </div>
 
-        <div className="card" style={{ maxWidth: "600px", margin: "0 auto", padding: "2.5rem", borderRadius: "2.2rem", border: "1px solid rgba(0, 0, 0, 0.1)", background: "#ffffff", boxShadow: "0 10px 25px rgba(0,0,0,0.05)" }}>
+        <div className="card gpa-admin-card" style={{ maxWidth: "600px", margin: "0 auto", padding: "2.5rem", borderRadius: "2.2rem", border: "1px solid rgba(0, 0, 0, 0.1)", background: "#ffffff", boxShadow: "0 10px 25px rgba(0,0,0,0.05)" }}>
           <div className="flex items-center gap-4 mb-8">
             <div style={{ padding: "1rem", borderRadius: "1rem", backgroundColor: "rgba(0, 12, 102, 0.05)" }}>
               <Eye size={32} style={{ color: "#000c66" }} />
             </div>
             <div>
-              <h2 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.5rem", fontWeight: 700 }}>Select Degree Programme</h2>
+              <h2 className="gpa-admin-card-title" style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.5rem", fontWeight: 700 }}>Select Degree Programme</h2>
               <p className="text-muted text-sm mt-1">Preview any degree curriculum as Superadmin</p>
             </div>
           </div>
@@ -251,7 +251,7 @@ export default function GPACalculatorPage() {
                 <button
                   key={d.degree_code}
                   onClick={() => handleDegreeSelect(d.degree_code)}
-                  className="card text-left flex items-center gap-4 hover-scale"
+                  className="card text-left flex items-center gap-4 hover-scale gpa-admin-degree-btn"
                   style={{ cursor: "pointer", padding: "1.25rem", border: "1px solid rgba(0, 0, 0, 0.1)", background: "#ffffff", borderRadius: "1rem", transition: "all 0.2s" }}>
                   <div style={{ padding: "0.75rem", borderRadius: "0.75rem", backgroundColor: "rgba(0, 12, 102, 0.05)", flexShrink: 0 }}>
                     <GraduationCap size={24} style={{ color: "#000c66" }} />
@@ -272,8 +272,8 @@ export default function GPACalculatorPage() {
 
   /* ── Not eligible ── */
   if (notEligible) return (
-    <div className="container py-16 flex justify-center">
-      <div className="card text-center shadow-2xl" style={{ maxWidth: "550px", borderTop: "3px solid var(--warning)", background: "#ffffff", borderRadius: "2.2rem" }}>
+    <div className="container py-16 flex justify-center gpa-container">
+      <div className="card text-center shadow-2xl gpa-not-eligible-card" style={{ maxWidth: "550px", borderTop: "3px solid var(--warning)", background: "#ffffff", borderRadius: "2.2rem" }}>
         <AlertCircle size={56} style={{ margin: "0 auto 1.5rem", color: "var(--warning)" }} />
         <h2 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.8rem", fontWeight: 800, marginBottom: "1rem" }}>Feature Not Available</h2>
         <p style={{ color: "#64748b", marginBottom: "1.5rem" }}>The Smart GPA Calculator is currently available only for <strong>Faculty of Applied Sciences</strong> students:</p>
@@ -289,7 +289,7 @@ export default function GPACalculatorPage() {
 
   /* ── Error ── */
   if (error && !curriculumLoaded) return (
-    <div className="container py-12">
+    <div className="container py-12 gpa-container">
       <div className="p-4 rounded-lg flex items-center gap-3" style={{ backgroundColor: "rgba(239,68,68,0.1)", color: "var(--danger)", border: "1px solid rgba(239,68,68,0.2)" }}>
         <AlertCircle size={20} />
         <span className="font-medium">{error}</span>
@@ -298,7 +298,7 @@ export default function GPACalculatorPage() {
   );
 
   return (
-    <div className="container" style={{ maxWidth: '1210px', marginTop: '1.5rem', paddingBottom: '4rem' }}>
+    <div className="container gpa-container" style={{ maxWidth: '1210px', marginTop: '1.5rem', paddingBottom: '4rem' }}>
       {/* Skeleton Animation Style Injection */}
       <style>{`
         @keyframes pulse {
@@ -311,16 +311,16 @@ export default function GPACalculatorPage() {
       `}</style>
 
       {/* Title Section */}
-      <div className="flex justify-between items-start mb-8 flex-wrap gap-4" style={{ marginTop: '1.5rem' }}>
+      <div className="flex justify-between items-start mb-8 flex-wrap gap-4 gpa-header-row" style={{ marginTop: '1.5rem' }}>
         <div>
-          <h1 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "3rem", fontWeight: 700, color: "#000000", letterSpacing: "0.02em", marginBottom: "0.25rem" }}>
+          <h1 className="gpa-page-title" style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "3rem", fontWeight: 700, color: "#000000", letterSpacing: "0.02em", marginBottom: "0.25rem" }}>
             Smart GPA Calculator
           </h1>
-          <p style={{ fontFamily: "var(--font-inclusive-sans), sans-serif", fontSize: "1.15rem", color: "#64748b", fontWeight: 500, marginBottom: "1rem" }}>
+          <p className="gpa-page-subtitle" style={{ fontFamily: "var(--font-inclusive-sans), sans-serif", fontSize: "1.15rem", color: "#64748b", fontWeight: 500, marginBottom: "1rem" }}>
             {userInfo ? userInfo.degree_name : "Loading Degree Programme..."}
           </p>
-          <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
-            <span style={{ 
+          <div className="gpa-badges-row" style={{ display: "flex", gap: "0.75rem", alignItems: "center", flexWrap: "wrap" }}>
+            <span className="gpa-badge" style={{ 
               border: "1.5px solid #000c66", 
               borderRadius: "9999px", 
               padding: "0.4rem 1.25rem", 
@@ -331,7 +331,7 @@ export default function GPACalculatorPage() {
             }}>
               {userInfo ? userInfo.enrollment_number : "UWU/IIT/.../.../"}
             </span>
-            <span style={{ 
+            <span className="gpa-badge" style={{ 
               border: "1.5px solid #000c66", 
               borderRadius: "9999px", 
               padding: "0.4rem 1.25rem", 
@@ -346,11 +346,12 @@ export default function GPACalculatorPage() {
 
           {/* MRT/SCT: Specialization Toggles */}
           {userInfo && !previewMode && !needsSpecialization && userInfo.raw_degree && ["MRT", "SCT"].includes(userInfo.raw_degree) && (
-            <div className="flex items-center gap-3 mt-4">
-              <span style={{ backgroundColor: "rgba(0, 12, 102, 0.05)", border: "1px solid rgba(0,12,102,0.15)", borderRadius: "9999px", padding: "0.4rem 1rem", fontSize: "0.85rem", fontWeight: 700, color: "#000c66", fontFamily: "var(--font-syne), sans-serif" }}>
+            <div className="flex items-center gap-3 mt-4 gpa-spec-row" style={{ flexWrap: "wrap" }}>
+              <span className="gpa-spec-badge" style={{ backgroundColor: "rgba(0, 12, 102, 0.05)", border: "1px solid rgba(0,12,102,0.15)", borderRadius: "9999px", padding: "0.4rem 1rem", fontSize: "0.85rem", fontWeight: 700, color: "#000c66", fontFamily: "var(--font-syne), sans-serif" }}>
                 Specialization: {userInfo.degree_code}
               </span>
               <button
+                className="gpa-spec-btn"
                 style={{ padding: "0.4rem 1rem", backgroundColor: "#000c66", color: "#ffffff", border: "none", borderRadius: "9999px", cursor: "pointer", fontSize: "0.8rem", fontWeight: 700, fontFamily: "var(--font-syne), sans-serif" }}
                 onClick={() => setNeedsSpecialization(true)}>
                 Change Specialization
@@ -361,7 +362,7 @@ export default function GPACalculatorPage() {
 
         {/* Superadmin Mode Selector */}
         {myRole === "superadmin" && previewMode && (
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.75rem", backgroundColor: "#f8fafc", padding: "1rem 1.5rem", borderRadius: "1.5rem", border: "1px solid rgba(0,0,0,0.1)" }}>
+          <div className="gpa-superadmin-box" style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.75rem", backgroundColor: "#f8fafc", padding: "1rem 1.5rem", borderRadius: "1.5rem", border: "1px solid rgba(0,0,0,0.1)" }}>
             <span style={{ backgroundColor: "rgba(0, 12, 102, 0.05)", color: "#000c66", border: "1px solid rgba(0, 12, 102, 0.15)", borderRadius: "9999px", padding: "0.3rem 0.9rem", fontSize: "0.8rem", fontWeight: 700, fontFamily: "var(--font-syne), sans-serif" }}>
               Previewing: {userInfo?.degree_code}
             </span>
@@ -376,66 +377,65 @@ export default function GPACalculatorPage() {
       </div>
 
       {/* GPA Summary Boxes Block */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.5rem", marginBottom: "3rem" }}>
+      <div className="gpa-summary-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.5rem", marginBottom: "3rem" }}>
         {/* Simulated GPA */}
-        <div style={{ backgroundColor: "#e6e9ec", borderRadius: "1.8rem", padding: "1.5rem 1.25rem", display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <div style={{ backgroundColor: "#000c66", color: "#ffffff", borderRadius: "9999px", padding: "0.5rem 2.2rem", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "1.15rem", textAlign: "center", width: "fit-content" }}>
+        <div className="gpa-summary-card" style={{ backgroundColor: "#e6e9ec", borderRadius: "1.8rem", padding: "1.5rem 1.25rem", display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <div className="gpa-summary-card-pill" style={{ backgroundColor: "#000c66", color: "#ffffff", borderRadius: "9999px", padding: "0.5rem 2.2rem", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "1.15rem", textAlign: "center", width: "fit-content" }}>
             Simulated GPA
           </div>
-          <div style={{ fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "2.5rem", color: "#000000", marginTop: "1rem" }}>
+          <div className="gpa-summary-card-value" style={{ fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "2.5rem", color: "#000000", marginTop: "1rem" }}>
             {liveGPA.toFixed(2)}
           </div>
         </div>
 
         {/* Official GPA */}
-        <div style={{ backgroundColor: "#e6e9ec", borderRadius: "1.8rem", padding: "1.5rem 1.25rem", display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <div style={{ backgroundColor: "#000c66", color: "#ffffff", borderRadius: "9999px", padding: "0.5rem 2.2rem", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "1.15rem", textAlign: "center", width: "fit-content" }}>
+        <div className="gpa-summary-card" style={{ backgroundColor: "#e6e9ec", borderRadius: "1.8rem", padding: "1.5rem 1.25rem", display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <div className="gpa-summary-card-pill" style={{ backgroundColor: "#000c66", color: "#ffffff", borderRadius: "9999px", padding: "0.5rem 2.2rem", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "1.15rem", textAlign: "center", width: "fit-content" }}>
             Official GPA
           </div>
-          <div style={{ fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "2.5rem", color: "#000000", marginTop: "1rem" }}>
+          <div className="gpa-summary-card-value" style={{ fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "2.5rem", color: "#000000", marginTop: "1rem" }}>
             {previewMode ? liveGPA.toFixed(2) : (gpaSummary?.current_gpa ?? 0) === 0 ? liveGPA.toFixed(2) : (gpaSummary?.current_gpa ?? 0).toFixed(2)}
           </div>
         </div>
 
         {/* Projected Honors */}
-        <div style={{ backgroundColor: "#e6e9ec", borderRadius: "1.8rem", padding: "1.5rem 1.25rem", display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <div style={{ backgroundColor: "#000c66", color: "#ffffff", borderRadius: "9999px", padding: "0.5rem 2.2rem", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "1.15rem", textAlign: "center", width: "fit-content" }}>
+        <div className="gpa-summary-card gpa-honors-card" style={{ backgroundColor: "#e6e9ec", borderRadius: "1.8rem", padding: "1.5rem 1.25rem", display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <div className="gpa-summary-card-pill" style={{ backgroundColor: "#000c66", color: "#ffffff", borderRadius: "9999px", padding: "0.5rem 2.2rem", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "1.15rem", textAlign: "center", width: "fit-content" }}>
             Projected Honors
           </div>
-          <div style={{ fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "2.2rem", color: "#000000", marginTop: "1.2rem", textAlign: "center", whiteSpace: "nowrap" }}>
+          <div className="gpa-summary-card-value gpa-honors-value" style={{ fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "2.2rem", color: "#000000", marginTop: "1.2rem", textAlign: "center", whiteSpace: "nowrap" }}>
             {liveClass}
           </div>
         </div>
       </div>
 
-      {/* Action Status Prompts */}
+      {/* Minimalist Error Toast */}
       {error && (
-        <div style={{ marginBottom: "1.5rem", padding: "1rem", borderRadius: "0.75rem", display: "flex", alignItems: "center", gap: "0.5rem", backgroundColor: "rgba(239,68,68,0.1)", color: "var(--danger)", border: "1px solid rgba(239,68,68,0.2)", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700 }}>
-          <AlertCircle size={20} /> <span>{error}</span>
-        </div>
-      )}
-      {saveMsg && (
-        <div style={{ marginBottom: "1.5rem", padding: "1rem", borderRadius: "0.75rem", display: "flex", alignItems: "center", gap: "0.5rem", backgroundColor: "rgba(34,197,94,0.1)", color: "var(--success)", border: "1px solid rgba(34,197,94,0.2)", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700 }}>
-          <CheckCircle size={20} /> <span>{saveMsg}</span>
+        <div className="gpa-toast-error">
+          <div className="gpa-toast-icon-wrapper error">
+            <AlertCircle size={18} />
+          </div>
+          <span>{error}</span>
         </div>
       )}
 
       {/* Specialization Selection Row (MRT / SCT students) */}
       {needsSpecialization && specOptions.length > 0 && (
-        <div className="card mb-10 overflow-hidden" style={{ borderRadius: "2.2rem", border: "1px solid rgba(0,0,0,0.1)", background: "#ffffff", padding: "2.5rem", boxShadow: "0 10px 25px rgba(0,0,0,0.03)" }}>
-          <h3 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.6rem", fontWeight: 800, color: "#000000", marginBottom: "0.5rem" }}>
+        <div className="card mb-10 overflow-hidden gpa-spec-choice-card" style={{ borderRadius: "2.2rem", border: "1px solid rgba(0,0,0,0.1)", background: "#ffffff", padding: "2.5rem", boxShadow: "0 10px 25px rgba(0,0,0,0.03)" }}>
+          <h3 className="gpa-spec-choice-title" style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.6rem", fontWeight: 800, color: "#000000", marginBottom: "0.5rem" }}>
             Choose Your Specialization
           </h3>
-          <p style={{ color: "#64748b", marginBottom: "1.5rem" }}>
+          <p className="gpa-spec-choice-desc" style={{ color: "#64748b", marginBottom: "1.5rem" }}>
             <strong>{baseDegree}</strong> students select a specialization at Level 300 (Year 3). Once you select your specialization, the full 4-year curriculum will load permanently.
           </p>
           {specError && <div style={{ color: "var(--danger)", marginBottom: "1rem", fontWeight: 700 }}>{specError}</div>}
-          <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))" }}>
+          <div className="grid gap-4 gpa-spec-choice-grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))" }}>
             {specOptions.map(opt => (
               <button
                 key={opt.code}
                 disabled={settingSpec}
                 onClick={() => handleSelectSpec(opt.code)}
+                className="gpa-spec-choice-btn"
                 style={{ cursor: "pointer", padding: "1.25rem", border: "1px solid rgba(0, 0, 0, 0.1)", background: "#ffffff", borderRadius: "1rem", textAlign: "left", transition: "all 0.2s" }}
               >
                 <div style={{ fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "1.1rem", color: "#000c66" }}>{baseDegree}-{opt.code}</div>
@@ -447,15 +447,16 @@ export default function GPACalculatorPage() {
       )}
 
       {/* Level Tabs Accordion Bar & Save Grades Row */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem", flexWrap: "wrap", gap: "1rem" }}>
+      <div className="gpa-controls-bar" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem", flexWrap: "wrap", gap: "1rem" }}>
         {/* Level Tabs Pill Container */}
-        <div style={{ display: "inline-flex", backgroundColor: "#e6effd", padding: "0.3rem", borderRadius: "9999px", border: "1px solid rgba(0, 12, 102, 0.05)" }}>
+        <div className="gpa-level-tabs-container" style={{ display: "inline-flex", backgroundColor: "#e6effd", padding: "0.3rem", borderRadius: "9999px", border: "1px solid rgba(0, 12, 102, 0.05)" }}>
           {["1", "2", "3", "4"].map(lvl => {
             const isActive = activeLevel === lvl;
             return (
               <button
                 key={lvl}
                 onClick={() => setActiveLevel(lvl)}
+                className={`gpa-level-tab-btn ${isActive ? "active" : ""}`}
                 style={{
                   backgroundColor: isActive ? "#000c66" : "transparent",
                   color: isActive ? "#ffffff" : "#000c66",
@@ -475,13 +476,14 @@ export default function GPACalculatorPage() {
           })}
         </div>
 
-        {/* Save Grades Button */}
+        {/* Save Grades Button (Desktop) */}
         {!previewMode && (
           <button
             onClick={handleSave}
-            disabled={saving}
+            disabled={saving || savedSuccess}
+            className={`gpa-save-btn ${savedSuccess ? "saved" : ""}`}
             style={{
-              backgroundColor: "#334155",
+              backgroundColor: savedSuccess ? "#059669" : "#334155",
               color: "#ffffff",
               border: "none",
               borderRadius: "9999px",
@@ -489,19 +491,66 @@ export default function GPACalculatorPage() {
               fontFamily: "var(--font-syne), sans-serif",
               fontWeight: 700,
               fontSize: "1rem",
-              cursor: "pointer",
+              cursor: (saving || savedSuccess) ? "default" : "pointer",
               display: "flex",
               alignItems: "center",
               gap: "0.5rem",
-              transition: "opacity 0.2s",
-              opacity: saving ? 0.7 : 1
+              transition: "all 0.25s ease",
+              boxShadow: savedSuccess ? "0 6px 20px rgba(5, 150, 105, 0.35)" : "none",
+              opacity: saving ? 0.8 : 1
             }}
           >
-            <Save size={18} />
-            <span>Save All Grades</span>
+            {savedSuccess ? (
+              <>
+                <Check size={18} />
+                <span>Grades Saved!</span>
+              </>
+            ) : saving ? (
+              <>
+                <Loader size={18} className="animate-spin" />
+                <span>Saving...</span>
+              </>
+            ) : (
+              <>
+                <Save size={18} />
+                <span>Save All Grades</span>
+              </>
+            )}
           </button>
         )}
       </div>
+
+      {/* Mobile Floating Action Button (Save Grades) */}
+      {!previewMode && (
+        <button
+          onClick={handleSave}
+          disabled={saving || savedSuccess}
+          className={`gpa-fab ${savedSuccess ? "saved" : ""}`}
+          style={{
+            backgroundColor: savedSuccess ? "#059669" : "#000c66",
+            boxShadow: savedSuccess ? "0 10px 25px rgba(5, 150, 105, 0.4), 0 4px 12px rgba(0, 0, 0, 0.2)" : undefined,
+            transition: "all 0.25s ease"
+          }}
+          suppressHydrationWarning
+        >
+          {savedSuccess ? (
+            <>
+              <Check size={18} />
+              <span>Saved!</span>
+            </>
+          ) : saving ? (
+            <>
+              <Loader size={18} className="animate-spin" />
+              <span>Saving...</span>
+            </>
+          ) : (
+            <>
+              <Save size={18} />
+              <span>Save Grades</span>
+            </>
+          )}
+        </button>
+      )}
 
       {/* Curriculum View (Filtered by selected level/year) */}
       {loading || !curriculumLoaded || !curriculum[activeLevel] ? (
@@ -519,10 +568,11 @@ export default function GPACalculatorPage() {
             const isSemOpen = openSems[semKey];
 
             return (
-              <div key={sem} style={{ display: "flex", flexDirection: "column" }}>
+              <div key={sem} className="gpa-sem-section" style={{ display: "flex", flexDirection: "column" }}>
                 {/* Semester Accordion Toggle Bar */}
                 <button
                   onClick={() => toggleSem(semKey)}
+                  className="gpa-sem-toggle-btn"
                   style={{
                     width: "100%",
                     backgroundColor: "#000c66",
@@ -545,7 +595,7 @@ export default function GPACalculatorPage() {
 
                 {/* Semester Content Container */}
                 {isSemOpen && (
-                  <div style={{ 
+                  <div className="gpa-sem-content" style={{ 
                     backgroundColor: "#f0f7ff", 
                     borderRadius: "1.8rem", 
                     padding: "1.5rem 2rem", 
@@ -555,101 +605,149 @@ export default function GPACalculatorPage() {
                     flexDirection: "column",
                     gap: "2rem"
                   }}>
-                    {Object.values(semData).map(grp => (
-                      <div key={grp.group_id} style={{ display: "flex", flexDirection: "column" }}>
-                        {/* Group Header */}
-                        <div style={{ display: "flex", alignItems: "baseline", gap: "0.5rem", marginBottom: "1rem" }}>
-                          <h4 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.15rem", fontWeight: 700, color: "#000000", margin: 0 }}>
-                            {grp.group_name} Course Units
-                          </h4>
-                          {Number(grp.min_credits_required) > 0 && (
-                            <span style={{ fontFamily: "var(--font-inclusive-sans), sans-serif", fontSize: "0.95rem", color: "#64748b", fontWeight: 500 }}>
-                              ({Number(grp.min_credits_required).toFixed(1)} credits required)
-                            </span>
-                          )}
-                        </div>
+                    {Object.values(semData).map(grp => {
+                      const groupDisplayTitle = grp.group_name.toLowerCase().includes("course unit") 
+                        ? grp.group_name 
+                        : `${grp.group_name} Course Units`;
 
-                        {/* Subject Table Card Wrapper */}
-                        <div style={{
-                          backgroundColor: "#ffffff",
-                          border: "1px solid #cbd5e1",
-                          borderRadius: "1.2rem",
-                          padding: "0.75rem 1.25rem",
-                          overflowX: "auto",
-                          boxShadow: "0 4px 6px -1px rgba(0,0,0,0.02)"
-                        }}>
-                          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                            <thead>
-                              <tr style={{ borderBottom: "1px solid #cbd5e1" }}>
-                                <th style={{ padding: "0.75rem 0.5rem", textAlign: "left", fontFamily: "var(--font-syne), sans-serif", fontSize: "0.95rem", fontWeight: 700, color: "#000c66" }}>Module Code</th>
-                                <th style={{ padding: "0.75rem 0.5rem", textAlign: "left", fontFamily: "var(--font-syne), sans-serif", fontSize: "0.95rem", fontWeight: 700, color: "#000c66" }}>Module Name</th>
-                                <th style={{ padding: "0.75rem 0.5rem", textAlign: "center", fontFamily: "var(--font-syne), sans-serif", fontSize: "0.95rem", fontWeight: 700, color: "#000c66" }}>Credits</th>
-                                <th style={{ padding: "0.75rem 0.5rem", textAlign: "center", fontFamily: "var(--font-syne), sans-serif", fontSize: "0.95rem", fontWeight: 700, color: "#000c66" }}>Type</th>
-                                <th style={{ padding: "0.75rem 0.5rem", textAlign: "right", fontFamily: "var(--font-syne), sans-serif", fontSize: "0.95rem", fontWeight: 700, color: "#000c66" }}>Grade</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {grp.modules.map(mod => {
-                                const sel = localGrades[mod.module_id] ?? "";
-                                return (
-                                  <tr key={mod.module_id} style={{ borderBottom: "1px solid rgba(0, 0, 0, 0.05)" }}>
-                                    {/* Code */}
-                                    <td style={{ padding: "0.85rem 0.5rem", fontFamily: "var(--font-syne), sans-serif", fontSize: "0.95rem", fontWeight: 700, color: "#000c66" }}>
-                                      {mod.module_code}
-                                    </td>
-                                    {/* Name */}
-                                    <td style={{ padding: "0.85rem 0.5rem", fontFamily: "var(--font-syne), sans-serif", fontSize: "0.95rem", fontWeight: 500, color: "#000c66" }}>
-                                      <span style={{ textDecoration: "underline" }}>{mod.module_name}</span>
-                                      {!mod.is_mandatory && (
-                                        <span style={{ fontSize: "0.75rem", color: "#64748b", marginLeft: "0.5rem", fontWeight: 500 }}>(non-GPA)</span>
-                                      )}
-                                    </td>
-                                    {/* Credits */}
-                                    <td style={{ padding: "0.85rem 0.5rem", textAlign: "center", fontFamily: "var(--font-syne), sans-serif", fontSize: "0.95rem", fontWeight: 500, color: "#000c66" }}>
-                                      {Number(mod.credits).toFixed(1)}
-                                    </td>
-                                    {/* Type */}
-                                    <td style={{ padding: "0.85rem 0.5rem", textAlign: "center", fontFamily: "var(--font-syne), sans-serif", fontSize: "0.9rem", fontWeight: 700, color: "#000c66" }}>
-                                      {mod.is_gpa ? "GPA" : "Non-GPA"}
-                                    </td>
-                                    {/* Grade Dropdown Selector */}
-                                    <td style={{ padding: "0.85rem 0.5rem", textAlign: "right" }}>
-                                      <div style={{ position: "relative", display: "inline-block" }}>
+                      return (
+                        <div key={grp.group_id} className="gpa-group-section" style={{ display: "flex", flexDirection: "column" }}>
+                          {/* Group Header */}
+                          <div className="gpa-group-header" style={{ display: "flex", alignItems: "baseline", gap: "0.5rem", marginBottom: "1rem", flexWrap: "wrap" }}>
+                            <h4 className="gpa-group-title" style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.15rem", fontWeight: 700, color: "#000000", margin: 0 }}>
+                              {groupDisplayTitle}
+                            </h4>
+                            {Number(grp.min_credits_required) > 0 && (
+                              <span className="gpa-group-credits" style={{ fontFamily: "var(--font-inclusive-sans), sans-serif", fontSize: "0.95rem", color: "#64748b", fontWeight: 500 }}>
+                                ({Number(grp.min_credits_required).toFixed(1)} credits required)
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Desktop Subject Table (Visible on Desktop only) */}
+                          <div className="gpa-table-wrapper gpa-desktop-table-view" style={{
+                            backgroundColor: "#ffffff",
+                            border: "1px solid #cbd5e1",
+                            borderRadius: "1.2rem",
+                            padding: "0.75rem 1.25rem",
+                            overflowX: "auto",
+                            boxShadow: "0 4px 6px -1px rgba(0,0,0,0.02)"
+                          }}>
+                            <table className="gpa-table" style={{ width: "100%", borderCollapse: "collapse" }}>
+                              <thead>
+                                <tr style={{ borderBottom: "1px solid #cbd5e1" }}>
+                                  <th style={{ padding: "0.75rem 0.5rem", textAlign: "left", fontFamily: "var(--font-syne), sans-serif", fontSize: "0.95rem", fontWeight: 700, color: "#000c66" }}>Module Code</th>
+                                  <th style={{ padding: "0.75rem 0.5rem", textAlign: "left", fontFamily: "var(--font-syne), sans-serif", fontSize: "0.95rem", fontWeight: 700, color: "#000c66" }}>Module Name</th>
+                                  <th style={{ padding: "0.75rem 0.5rem", textAlign: "center", fontFamily: "var(--font-syne), sans-serif", fontSize: "0.95rem", fontWeight: 700, color: "#000c66" }}>Credits</th>
+                                  <th style={{ padding: "0.75rem 0.5rem", textAlign: "center", fontFamily: "var(--font-syne), sans-serif", fontSize: "0.95rem", fontWeight: 700, color: "#000c66" }}>Type</th>
+                                  <th style={{ padding: "0.75rem 0.5rem", textAlign: "right", fontFamily: "var(--font-syne), sans-serif", fontSize: "0.95rem", fontWeight: 700, color: "#000c66" }}>Grade</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {grp.modules.map(mod => {
+                                  const sel = localGrades[mod.module_id] ?? "";
+                                  return (
+                                    <tr key={mod.module_id} className="gpa-table-row" style={{ borderBottom: "1px solid rgba(0, 0, 0, 0.05)" }}>
+                                      {/* Code */}
+                                      <td className="gpa-cell-code" style={{ padding: "0.85rem 0.5rem", fontFamily: "var(--font-syne), sans-serif", fontSize: "0.95rem", fontWeight: 700, color: "#000c66" }}>
+                                        {mod.module_code}
+                                      </td>
+                                      {/* Name */}
+                                      <td className="gpa-cell-name" style={{ padding: "0.85rem 0.5rem", fontFamily: "var(--font-syne), sans-serif", fontSize: "0.95rem", fontWeight: 500, color: "#000c66" }}>
+                                        <span style={{ textDecoration: "underline" }}>{mod.module_name}</span>
+                                        {!mod.is_mandatory && (
+                                          <span style={{ fontSize: "0.75rem", color: "#64748b", marginLeft: "0.5rem", fontWeight: 500 }}>(non-GPA)</span>
+                                        )}
+                                      </td>
+                                      {/* Credits */}
+                                      <td className="gpa-cell-credits" style={{ padding: "0.85rem 0.5rem", textAlign: "center", fontFamily: "var(--font-syne), sans-serif", fontSize: "0.95rem", fontWeight: 500, color: "#000c66" }}>
+                                        {Number(mod.credits).toFixed(1)}
+                                      </td>
+                                      {/* Type */}
+                                      <td className="gpa-cell-type" style={{ padding: "0.85rem 0.5rem", textAlign: "center", fontFamily: "var(--font-syne), sans-serif", fontSize: "0.9rem", fontWeight: 700, color: "#000c66" }}>
+                                        {mod.is_gpa ? "GPA" : "Non-GPA"}
+                                      </td>
+                                      {/* Grade Dropdown Selector */}
+                                      <td className="gpa-cell-grade" style={{ padding: "0.85rem 0.5rem", textAlign: "right" }}>
+                                        <div style={{ position: "relative", display: "inline-block" }}>
+                                          <select
+                                            value={sel}
+                                            onChange={e => handleGradeChange(mod.module_id, e.target.value)}
+                                            disabled={previewMode}
+                                            className="gpa-grade-select"
+                                            style={{
+                                              paddingRight: "1.25rem",
+                                              fontFamily: "var(--font-syne), sans-serif",
+                                              fontWeight: 700,
+                                              fontSize: "0.95rem",
+                                              color: "#000c66",
+                                              border: "none",
+                                              backgroundColor: "transparent",
+                                              outline: "none",
+                                              cursor: "pointer",
+                                              appearance: "none",
+                                              textAlign: "right"
+                                            }}
+                                          >
+                                            {GRADES.map(g => (
+                                              <option key={g} value={g} style={{ backgroundColor: "#ffffff", color: "#000000" }}>
+                                                {g || "—"}
+                                              </option>
+                                            ))}
+                                          </select>
+                                          <ChevronDown size={14} style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)", pointerEvents: "none", color: "#000c66" }} />
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+
+                          {/* Mobile Subject Cards (Visible on Mobile only) */}
+                          <div className="gpa-mobile-cards-view">
+                            {grp.modules.map(mod => {
+                              const sel = localGrades[mod.module_id] ?? "";
+                              return (
+                                <div key={mod.module_id} className="gpa-mobile-module-card">
+                                  <div className="gpa-mobile-module-top">
+                                    <div className="gpa-mobile-module-info">
+                                      <div className="gpa-mobile-code-row">
+                                        <span className="gpa-mobile-code-badge">{mod.module_code}</span>
+                                        <span className="gpa-mobile-credits-badge">{Number(mod.credits).toFixed(1)} Credits</span>
+                                        <span className={`gpa-mobile-type-badge ${mod.is_gpa ? "gpa" : "non-gpa"}`}>
+                                          {mod.is_gpa ? "GPA" : "Non-GPA"}
+                                        </span>
+                                      </div>
+                                      <h5 className="gpa-mobile-module-title">{mod.module_name}</h5>
+                                    </div>
+                                    <div className="gpa-mobile-grade-box">
+                                      <span className="gpa-mobile-grade-label">Grade</span>
+                                      <div className={`gpa-mobile-grade-select-wrapper ${sel ? "selected" : ""}`}>
                                         <select
                                           value={sel}
                                           onChange={e => handleGradeChange(mod.module_id, e.target.value)}
                                           disabled={previewMode}
-                                          style={{
-                                            paddingRight: "1.25rem",
-                                            fontFamily: "var(--font-syne), sans-serif",
-                                            fontWeight: 700,
-                                            fontSize: "0.95rem",
-                                            color: "#000c66",
-                                            border: "none",
-                                            backgroundColor: "transparent",
-                                            outline: "none",
-                                            cursor: "pointer",
-                                            appearance: "none",
-                                            textAlign: "right"
-                                          }}
+                                          className="gpa-mobile-grade-select"
                                         >
                                           {GRADES.map(g => (
-                                            <option key={g} value={g} style={{ backgroundColor: "#ffffff", color: "#000000" }}>
+                                            <option key={g} value={g}>
                                               {g || "—"}
                                             </option>
                                           ))}
                                         </select>
-                                        <ChevronDown size={14} style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)", pointerEvents: "none", color: "#000c66" }} />
+                                        <ChevronDown size={13} className="gpa-mobile-select-chevron" />
                                       </div>
-                                    </td>
-                                  </tr>
-                                );
-                              })}
-                            </tbody>
-                          </table>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
