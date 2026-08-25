@@ -41,10 +41,10 @@ export default function InfoHubPage() {
   const contacts = filteredItems.filter(i => i.category === 'contact');
 
   return (
-    <div style={{ maxWidth: "1210px", margin: "1.5rem auto", padding: "0 1rem", minHeight: "100vh", position: "relative" }}>
+    <div className="info-hub-container" style={{ maxWidth: "1210px", margin: "1.5rem auto", padding: "0 1rem", minHeight: "100vh", position: "relative" }}>
       {/* Title & Subtitle */}
-      <div style={{ textAlign: "left", marginBottom: "2rem" }}>
-        <h1 style={{
+      <div className="info-hub-header" style={{ textAlign: "left", marginBottom: "2rem" }}>
+        <h1 className="info-hub-title" style={{
           fontFamily: "var(--font-syne), sans-serif",
           fontSize: "3rem",
           fontWeight: 700,
@@ -53,7 +53,7 @@ export default function InfoHubPage() {
         }}>
           Information Hub
         </h1>
-        <p style={{
+        <p className="info-hub-subtitle" style={{
           fontFamily: "var(--font-roboto), sans-serif",
           fontSize: "1.1rem",
           color: "#505255",
@@ -64,7 +64,7 @@ export default function InfoHubPage() {
       </div>
 
       {/* Control row: Search and Switcher Tab Capsule */}
-      <div style={{
+      <div className="info-hub-controls-bar" style={{
         display: "flex",
         gap: "1.5rem",
         flexWrap: "wrap",
@@ -74,9 +74,10 @@ export default function InfoHubPage() {
         borderBottom: "1.5px solid rgba(0, 12, 102, 0.1)"
       }}>
         {/* Search Bar */}
-        <div style={{ position: "relative", maxWidth: "450px", width: "100%" }}>
+        <div className="info-hub-search-wrapper" style={{ position: "relative", maxWidth: "450px", width: "100%" }}>
           <input 
             type="text" 
+            className="info-hub-search-input"
             style={{
               width: "100%",
               height: "48px",
@@ -93,11 +94,11 @@ export default function InfoHubPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <SearchIcon size={20} style={{ position: "absolute", right: "1.5rem", top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }} />
+          <SearchIcon size={20} className="info-hub-search-icon" style={{ position: "absolute", right: "1.5rem", top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }} />
         </div>
 
         {/* Sub Navigation switcher tabs */}
-        <div style={{
+        <div className="info-hub-tabs-container" style={{
           display: "flex",
           backgroundColor: "#edf4fe",
           borderRadius: "9999px",
@@ -108,6 +109,7 @@ export default function InfoHubPage() {
         }}>
           <button 
             onClick={() => setActiveTab("procedure")}
+            className={`info-hub-tab-btn ${activeTab === "procedure" ? "active" : ""}`}
             style={{
               display: "flex",
               alignItems: "center",
@@ -124,10 +126,13 @@ export default function InfoHubPage() {
               transition: "all 0.2s"
             }}
           >
-            <FileText size={16} /> University Procedures
+            <FileText size={16} />
+            <span className="info-hub-tab-label-full">University Procedures</span>
+            <span className="info-hub-tab-label-short">Procedures</span>
           </button>
           <button 
             onClick={() => setActiveTab("hotline")}
+            className={`info-hub-tab-btn ${activeTab === "hotline" ? "active" : ""}`}
             style={{
               display: "flex",
               alignItems: "center",
@@ -144,10 +149,13 @@ export default function InfoHubPage() {
               transition: "all 0.2s"
             }}
           >
-            <Phone size={16} /> Emergency Hotlines
+            <Phone size={16} />
+            <span className="info-hub-tab-label-full">Emergency Hotlines</span>
+            <span className="info-hub-tab-label-short">Hotlines</span>
           </button>
           <button 
             onClick={() => setActiveTab("contact")}
+            className={`info-hub-tab-btn ${activeTab === "contact" ? "active" : ""}`}
             style={{
               display: "flex",
               alignItems: "center",
@@ -164,13 +172,15 @@ export default function InfoHubPage() {
               transition: "all 0.2s"
             }}
           >
-            <UserCircle size={16} /> Key Contacts
+            <UserCircle size={16} />
+            <span className="info-hub-tab-label-full">Key Contacts</span>
+            <span className="info-hub-tab-label-short">Contacts</span>
           </button>
         </div>
       </div>
 
       {/* Main Content Area */}
-      <div style={{ marginTop: "2rem", paddingBottom: "3rem" }}>
+      <div className="info-hub-content-area" style={{ marginTop: "2rem", paddingBottom: "3rem" }}>
         {loading ? (
           <div style={{ textAlign: "center", padding: "4rem 0", color: "#64748b", fontFamily: "var(--font-roboto), sans-serif" }}>
             Loading information...
@@ -179,19 +189,19 @@ export default function InfoHubPage() {
           <>
             {/* Procedures Tab */}
             {activeTab === "procedure" && (
-              <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+              <div className="info-hub-procedures-list" style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
                 {procedures.length === 0 ? (
                   <div style={{ color: "#64748b", fontStyle: "italic", padding: "2rem 0", fontFamily: "var(--font-roboto), sans-serif" }}>No procedures found.</div>
                 ) : (
                   procedures.map(proc => (
-                    <div key={proc.id} style={{
+                    <div key={proc.id} className="info-hub-procedure-card" style={{
                       backgroundColor: "#edf4fe",
                       border: "1.5px solid rgba(0, 12, 102, 0.1)",
                       borderRadius: "1.5rem",
                       padding: "1.75rem",
                       boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)"
                     }}>
-                      <h3 style={{
+                      <h3 className="info-hub-procedure-title" style={{
                         fontFamily: "var(--font-syne), sans-serif",
                         fontSize: "1.5rem",
                         fontWeight: 700,
@@ -200,7 +210,7 @@ export default function InfoHubPage() {
                       }}>
                         {proc.title}
                       </h3>
-                      <div style={{
+                      <div className="info-hub-procedure-desc" style={{
                         backgroundColor: "#ffffff",
                         border: "1.5px solid rgba(0, 12, 102, 0.05)",
                         borderRadius: "1rem",
@@ -216,11 +226,12 @@ export default function InfoHubPage() {
                       </div>
 
                       {proc.action_text && proc.action_link && (
-                        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                        <div className="info-hub-procedure-action-row" style={{ display: "flex", justifyContent: "flex-end" }}>
                           <a 
                             href={proc.action_link} 
                             target="_blank" 
                             rel="noreferrer" 
+                            className="info-hub-procedure-btn"
                             style={{
                               display: "inline-flex",
                               alignItems: "center",
@@ -251,7 +262,7 @@ export default function InfoHubPage() {
 
             {/* Emergency Hotlines Tab */}
             {activeTab === "hotline" && (
-              <div style={{
+              <div className="info-hub-hotlines-grid" style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
                 gap: "1.5rem"
@@ -260,7 +271,7 @@ export default function InfoHubPage() {
                   <div style={{ color: "#64748b", fontStyle: "italic", padding: "2rem 0", fontFamily: "var(--font-roboto), sans-serif", gridColumn: "1 / -1" }}>No hotlines found.</div>
                 ) : (
                   hotlines.map(hotline => (
-                    <div key={hotline.id} style={{
+                    <div key={hotline.id} className="info-hub-hotline-card" style={{
                       backgroundColor: "#edf4fe",
                       border: "1.5px solid rgba(0, 12, 102, 0.1)",
                       borderRadius: "1.5rem",
@@ -270,7 +281,7 @@ export default function InfoHubPage() {
                       flexDirection: "column",
                       justifyContent: "space-between"
                     }}>
-                      <h3 style={{
+                      <h3 className="info-hub-hotline-title" style={{
                         fontFamily: "var(--font-syne), sans-serif",
                         fontSize: "1.6rem",
                         fontWeight: 700,
@@ -280,14 +291,14 @@ export default function InfoHubPage() {
                         {hotline.title}
                       </h3>
                       
-                      <div style={{
+                      <div className="info-hub-hotline-row" style={{
                         display: "flex",
                         gap: "0.5rem",
                         alignItems: "center",
                         justifyContent: "space-between"
                       }}>
                         {/* Description Pill */}
-                        <div style={{
+                        <div className="info-hub-hotline-desc-pill" style={{
                           backgroundColor: "#ffffff",
                           border: "1.5px solid rgba(0, 12, 102, 0.05)",
                           borderRadius: "9999px",
@@ -307,6 +318,7 @@ export default function InfoHubPage() {
                         {/* Phone Dialer Link Pill */}
                         <a 
                           href={`tel:${hotline.contact_info}`}
+                          className="info-hub-hotline-dial-pill"
                           style={{
                             backgroundColor: "#ffffff",
                             border: "1.5px solid rgba(0, 12, 102, 0.05)",
@@ -335,7 +347,7 @@ export default function InfoHubPage() {
 
             {/* Key Contacts Tab */}
             {activeTab === "contact" && (
-              <div style={{
+              <div className="info-hub-contacts-grid" style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
                 gap: "1.5rem"
@@ -344,7 +356,7 @@ export default function InfoHubPage() {
                   <div style={{ color: "#64748b", fontStyle: "italic", padding: "2rem 0", fontFamily: "var(--font-roboto), sans-serif", gridColumn: "1 / -1" }}>No contacts found.</div>
                 ) : (
                   contacts.map(contact => (
-                    <div key={contact.id} style={{
+                    <div key={contact.id} className="info-hub-contact-card" style={{
                       backgroundColor: "#edf4fe",
                       border: "1.5px solid rgba(0, 12, 102, 0.1)",
                       borderRadius: "1.5rem",
@@ -355,7 +367,7 @@ export default function InfoHubPage() {
                       alignItems: "stretch"
                     }}>
                       {/* Top Centered Navy Banner Capsule */}
-                      <div style={{
+                      <div className="info-hub-contact-banner" style={{
                         backgroundColor: "#000c66",
                         color: "#ffffff",
                         borderRadius: "9999px",
@@ -370,7 +382,7 @@ export default function InfoHubPage() {
                       </div>
 
                       {/* Details row: Designation */}
-                      <div style={{
+                      <div className="info-hub-contact-row" style={{
                         display: "flex",
                         alignItems: "center",
                         gap: "0.75rem",
@@ -385,7 +397,7 @@ export default function InfoHubPage() {
 
                       {/* Details row: Email Link */}
                       {contact.contact_info && (
-                        <div style={{
+                        <div className="info-hub-contact-row" style={{
                           display: "flex",
                           alignItems: "center",
                           gap: "0.75rem",
