@@ -195,18 +195,19 @@ export default function LostAndFoundPage() {
   });
 
   return (
-    <div className="container" style={{ maxWidth: '1210px', marginTop: '1.5rem', paddingLeft: '0', paddingRight: '0', minHeight: '100vh', paddingBottom: '4rem' }}>
+    <div className="container lost-found-container" style={{ maxWidth: '1210px', marginTop: '1.5rem', paddingLeft: '0', paddingRight: '0', minHeight: '100vh', paddingBottom: '4rem' }}>
       {/* Header */}
-      <div className="flex justify-between items-center mb-6 flex-wrap gap-4" style={{ marginTop: '1.5rem' }}>
+      <div className="flex justify-between items-center mb-6 flex-wrap gap-4 lost-found-header" style={{ marginTop: '1.5rem' }}>
         <div>
-          <h1 style={{ fontFamily: 'var(--font-syne), sans-serif', fontWeight: 700, fontSize: '3rem', color: '#000000', letterSpacing: '0.02em', marginBottom: '0.25rem' }}>
+          <h1 className="lost-found-page-title" style={{ fontFamily: 'var(--font-syne), sans-serif', fontWeight: 700, fontSize: '3rem', color: '#000000', letterSpacing: '0.02em', marginBottom: '0.25rem' }}>
             Lost & Found Items
           </h1>
-          <p style={{ fontFamily: 'var(--font-inclusive-sans), sans-serif', fontSize: '1.15rem', color: '#64748b', fontWeight: 500 }}>
+          <p className="lost-found-page-subtitle" style={{ fontFamily: 'var(--font-inclusive-sans), sans-serif', fontSize: '1.15rem', color: '#64748b', fontWeight: 500 }}>
             Community portal to report and recover misplaced items.
           </p>
         </div>
         <button 
+          className="lost-found-report-btn"
           style={{ 
             backgroundColor: '#000c66', 
             color: '#ffffff', 
@@ -230,9 +231,20 @@ export default function LostAndFoundPage() {
         </button>
       </div>
 
+      {/* Mobile Floating Action Button */}
+      <button 
+        className="lost-found-fab"
+        onClick={() => setShowModal(true)}
+        suppressHydrationWarning
+      >
+        <PlusCircle size={18} />
+        <span>Report Item</span>
+      </button>
+
       {/* Filter Buttons */}
-      <div className="flex gap-2 flex-wrap mb-8" style={{ marginTop: '2rem' }}>
+      <div className="flex gap-2 flex-wrap mb-8 lost-found-filter-bar" style={{ marginTop: '2rem' }}>
         <button 
+          className="lost-found-filter-btn"
           onClick={() => setFilter("All")}
           style={{
             height: '38px',
@@ -251,9 +263,10 @@ export default function LostAndFoundPage() {
             justifyContent: 'center'
           }}
         >
-          All Reports
+          <span>All<span className="lost-found-btn-suffix"> Reports</span></span>
         </button>
         <button 
+          className="lost-found-filter-btn"
           onClick={() => setFilter("Lost")}
           style={{
             height: '38px',
@@ -272,9 +285,10 @@ export default function LostAndFoundPage() {
             justifyContent: 'center'
           }}
         >
-          Lost Items
+          <span>Lost<span className="lost-found-btn-suffix"> Items</span></span>
         </button>
         <button 
+          className="lost-found-filter-btn"
           onClick={() => setFilter("Found")}
           style={{
             height: '38px',
@@ -293,10 +307,11 @@ export default function LostAndFoundPage() {
             justifyContent: 'center'
           }}
         >
-          Found Items
+          <span>Found<span className="lost-found-btn-suffix"> Items</span></span>
         </button>
         {myId && (
           <button 
+            className="lost-found-filter-btn"
             onClick={() => setFilter("Mine")}
             style={{
               height: '38px',
@@ -315,7 +330,7 @@ export default function LostAndFoundPage() {
               justifyContent: 'center'
             }}
           >
-            My Reports
+            <span>My Reports</span>
           </button>
         )}
       </div>
@@ -324,21 +339,21 @@ export default function LostAndFoundPage() {
       {loading ? (
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "5rem 0", color: "#64748b", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700 }}>Loading reports...</div>
       ) : filteredReports.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "5rem 0", color: "#64748b", maxWidth: "600px", margin: "0 auto", fontFamily: "var(--font-syne), sans-serif" }}>
-          <Search size={48} style={{ margin: "0 auto 1rem auto", opacity: 0.3 }} />
-          <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: "#000000", marginBottom: "0.5rem" }}>No Reports Found</h2>
-          <p style={{ fontWeight: 500 }}>No listings match your criteria. You can create a report if you lost or found an item.</p>
+        <div className="no-events-container" style={{ textAlign: "center", padding: "5rem 0", color: "#64748b", maxWidth: "600px", margin: "0 auto", fontFamily: "var(--font-syne), sans-serif" }}>
+          <Search size={48} className="no-events-icon" style={{ margin: "0 auto 1rem auto", opacity: 0.3 }} />
+          <h2 className="no-events-title" style={{ fontSize: "1.5rem", fontWeight: 800, color: "#000000", marginBottom: "0.5rem" }}>No Reports Found</h2>
+          <p className="no-events-desc" style={{ fontWeight: 500 }}>No listings match your criteria. You can create a report if you lost or found an item.</p>
         </div>
       ) : (
-        <div className="grid gap-8" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))" }}>
+        <div className="grid gap-8 lost-found-items-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))" }}>
           {filteredReports.map((report) => {
             const isMine = report.user_id === +myId;
             const isResolved = report.status === 'resolved';
 
             return (
-              <div key={report.id} className="event-card" style={{ opacity: isResolved ? 0.6 : 1 }}>
+              <div key={report.id} className="event-card lost-found-item-card" style={{ opacity: isResolved ? 0.6 : 1 }}>
                 {/* Image visual wrapper with aspect ratio matching mockup */}
-                <div className="event-card-image-wrapper">
+                <div className="event-card-image-wrapper lost-found-card-image-wrapper">
                   {report.images && report.images.length > 0 ? (
                     <img src={report.images[0]} alt={report.title} className="event-card-img" />
                   ) : (
@@ -348,19 +363,19 @@ export default function LostAndFoundPage() {
                   )}
                   {isResolved && (
                     <div className="absolute inset-0 flex justify-center items-center z-10" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                      <div style={{ backgroundColor: "#10b981", color: "white", padding: "0.4rem 1.25rem", borderRadius: "9999px", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "0.95rem" }}>RESOLVED</div>
+                      <div className="lost-found-resolved-badge" style={{ backgroundColor: "#10b981", color: "white", padding: "0.4rem 1.25rem", borderRadius: "9999px", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "0.95rem" }}>RESOLVED</div>
                     </div>
                   )}
                 </div>
 
                 {/* Content block stack */}
-                <div className="event-card-content">
+                <div className="event-card-content lost-found-card-content">
                   {/* Title & Type Badge Row */}
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
-                    <h3 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.25rem", fontWeight: 700, color: "#000000", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
+                  <div className="lost-found-item-header-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
+                    <h3 className="lost-found-item-title" style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.25rem", fontWeight: 700, color: "#000000", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
                       {report.title}
                     </h3>
-                    <span style={{ 
+                    <span className="lost-found-item-type-badge" style={{ 
                       backgroundColor: report.type === "Lost" ? "#a61c1c" : "#1b8a5a", 
                       color: "#ffffff", 
                       borderRadius: "9999px",
@@ -374,7 +389,7 @@ export default function LostAndFoundPage() {
                   </div>
 
                   {/* Description Box Container */}
-                  <div style={{ 
+                  <div className="lost-found-item-desc" style={{ 
                     backgroundColor: "#d6d9de", 
                     borderRadius: "1rem", 
                     padding: "0.75rem 1rem", 
@@ -393,32 +408,33 @@ export default function LostAndFoundPage() {
                   </div>
 
                   {/* Metadata List */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: "0.65rem", marginBottom: "1.5rem", fontFamily: "var(--font-syne), sans-serif", fontSize: "1.05rem", color: "#000000", fontWeight: 700 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                  <div className="lost-found-item-metadata" style={{ display: "flex", flexDirection: "column", gap: "0.65rem", marginBottom: "1.5rem", fontFamily: "var(--font-syne), sans-serif", fontSize: "1.05rem", color: "#000000", fontWeight: 700 }}>
+                    <div className="lost-found-meta-row" style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
                       <MapPin size={18} style={{ color: "#000000", flexShrink: 0 }} />
                       <span>{report.location}</span>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                    <div className="lost-found-meta-row" style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
                       <Clock size={18} style={{ color: "#000000", flexShrink: 0 }} />
                       <span>{formatReportDateTime(report.time_date)}</span>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                    <div className="lost-found-meta-row" style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
                         <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
                         <circle cx="12" cy="7" r="4" />
                       </svg>
                       <span>{report.reporter_name}</span>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                    <div className="lost-found-meta-row" style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
                       <span className="material-symbols-outlined" style={{ fontSize: "18px", color: "#000000", flexShrink: 0 }}>call</span>
                       <span>{report.contact_number}</span>
                     </div>
                   </div>
 
                   {/* Actions Buttons */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", width: "100%", marginTop: "auto" }}>
+                  <div className="lost-found-item-actions" style={{ display: "flex", flexDirection: "column", gap: "0.75rem", width: "100%", marginTop: "auto" }}>
                     {!isResolved && (
                       <button 
+                        className="lost-found-btn lost-found-contact-btn"
                         onClick={() => setContactReport(report)}
                         style={{ 
                           backgroundColor: "#0d0e4aff", 
@@ -446,6 +462,7 @@ export default function LostAndFoundPage() {
 
                     {isMine && !isResolved && (
                       <button 
+                        className="lost-found-btn lost-found-resolve-btn"
                         onClick={() => handleMarkResolved(report.id)}
                         style={{ 
                           backgroundColor: "#115e3b", 
@@ -481,6 +498,7 @@ export default function LostAndFoundPage() {
       {/* Create Modal */}
       {showModal && (
         <div 
+          className="lost-found-modal-overlay"
           style={{ 
             position: "fixed", 
             inset: 0, 
@@ -495,6 +513,7 @@ export default function LostAndFoundPage() {
           onClick={() => setShowModal(false)}
         >
           <div 
+            className="lost-found-modal-card"
             style={{ 
               maxWidth: "600px", 
               width: "100%", 
@@ -508,15 +527,16 @@ export default function LostAndFoundPage() {
             onClick={e => e.stopPropagation()}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
-              <h2 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.75rem", fontWeight: 700, color: "#000000" }}>Report an Item</h2>
+              <h2 className="lost-found-modal-title" style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.75rem", fontWeight: 700, color: "#000000" }}>Report an Item</h2>
               <button onClick={() => setShowModal(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "#000000" }}><X size={22} /></button>
             </div>
 
-            <form onSubmit={handleCreateReport} style={{ fontFamily: "var(--font-syne), sans-serif", display: "flex", flexDirection: "column", gap: "1rem" }}>
+            <form className="lost-found-modal-form" onSubmit={handleCreateReport} style={{ fontFamily: "var(--font-syne), sans-serif", display: "flex", flexDirection: "column", gap: "1rem" }}>
               <div className="responsive-form-grid">
                 <div>
                   <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Report Type *</label>
                   <select 
+                    className="lost-found-modal-input"
                     value={form.type} 
                     onChange={e => setForm({...form, type: e.target.value})}
                     style={{
@@ -540,6 +560,7 @@ export default function LostAndFoundPage() {
                 <div>
                   <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Item Title *</label>
                   <input 
+                    className="lost-found-modal-input"
                     type="text" 
                     required 
                     value={form.title} 
@@ -566,6 +587,7 @@ export default function LostAndFoundPage() {
                 <div>
                   <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Location *</label>
                   <input 
+                    className="lost-found-modal-input"
                     type="text" 
                     required 
                     value={form.location} 
@@ -591,6 +613,7 @@ export default function LostAndFoundPage() {
                   <div className="responsive-date-time-flex">
                     {/* Month Dropdown */}
                     <select
+                      className="lost-found-modal-input"
                       value={selectedMonth}
                       onChange={e => setSelectedMonth(e.target.value)}
                       style={{
@@ -614,6 +637,7 @@ export default function LostAndFoundPage() {
 
                     {/* Day Dropdown */}
                     <select
+                      className="lost-found-modal-input"
                       value={selectedDay}
                       onChange={e => setSelectedDay(e.target.value)}
                       style={{
@@ -637,6 +661,7 @@ export default function LostAndFoundPage() {
 
                     {/* Time Input */}
                     <input
+                      className="lost-found-modal-input"
                       type="time"
                       value={selectedTime}
                       onChange={e => setSelectedTime(e.target.value)}
@@ -662,6 +687,7 @@ export default function LostAndFoundPage() {
                 <div>
                   <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Contact Number *</label>
                   <input 
+                    className="lost-found-modal-input"
                     type="text" 
                     required 
                     value={form.contact_number} 
@@ -685,6 +711,7 @@ export default function LostAndFoundPage() {
                 <div>
                   <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Contact Email</label>
                   <input 
+                    className="lost-found-modal-input"
                     type="email" 
                     value={form.contact_email} 
                     onChange={e => setForm({...form, contact_email: e.target.value})} 
@@ -709,6 +736,7 @@ export default function LostAndFoundPage() {
               <div>
                 <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Description *</label>
                 <textarea 
+                  className="lost-found-modal-textarea"
                   rows={4} 
                   required 
                   value={form.description} 
@@ -732,7 +760,7 @@ export default function LostAndFoundPage() {
 
               <div>
                 <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Images (Optional, Max 3)</label>
-                <div className="border-2 border-dashed border-border rounded-lg p-6 text-center text-muted flex flex-col items-center justify-center cursor-pointer relative hover:border-primary transition-colors" style={{ backgroundColor: "#f1f3f5", borderRadius: "1rem", border: "2px dashed rgba(0,0,0,0.15)" }}>
+                <div className="border-2 border-dashed border-border rounded-lg p-6 text-center text-muted flex flex-col items-center justify-center cursor-pointer relative hover:border-primary transition-colors lost-found-modal-upload-box" style={{ backgroundColor: "#f1f3f5", borderRadius: "1rem", border: "2px dashed rgba(0,0,0,0.15)" }}>
                   <Upload size={24} className="mb-2" />
                   <span style={{ fontWeight: 700, fontSize: "0.9rem" }}>Click to select images</span>
                   <input 
@@ -756,6 +784,7 @@ export default function LostAndFoundPage() {
               </div>
 
               <button 
+                className="lost-found-modal-submit-btn"
                 type="submit" 
                 disabled={formLoading} 
                 style={{ 
@@ -784,6 +813,7 @@ export default function LostAndFoundPage() {
       {/* Contact Via Modal */}
       {contactReport && (
         <div 
+          className="lost-found-modal-overlay"
           style={{ 
             position: "fixed", 
             inset: 0, 
@@ -798,6 +828,7 @@ export default function LostAndFoundPage() {
           onClick={() => setContactReport(null)}
         >
           <div 
+            className="lost-found-contact-modal-card"
             style={{ 
               maxWidth: "400px", 
               width: "100%", 
@@ -812,6 +843,7 @@ export default function LostAndFoundPage() {
           >
             {/* Close Button */}
             <button 
+              className="lost-found-contact-close-btn"
               onClick={() => setContactReport(null)} 
               style={{ 
                 position: "absolute",
@@ -834,14 +866,15 @@ export default function LostAndFoundPage() {
             </button>
 
             {/* Header */}
-            <h2 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "2.2rem", fontWeight: 700, color: "#000000", marginBottom: "2rem" }}>
+            <h2 className="lost-found-contact-title" style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "2.2rem", fontWeight: 700, color: "#000000", marginBottom: "2rem" }}>
               Contact Via
             </h2>
 
             {/* Options Grid */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+            <div className="lost-found-contact-options" style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
               {/* WhatsApp Button */}
               <button
+                className="lost-found-contact-option-btn"
                 onClick={() => {
                   const phone = contactReport.contact_number;
                   let clean = phone.replace(/\D/g, "");
@@ -875,6 +908,7 @@ export default function LostAndFoundPage() {
 
               {/* Email Button */}
               <button
+                className="lost-found-contact-option-btn"
                 onClick={() => {
                   const email = contactReport.contact_email || contactReport.reporter_email;
                   const subject = `Inquiry regarding your ${contactReport.type} report: ${contactReport.title} on UWU-nexus`;
