@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Search, Filter, Phone, X, Upload, Image as ImageIcon, Edit, Tag, Plus, Store, ChevronDown } from "lucide-react";
-import { uploadToCloudinary } from "../lib/cloudinary";
+import { uploadToCloudinary, validateImageFile } from "../lib/cloudinary";
 
 interface Category {
   id: number;
@@ -56,6 +56,7 @@ export default function MarketplacePage() {
     contact_email: ""
   });
   const [files, setFiles] = useState<File[]>([]);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   useEffect(() => {
     const parseCookie = (name: string) => document.cookie.split("; ").find(r => r.startsWith(name + "="))?.split("=")[1];
@@ -87,6 +88,7 @@ export default function MarketplacePage() {
     setEditingItem(null);
     setForm({ title: "", description: "", price: "", condition_state: "Used - Good", category_id: "", contact_number: "", contact_email: "" });
     setFiles([]);
+    setUploadError(null);
     setShowModal(true);
   };
 
@@ -97,11 +99,12 @@ export default function MarketplacePage() {
       description: item.description,
       price: item.price,
       condition_state: item.condition_state,
-      category_id: item.category_id.toString() || (categories.find(c => c.name === item.category_name)?.id.toString() || ""),
-      contact_number: item.contact_number || "",
-      contact_email: item.contact_email || ""
+      category_id: item.category_id.toString(),
+      contact_number: item.contact_number,
+      contact_email: item.contact_email
     });
     setFiles([]);
+    setUploadError(null);
     setShowModal(true);
   };
 
@@ -887,15 +890,30 @@ export default function MarketplacePage() {
                     multiple
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     onChange={e => {
-                      if (e.target.files) {
-                        const newFiles = Array.from(e.target.files).slice(0, 3);
-                        setFiles(newFiles);
+                      setUploadError(null);
+                      if (e.target.files && e.target.files.length > 0) {
+                        const rawFiles = Array.from(e.target.files).slice(0, 3);
+                        for (const f of rawFiles) {
+                          const err = validateImageFile(f);
+                          if (err) {
+                            setUploadError(err);
+                            e.target.value = "";
+                            setFiles([]);
+                            return;
+                          }
+                        }
+                        setFiles(rawFiles);
                       }
                     }}
                   />
                 </div>
-                {files.length > 0 && (
-                  <div style={{ fontSize: "0.85rem", color: "var(--success)", marginTop: "0.5rem", fontWeight: 700 }}>
+                {uploadError && (
+                  <div style={{ fontSize: "0.85rem", color: "var(--danger)", marginTop: "0.5rem", fontWeight: 700, fontFamily: "var(--font-roboto), sans-serif" }}>
+                    {uploadError}
+                  </div>
+                )}
+                {files.length > 0 && !uploadError && (
+                  <div style={{ fontSize: "0.85rem", color: "var(--success)", marginTop: "0.5rem", fontWeight: 700, fontFamily: "var(--font-roboto), sans-serif" }}>
                     {files.length} file(s) selected
                   </div>
                 )}
