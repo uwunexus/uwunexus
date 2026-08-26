@@ -21,7 +21,7 @@ export async function loginAction(role: string = "student", userId: string = "",
     path: "/",
     maxAge: 60 * 60 * 24 * 7
   });
-  redirect("/");
+  return { success: true };
 }
 
 export async function logoutAction() {
