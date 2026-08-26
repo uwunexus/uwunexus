@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { Shield, Users, Calendar, Search, RefreshCw, CheckCircle, XCircle, Trash2, PlusCircle, Clock, MapPin, X, Upload, ChevronDown, Ticket, Store, EyeOff, BookOpen, Edit, AlertTriangle } from "lucide-react";
-import { uploadToCloudinary } from "../lib/cloudinary";
+import { uploadToCloudinary, validateImageFile } from "../lib/cloudinary";
 
 /* ─── Types ──────────────────────────────────────────────────── */
 interface User {
@@ -2046,6 +2046,14 @@ function EventFormModal({ myId, initialData, onClose, onSaved }: { myId: string;
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    const valErr = validateImageFile(file);
+    if (valErr) {
+      setError(valErr);
+      e.target.value = "";
+      setImageFile(null);
+      return;
+    }
+    setError("");
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
   };
@@ -2363,6 +2371,14 @@ function TicketFormModal({ myId, initialData, onClose, onSaved }: { myId: string
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    const valErr = validateImageFile(file);
+    if (valErr) {
+      setError(valErr);
+      e.target.value = "";
+      setImageFile(null);
+      return;
+    }
+    setError("");
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
   };
