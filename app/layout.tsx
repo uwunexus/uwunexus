@@ -78,8 +78,7 @@ export default async function RootLayout({
             <div className="footer-top-row flex justify-between items-center" style={{ flexWrap: 'wrap', gap: '2rem', paddingBottom: '1.5rem' }}>
               <div className="footer-links-group flex gap-8" style={{ flexWrap: 'wrap' }}>
                 <Link href="/about" className="text-muted font-semibold hover:text-primary">About us</Link>
-                <Link href="/services" className="text-muted font-semibold hover:text-primary">Services</Link>
-                <Link href="/explore" className="text-muted font-semibold hover:text-primary">Explore</Link>
+                <a href="/#services" className="text-muted font-semibold hover:text-primary">Services</a>
               </div>
               <div className="footer-social-group flex gap-4 items-center">
                 {/* Facebook custom SVG */}
