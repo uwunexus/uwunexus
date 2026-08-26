@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Search, MapPin, Clock, X, Upload, Phone, CheckCircle, Image as ImageIcon, PlusCircle } from "lucide-react";
 import Image from "next/image";
-import { uploadToCloudinary } from "../lib/cloudinary";
+import { uploadToCloudinary, validateImageFile } from "../lib/cloudinary";
 
 interface Report {
   id: number;
@@ -57,6 +57,7 @@ export default function LostAndFoundPage() {
   // Modal State
   const [showModal, setShowModal] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [myId, setMyId] = useState("");
   const [contactReport, setContactReport] = useState<Report | null>(null);
   const [copiedEmail, setCopiedEmail] = useState(false);
@@ -65,6 +66,22 @@ export default function LostAndFoundPage() {
   const [selectedMonth, setSelectedMonth] = useState("jan");
   const [selectedDay, setSelectedDay] = useState("1");
   const [selectedTime, setSelectedTime] = useState("12:00");
+
+  // Date boundary calculations (Only allow dates up to Today)
+  const now = new Date();
+  const currentMonthIndex = now.getMonth();
+  const currentDay = now.getDate();
+  const currentYear = now.getFullYear();
+  const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+  
+  // Only allow months up to the current month in current year
+  const availableMonths = monthNames.slice(0, currentMonthIndex + 1);
+
+  // Available days for the selected month (capped at today if current month)
+  const selectedMonthIndex = Math.max(0, monthNames.indexOf(selectedMonth));
+  const daysInSelectedMonth = new Date(currentYear, selectedMonthIndex + 1, 0).getDate();
+  const maxDayForMonth = selectedMonthIndex === currentMonthIndex ? currentDay : daysInSelectedMonth;
+  const availableDays = Array.from({ length: maxDayForMonth }, (_, i) => (i + 1).toString());
 
   const [form, setForm] = useState({
     title: "",
@@ -83,12 +100,11 @@ export default function LostAndFoundPage() {
     fetchReports();
 
     // Initialize with current date and time
-    const now = new Date();
-    const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
-    setSelectedMonth(monthNames[now.getMonth()]);
-    setSelectedDay(now.getDate().toString());
-    const hr = now.getHours().toString().padStart(2, '0');
-    const min = now.getMinutes().toString().padStart(2, '0');
+    const initialNow = new Date();
+    setSelectedMonth(monthNames[initialNow.getMonth()]);
+    setSelectedDay(initialNow.getDate().toString());
+    const hr = initialNow.getHours().toString().padStart(2, '0');
+    const min = initialNow.getMinutes().toString().padStart(2, '0');
     setSelectedTime(`${hr}:${min}`);
   }, []);
 
@@ -109,6 +125,22 @@ export default function LostAndFoundPage() {
   const handleCreateReport = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!myId) return alert("You must be logged in to create a report.");
+
+    // Validate that the date and time is not in the future
+    const [hoursStr, minutesStr] = (selectedTime || "00:00").split(":");
+    const reportDateTime = new Date(
+      currentYear,
+      selectedMonthIndex,
+      parseInt(selectedDay, 10),
+      parseInt(hoursStr || "0", 10),
+      parseInt(minutesStr || "0", 10)
+    );
+
+    if (reportDateTime.getTime() > Date.now()) {
+      alert("Date and time cannot be in the future.");
+      return;
+    }
+
     setFormLoading(true);
 
     try {
@@ -119,7 +151,6 @@ export default function LostAndFoundPage() {
       // Format selectedTime into AM/PM with dot syntax (e.g. 10.30pm)
       let timeStr = "";
       if (selectedTime) {
-        const [hoursStr, minutesStr] = selectedTime.split(":");
         let hours = parseInt(hoursStr, 10);
         const minutes = parseInt(minutesStr, 10);
         const ampm = hours >= 12 ? "pm" : "am";
@@ -617,7 +648,15 @@ export default function LostAndFoundPage() {
                     <select
                       className="lost-found-modal-input"
                       value={selectedMonth}
-                      onChange={e => setSelectedMonth(e.target.value)}
+                      onChange={e => {
+                        const newMonth = e.target.value;
+                        setSelectedMonth(newMonth);
+                        const newMonthIndex = monthNames.indexOf(newMonth);
+                        const maxD = newMonthIndex === currentMonthIndex ? currentDay : new Date(currentYear, newMonthIndex + 1, 0).getDate();
+                        if (parseInt(selectedDay, 10) > maxD) {
+                          setSelectedDay(maxD.toString());
+                        }
+                      }}
                       style={{
                         flex: 1,
                         height: "45px",
@@ -632,7 +671,7 @@ export default function LostAndFoundPage() {
                         color: "#000000"
                       }}
                     >
-                      {["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"].map(m => (
+                      {availableMonths.map(m => (
                         <option key={m} value={m}>{m.toUpperCase()}</option>
                       ))}
                     </select>
@@ -656,7 +695,7 @@ export default function LostAndFoundPage() {
                         color: "#000000"
                       }}
                     >
-                      {Array.from({ length: 31 }, (_, i) => (i + 1).toString()).map(d => (
+                      {availableDays.map(d => (
                         <option key={d} value={d}>{d}</option>
                       ))}
                     </select>
@@ -771,15 +810,30 @@ export default function LostAndFoundPage() {
                     multiple 
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
                     onChange={e => {
-                      if (e.target.files) {
-                        const newFiles = Array.from(e.target.files).slice(0, 3);
-                        setFiles(newFiles);
+                      setUploadError(null);
+                      if (e.target.files && e.target.files.length > 0) {
+                        const rawFiles = Array.from(e.target.files).slice(0, 3);
+                        for (const f of rawFiles) {
+                          const err = validateImageFile(f);
+                          if (err) {
+                            setUploadError(err);
+                            e.target.value = "";
+                            setFiles([]);
+                            return;
+                          }
+                        }
+                        setFiles(rawFiles);
                       }
                     }}
                   />
                 </div>
-                {files.length > 0 && (
-                  <div style={{ fontSize: "0.85rem", color: "var(--success)", marginTop: "0.5rem", fontWeight: 700 }}>
+                {uploadError && (
+                  <div style={{ fontSize: "0.85rem", color: "var(--danger)", marginTop: "0.5rem", fontWeight: 700, fontFamily: "var(--font-roboto), sans-serif" }}>
+                    {uploadError}
+                  </div>
+                )}
+                {files.length > 0 && !uploadError && (
+                  <div style={{ fontSize: "0.85rem", color: "var(--success)", marginTop: "0.5rem", fontWeight: 700, fontFamily: "var(--font-roboto), sans-serif" }}>
                     {files.length} file(s) selected
                   </div>
                 )}
