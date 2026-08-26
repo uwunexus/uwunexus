@@ -74,7 +74,7 @@ export default function AuthModal() {
       if (!response.ok) throw new Error(data.message || "Failed to log in");
 
       // Set cookie session in Next.js Server Action
-      await loginAction(data.user.role, String(data.user.id));
+      await loginAction(data.user.role, String(data.user.id), data.user.enrollmentNumber || "");
       
       // Close modal and refresh session details on current page
       closeModal();
@@ -113,7 +113,7 @@ export default function AuthModal() {
       if (!response.ok) throw new Error(data.message || "Failed to sign up");
 
       // Auto login
-      await loginAction(data.user.role, String(data.user.id));
+      await loginAction(data.user.role, String(data.user.id), data.user.enrollmentNumber || "");
       closeModal();
       window.location.reload();
     } catch (err: any) {

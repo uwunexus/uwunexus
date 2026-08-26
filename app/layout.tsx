@@ -7,6 +7,7 @@ import { logoutAction } from "./actions/auth";
 import { Shield, ArrowRight } from "lucide-react";
 import NavLinks from "./components/NavLinks";
 import AuthModal from "./components/AuthModal";
+import UserNavProfile from "./components/UserNavProfile";
 
 const inter = Inter({ subsets: ["latin"], variable: '--font-inter', display: 'swap' });
 const outfit = Outfit({ subsets: ["latin"], variable: '--font-outfit', display: 'swap' });
@@ -31,6 +32,7 @@ export default async function RootLayout({
   const cookieStore = await cookies();
   const isAuthenticated = cookieStore.get("uwu_auth")?.value === "true";
   const role = cookieStore.get("uwu_role")?.value ?? "";
+  const enrollmentNumber = cookieStore.get("uwu_enrollment")?.value ?? "";
   const isAdmin = ["superadmin", "clubadmin"].includes(role);
 
   return (
@@ -53,11 +55,7 @@ export default async function RootLayout({
                       Admin
                     </Link>
                   )}
-                  <form action={logoutAction}>
-                    <button type="submit" className="btn-logout" style={{ fontFamily: 'var(--font-inter), sans-serif', fontWeight: 900 }}>
-                      <span>Logout</span>
-                    </button>
-                  </form>
+                  <UserNavProfile role={role} enrollmentNumber={enrollmentNumber} logoutAction={logoutAction} />
                 </>
               ) : (
                 <>
