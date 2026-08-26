@@ -47,6 +47,23 @@ export async function compressImage(
   });
 }
 
+export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+export const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
+
+/**
+ * Validates file size (max 5MB) and type (JPEG, PNG, WebP).
+ * Returns null if valid, or a friendly error message string if invalid.
+ */
+export function validateImageFile(file: File): string | null {
+  if (!ALLOWED_IMAGE_TYPES.includes(file.type.toLowerCase())) {
+    return "Please select an image file (JPG, PNG, or WebP).";
+  }
+  if (file.size > MAX_FILE_SIZE) {
+    return "Please choose a photo smaller than 5MB.";
+  }
+  return null;
+}
+
 /**
  * Compress and upload an image to Cloudinary.
  * Returns the secure URL of the uploaded image.
@@ -57,6 +74,11 @@ export async function uploadToCloudinary(
 ): Promise<string> {
   if (!CLOUD_NAME || !UPLOAD_PRESET) {
     throw new Error("Cloudinary environment variables not configured. Check .env.local");
+  }
+
+  const validationError = validateImageFile(file);
+  if (validationError) {
+    throw new Error(validationError);
   }
 
   const compressed = await compressImage(file);
