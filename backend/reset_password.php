@@ -28,7 +28,7 @@ try {
     if ($user) {
         $hash = password_hash($password, PASSWORD_DEFAULT);
         
-        $updateStmt = $pdo->prepare("UPDATE users SET password_hash = ?, reset_token = NULL, reset_token_expires_at = NULL WHERE id = ?");
+        $updateStmt = $pdo->prepare("UPDATE users SET password_hash = ?, reset_token = NULL, reset_token_expires_at = NULL, is_verified = TRUE WHERE id = ?");
         $updateStmt->execute([$hash, $user['id']]);
 
         echo json_encode(["success" => true, "message" => "Password successfully reset! You can now log in."]);

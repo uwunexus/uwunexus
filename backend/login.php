@@ -21,7 +21,7 @@ try {
     if ($user && password_verify($password, $user['password_hash'])) {
         if (!$user['is_verified']) {
             http_response_code(403);
-            echo json_encode(["success" => false, "message" => "Please verify your email address before logging in."]);
+            echo json_encode(["success" => false, "message" => "Your account is not verified. Please verify your email or request a new verification link.", "is_unverified" => true]);
             exit();
         }
 

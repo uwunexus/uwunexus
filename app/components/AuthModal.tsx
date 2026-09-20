@@ -25,6 +25,7 @@ export default function AuthModal() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showResendVerification, setShowResendVerification] = useState(false);
 
   // Sync modal view state with URL query parameter
   useEffect(() => {
@@ -53,6 +54,28 @@ export default function AuthModal() {
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
+    const handleResendVerification = async () => {
+    if (!email) return;
+    setLoading(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "/api/backend"}/resend_verification.php`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Failed to resend verification email");
+      
+      setToastMessage("Verification email sent! Please check your inbox.");
+      setShowResendVerification(false);
+      setError("");
+    } catch (err: any) {
+      setError(err.message || "Failed to resend verification email.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const isAdminEmail = email === "admin@admin.com";
@@ -72,7 +95,12 @@ export default function AuthModal() {
       });
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Failed to log in");
+      if (!response.ok) {
+        if (data.is_unverified) {
+          setShowResendVerification(true);
+        }
+        throw new Error(data.message || "Failed to log in");
+      }
 
       // Set cookie session in Next.js Server Action
       await loginAction(data.user.role, String(data.user.id), data.user.enrollmentNumber || "");
@@ -314,6 +342,27 @@ export default function AuthModal() {
               lineHeight: "1.4"
             }}>
               {error}
+              {showResendVerification && (
+                <button
+                  type="button"
+                  onClick={handleResendVerification}
+                  disabled={loading}
+                  style={{
+                    display: "block",
+                    marginTop: "0.5rem",
+                    backgroundColor: "transparent",
+                    border: "1px solid #d93025",
+                    color: "#d93025",
+                    padding: "0.25rem 0.75rem",
+                    borderRadius: "4px",
+                    fontSize: "0.8rem",
+                    cursor: loading ? "not-allowed" : "pointer",
+                    fontWeight: 600
+                  }}
+                >
+                  {loading ? "Sending..." : "Resend Verification Email"}
+                </button>
+              )}
             </div>
           )}
 

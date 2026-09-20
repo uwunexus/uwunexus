@@ -66,11 +66,16 @@ if (str_ends_with($email, '@std.uwu.ac.lk')) {
 }
 
 try {
-    $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
+    $stmt = $pdo->prepare("SELECT id, is_verified FROM users WHERE email = ?");
     $stmt->execute([$email]);
-    if ($stmt->fetch()) {
+    $existingUser = $stmt->fetch();
+    if ($existingUser) {
         http_response_code(409);
-        echo json_encode(["success" => false, "message" => "Email already registered"]);
+        if (!$existingUser['is_verified']) {
+            echo json_encode(["success" => false, "message" => "You already have an account that is not verified. Try to log in. If you forgot your password, use the forgot password option."]);
+        } else {
+            echo json_encode(["success" => false, "message" => "Email already registered"]);
+        }
         exit();
     }
 
