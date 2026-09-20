@@ -146,6 +146,7 @@ export default function AuthModal() {
 
       setToastMessage(data.message || "Account created! Please check your email to verify.");
       setTimeout(() => {
+        setToastMessage(null);
         setIsLoginView(true);
       }, 3000);
     } catch (err: any) {
