@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { Search, Filter, Phone, X, Upload, Image as ImageIcon, Edit, Tag, Plus, Store, ChevronDown } from "lucide-react";
 import { uploadToCloudinary, validateImageFile } from "../lib/cloudinary";
 
@@ -972,16 +973,18 @@ export default function MarketplacePage() {
           onClick={() => setContactProduct(null)}
         >
           <div
-            className="marketplace-contact-modal-card"
+            className="marketplace-detail-modal-card"
             style={{
-              maxWidth: "400px",
+              maxWidth: "500px",
               width: "100%",
               backgroundColor: "#ffffff",
               borderRadius: "2.2rem",
-              padding: "3rem 2.5rem",
+              padding: "2.5rem",
               boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
               position: "relative",
-              textAlign: "center"
+              textAlign: "left",
+              maxHeight: "90vh",
+              overflowY: "auto"
             }}
             onClick={e => e.stopPropagation()}
           >
@@ -992,8 +995,8 @@ export default function MarketplacePage() {
                 position: "absolute",
                 top: "1.5rem",
                 right: "1.5rem",
-                background: "#ffffff",
-                border: "1.5px solid #e2e8f0",
+                background: "#f1f5f9",
+                border: "none",
                 borderRadius: "50%",
                 width: "36px",
                 height: "36px",
@@ -1001,20 +1004,54 @@ export default function MarketplacePage() {
                 alignItems: "center",
                 justifyContent: "center",
                 cursor: "pointer",
-                color: "#000000",
-                boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.08)"
+                color: "#64748b",
+                transition: "background-color 0.2s"
               }}
             >
               <X size={18} />
             </button>
 
-            {/* Header */}
-            <h2 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "2.2rem", fontWeight: 700, color: "#000000", marginBottom: "2rem" }}>
-              Contact Via
-            </h2>
+            {/* Product Image */}
+            <div style={{ width: "100%", height: "220px", borderRadius: "1.2rem", overflow: "hidden", marginBottom: "1.5rem", position: "relative", backgroundColor: "#f8fafc" }}>
+              <Image
+                src={contactProduct.images?.[0] || "/placeholder-image.jpg"}
+                alt={contactProduct.title}
+                fill
+                style={{ objectFit: "contain" }}
+              />
+            </div>
+
+            {/* Product Details */}
+            <div style={{ marginBottom: "2rem" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", marginBottom: "0.5rem" }}>
+                <h2 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.6rem", fontWeight: 700, color: "#0f172a", margin: 0, lineHeight: 1.2 }}>
+                  {contactProduct.title}
+                </h2>
+                <div style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.4rem", fontWeight: 800, color: "var(--primary)", whiteSpace: "nowrap" }}>
+                  LKR {Number(contactProduct.price).toFixed(2)}
+                </div>
+              </div>
+
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "1rem" }}>
+                <span style={{ backgroundColor: "rgba(0,12,102,0.06)", color: "#000c66", padding: "0.3rem 0.8rem", borderRadius: "999px", fontSize: "0.8rem", fontWeight: 600 }}>
+                  {contactProduct.condition_state}
+                </span>
+                <span style={{ backgroundColor: "#f1f5f9", color: "#475569", padding: "0.3rem 0.8rem", borderRadius: "999px", fontSize: "0.8rem", fontWeight: 600 }}>
+                  Seller: {contactProduct.seller_name || "Super Admin"}
+                </span>
+              </div>
+
+              <div style={{ backgroundColor: "#f8fafc", padding: "1rem", borderRadius: "0.8rem", fontSize: "0.95rem", color: "#334155", lineHeight: 1.5, whiteSpace: "pre-wrap" }}>
+                {contactProduct.description}
+              </div>
+            </div>
+
+            <h3 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.2rem", fontWeight: 700, color: "#000000", marginBottom: "1rem", textAlign: "center" }}>
+              Contact Seller
+            </h3>
 
             {/* Options Grid */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+            <div style={{ display: "flex", gap: "1rem" }}>
               {/* WhatsApp Button */}
               <button
                 onClick={() => {
@@ -1026,24 +1063,24 @@ export default function MarketplacePage() {
                   window.open(`https://wa.me/${clean}`, "_blank");
                 }}
                 style={{
-                  width: "100%",
-                  height: "55px",
+                  flex: 1,
+                  height: "48px",
                   borderRadius: "9999px",
-                  border: "1.5px solid #000000",
-                  backgroundColor: "#ffffff",
+                  border: "1.5px solid #25D366",
+                  backgroundColor: "rgba(37, 211, 102, 0.08)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  gap: "1rem",
+                  gap: "0.5rem",
                   cursor: "pointer",
-                  transition: "background-color 0.2s"
+                  transition: "all 0.2s"
                 }}
               >
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M12.004 2C6.48 2 2 6.48 2 12.004c0 1.764.46 3.42 1.268 4.876L2 22l5.284-1.388c1.392.76 2.972 1.196 4.72 1.196 5.524 0 10.004-4.48 10.004-10.004C22.008 6.48 17.528 2 12.004 2z" fill="#25D366" />
                   <path d="M17.508 14.304c-.304-.152-1.8-.888-2.076-.988-.276-.1-.476-.152-.676.152-.2.304-.776.988-.952 1.188-.176.2-.352.224-.656.072-1.14-.572-1.9-1.02-2.652-2.312-.2-.344.2-.32.572-1.064.092-.184.048-.344-.024-.496-.072-.152-.676-1.632-.928-2.236-.244-.588-.492-.508-.676-.516-.176-.008-.376-.008-.576-.008s-.524.076-.8.376c-.276.3-1.052 1.028-1.052 2.508s1.076 2.904 1.224 3.104c.148.2 2.116 3.232 5.128 4.532.716.308 1.276.492 1.712.632.72.228 1.376.196 1.896.116.58-.088 1.8-.736 2.052-1.44.252-.704.252-1.308.176-1.44-.076-.132-.276-.232-.58-.384z" fill="#FFF" />
                 </svg>
-                <span style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.3rem", fontWeight: 700, color: "#000000" }}>
+                <span style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1rem", fontWeight: 700, color: "#166534" }}>
                   Whatsapp
                 </span>
               </button>
@@ -1058,26 +1095,26 @@ export default function MarketplacePage() {
                   window.open(gmailUrl, "_blank");
                 }}
                 style={{
-                  width: "100%",
-                  height: "55px",
+                  flex: 1,
+                  height: "48px",
                   borderRadius: "9999px",
-                  border: "1.5px solid #000000",
-                  backgroundColor: "#ffffff",
+                  border: "1.5px solid #4285F4",
+                  backgroundColor: "rgba(66, 133, 244, 0.08)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  gap: "1rem",
+                  gap: "0.5rem",
                   cursor: "pointer",
-                  transition: "background-color 0.2s"
+                  transition: "all 0.2s"
                 }}
               >
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path fill="#4285F4" d="M20 18h2V6c0-1.1-.9-2-2-2h-3v14h3z" />
                   <path fill="#34A853" d="M4 18h2V4H4c-1.1 0-2 0.9-2 2v12h2z" />
                   <path fill="#EA4335" d="M12 13.5l8-6.5V4l-8 6.5L4 4v3l8 6.5z" />
                   <path fill="#FBBC05" d="M17 4h-3v5l3-2.5V4zM7 4h3v5L7 6.5V4z" />
                 </svg>
-                <span style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.3rem", fontWeight: 700, color: "#000000" }}>
+                <span style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1rem", fontWeight: 700, color: "#1e40af" }}>
                   Email
                 </span>
               </button>
