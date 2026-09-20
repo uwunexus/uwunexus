@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, MapPin, Clock, X, Upload, Phone, CheckCircle, Image as ImageIcon, PlusCircle, Eye, Mail } from "lucide-react";
+import { Search, MapPin, Clock, X, Upload, Phone, CheckCircle, Image as ImageIcon, PlusCircle } from "lucide-react";
 import Image from "next/image";
-import { uploadToCloudinary } from "../lib/cloudinary";
+import { uploadToCloudinary, validateImageFile } from "../lib/cloudinary";
 
 interface Report {
   id: number;
@@ -57,18 +57,31 @@ export default function LostAndFoundPage() {
   // Modal State
   const [showModal, setShowModal] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [myId, setMyId] = useState("");
   const [contactReport, setContactReport] = useState<Report | null>(null);
-  const [detailReport, setDetailReport] = useState<Report | null>(null);
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
-
-  const [alertMessage, setAlertMessage] = useState("");
-  const [confirmDialog, setConfirmDialog] = useState<{ message: string, onConfirm: () => void } | null>(null);
+  const [copiedEmail, setCopiedEmail] = useState(false);
 
   // Split date/time states (Option B: Remove Year)
   const [selectedMonth, setSelectedMonth] = useState("jan");
   const [selectedDay, setSelectedDay] = useState("1");
   const [selectedTime, setSelectedTime] = useState("12:00");
+
+  // Date boundary calculations (Only allow dates up to Today)
+  const now = new Date();
+  const currentMonthIndex = now.getMonth();
+  const currentDay = now.getDate();
+  const currentYear = now.getFullYear();
+  const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+  
+  // Only allow months up to the current month in current year
+  const availableMonths = monthNames.slice(0, currentMonthIndex + 1);
+
+  // Available days for the selected month (capped at today if current month)
+  const selectedMonthIndex = Math.max(0, monthNames.indexOf(selectedMonth));
+  const daysInSelectedMonth = new Date(currentYear, selectedMonthIndex + 1, 0).getDate();
+  const maxDayForMonth = selectedMonthIndex === currentMonthIndex ? currentDay : daysInSelectedMonth;
+  const availableDays = Array.from({ length: maxDayForMonth }, (_, i) => (i + 1).toString());
 
   const [form, setForm] = useState({
     title: "",
@@ -87,12 +100,11 @@ export default function LostAndFoundPage() {
     fetchReports();
 
     // Initialize with current date and time
-    const now = new Date();
-    const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
-    setSelectedMonth(monthNames[now.getMonth()]);
-    setSelectedDay(now.getDate().toString());
-    const hr = now.getHours().toString().padStart(2, '0');
-    const min = now.getMinutes().toString().padStart(2, '0');
+    const initialNow = new Date();
+    setSelectedMonth(monthNames[initialNow.getMonth()]);
+    setSelectedDay(initialNow.getDate().toString());
+    const hr = initialNow.getHours().toString().padStart(2, '0');
+    const min = initialNow.getMinutes().toString().padStart(2, '0');
     setSelectedTime(`${hr}:${min}`);
   }, []);
 
@@ -112,33 +124,20 @@ export default function LostAndFoundPage() {
 
   const handleCreateReport = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!myId) {
-      setAlertMessage("You must be logged in to create a report.");
-      return;
-    }
+    if (!myId) return alert("You must be logged in to create a report.");
 
-    // Validate that the selected date/time is not in the future
-    const now = new Date();
-    const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
-    const monthIndex = monthNames.indexOf(selectedMonth);
-    const day = parseInt(selectedDay, 10);
-    
-    let year = now.getFullYear();
-    // If selected month is greater than current month, it must be from last year
-    if (monthIndex > now.getMonth()) {
-      year -= 1;
-    }
-    
-    const [hoursStr, minutesStr] = selectedTime.split(":");
-    const selectedDateObj = new Date(year, monthIndex, day, parseInt(hoursStr || "0", 10), parseInt(minutesStr || "0", 10));
-    
-    if (selectedDateObj > now) {
-      setAlertMessage("Future dates and times are not allowed for Lost & Found items.");
-      return;
-    }
+    // Validate that the date and time is not in the future
+    const [hoursStr, minutesStr] = (selectedTime || "00:00").split(":");
+    const reportDateTime = new Date(
+      currentYear,
+      selectedMonthIndex,
+      parseInt(selectedDay, 10),
+      parseInt(hoursStr || "0", 10),
+      parseInt(minutesStr || "0", 10)
+    );
 
-    if (!/^[0-9]{10}$/.test(form.contact_number)) {
-      setAlertMessage("Phone number must be exactly 10 digits.");
+    if (reportDateTime.getTime() > Date.now()) {
+      alert("Date and time cannot be in the future.");
       return;
     }
 
@@ -152,7 +151,6 @@ export default function LostAndFoundPage() {
       // Format selectedTime into AM/PM with dot syntax (e.g. 10.30pm)
       let timeStr = "";
       if (selectedTime) {
-        const [hoursStr, minutesStr] = selectedTime.split(":");
         let hours = parseInt(hoursStr, 10);
         const minutes = parseInt(minutesStr, 10);
         const ampm = hours >= 12 ? "pm" : "am";
@@ -176,7 +174,7 @@ export default function LostAndFoundPage() {
       
       const data = await res.json();
       if (data.success) {
-        setAlertMessage("Report created successfully!");
+        alert("Report created successfully!");
         setShowModal(false);
         setForm({ title: "", description: "", location: "", time_date: "", type: "Lost", contact_number: "", contact_email: "" });
         setFiles([]);
@@ -192,36 +190,32 @@ export default function LostAndFoundPage() {
 
         fetchReports();
       } else {
-        setAlertMessage(data.message);
+        alert(data.message);
       }
     } catch (err: any) {
-      setAlertMessage(err.message || "An error occurred");
+      alert(err.message || "An error occurred");
     } finally {
       setFormLoading(false);
     }
   };
 
   const handleMarkResolved = async (id: number) => {
-    setConfirmDialog({
-      message: "Are you sure you want to mark this as Found/Resolved?",
-      onConfirm: async () => {
-        setConfirmDialog(null);
-        try {
-          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/update_lost_found.php`, {
-            method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id, user_id: +myId, status: 'resolved' })
-          });
-          const data = await res.json();
-          if (data.success) {
-            setReports(prev => prev.map(r => r.id === id ? { ...r, status: 'resolved' } : r));
-          } else {
-            setAlertMessage(data.message);
-          }
-        } catch (e) {
-          setAlertMessage("Error updating status.");
-        }
+    if (!confirm("Are you sure you want to mark this as Found/Resolved?")) return;
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/update_lost_found.php`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, user_id: +myId, status: 'resolved' })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setReports(prev => prev.map(r => r.id === id ? { ...r, status: 'resolved' } : r));
+      } else {
+        alert(data.message);
       }
-    });
+    } catch (e) {
+      alert("Error updating status.");
+    }
   };
 
   const filteredReports = reports.filter(r => {
@@ -232,33 +226,34 @@ export default function LostAndFoundPage() {
   });
 
   return (
-    <div className="container" style={{ maxWidth: '1210px', marginTop: '1.5rem', minHeight: '100vh', paddingBottom: '4rem' }}>
+    <div className="container lost-found-container" style={{ maxWidth: '1210px', marginTop: '1.5rem', paddingLeft: '0', paddingRight: '0', minHeight: '100vh', paddingBottom: '4rem' }}>
       {/* Header */}
-      <div className="flex justify-between items-center mb-6 flex-wrap gap-4" style={{ marginTop: '1.5rem' }}>
+      <div className="flex justify-between items-center mb-6 flex-wrap gap-4 lost-found-header" style={{ marginTop: '1.5rem' }}>
         <div>
-          <h1 className="page-main-title">
+          <h1 className="lost-found-page-title" style={{ fontFamily: 'var(--font-syne), sans-serif', fontWeight: 700, fontSize: '3rem', color: '#000000', letterSpacing: '0.02em', marginBottom: '0.25rem' }}>
             Lost & Found Items
           </h1>
-          <p style={{ fontFamily: 'var(--font-inclusive-sans), sans-serif', fontSize: '1.15rem', color: '#64748b', fontWeight: 500 }}>
+          <p className="lost-found-page-subtitle" style={{ fontFamily: 'var(--font-inclusive-sans), sans-serif', fontSize: '1.15rem', color: '#64748b', fontWeight: 500 }}>
             Community portal to report and recover misplaced items.
           </p>
         </div>
         <button 
+          className="lost-found-report-btn"
           style={{ 
             backgroundColor: '#000c66', 
             color: '#ffffff', 
             border: 'none', 
             borderRadius: '9999px', 
-            padding: '0.75rem 1.5rem', 
+            padding: '0.6rem 2.2rem', 
             fontFamily: 'var(--font-syne), sans-serif', 
             fontWeight: 700, 
-            fontSize: '1rem', 
+            fontSize: '1rem',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             gap: '0.5rem',
-            boxShadow: '0 4px 14px rgba(0, 12, 102, 0.2)',
-            transition: 'all 0.2s'
+            transition: 'background-color 0.2s',
+            transform: 'translateY(-12px)'
           }} 
           onClick={() => setShowModal(true)}
         >
@@ -267,9 +262,20 @@ export default function LostAndFoundPage() {
         </button>
       </div>
 
+      {/* Mobile Floating Action Button */}
+      <button 
+        className="lost-found-fab"
+        onClick={() => setShowModal(true)}
+        suppressHydrationWarning
+      >
+        <PlusCircle size={18} />
+        <span>Report Item</span>
+      </button>
+
       {/* Filter Buttons */}
-      <div className="flex gap-2 flex-wrap mb-8" style={{ marginTop: '2rem' }}>
+      <div className="flex gap-2 flex-wrap mb-8 lost-found-filter-bar" style={{ marginTop: '2rem' }}>
         <button 
+          className="lost-found-filter-btn"
           onClick={() => setFilter("All")}
           style={{
             height: '38px',
@@ -288,9 +294,10 @@ export default function LostAndFoundPage() {
             justifyContent: 'center'
           }}
         >
-          All Reports
+          <span>All<span className="lost-found-btn-suffix"> Reports</span></span>
         </button>
         <button 
+          className="lost-found-filter-btn"
           onClick={() => setFilter("Lost")}
           style={{
             height: '38px',
@@ -309,9 +316,10 @@ export default function LostAndFoundPage() {
             justifyContent: 'center'
           }}
         >
-          Lost Items
+          <span>Lost<span className="lost-found-btn-suffix"> Items</span></span>
         </button>
         <button 
+          className="lost-found-filter-btn"
           onClick={() => setFilter("Found")}
           style={{
             height: '38px',
@@ -330,10 +338,11 @@ export default function LostAndFoundPage() {
             justifyContent: 'center'
           }}
         >
-          Found Items
+          <span>Found<span className="lost-found-btn-suffix"> Items</span></span>
         </button>
         {myId && (
           <button 
+            className="lost-found-filter-btn"
             onClick={() => setFilter("Mine")}
             style={{
               height: '38px',
@@ -352,7 +361,7 @@ export default function LostAndFoundPage() {
               justifyContent: 'center'
             }}
           >
-            My Reports
+            <span>My Reports</span>
           </button>
         )}
       </div>
@@ -361,21 +370,23 @@ export default function LostAndFoundPage() {
       {loading ? (
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "5rem 0", color: "#64748b", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700 }}>Loading reports...</div>
       ) : filteredReports.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "5rem 0", color: "#64748b", maxWidth: "600px", margin: "0 auto", fontFamily: "var(--font-syne), sans-serif" }}>
-          <Search size={48} style={{ margin: "0 auto 1rem auto", opacity: 0.3 }} />
-          <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: "#000000", marginBottom: "0.5rem" }}>No Reports Found</h2>
-          <p style={{ fontWeight: 500 }}>No listings match your criteria. You can create a report if you lost or found an item.</p>
+        <div className="no-events-container">
+          <div className="no-events-icon-badge">
+            <Search size={26} />
+          </div>
+          <h2 className="no-events-title">No Reports Found</h2>
+          <p className="no-events-desc">No listings match your criteria. You can create a report if you lost or found an item.</p>
         </div>
       ) : (
-        <div className="grid gap-8" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))" }}>
+        <div className="grid gap-8 lost-found-items-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))" }}>
           {filteredReports.map((report) => {
             const isMine = report.user_id === +myId;
             const isResolved = report.status === 'resolved';
 
             return (
-              <div key={report.id} className="event-card" onClick={() => { setDetailReport(report); setActiveImageIndex(0); }} style={{ opacity: isResolved ? 0.6 : 1, cursor: "pointer" }}>
+              <div key={report.id} className="event-card lost-found-item-card" style={{ opacity: isResolved ? 0.6 : 1 }}>
                 {/* Image visual wrapper with aspect ratio matching mockup */}
-                <div className="event-card-image-wrapper">
+                <div className="event-card-image-wrapper lost-found-card-image-wrapper">
                   {report.images && report.images.length > 0 ? (
                     <img src={report.images[0]} alt={report.title} className="event-card-img" />
                   ) : (
@@ -385,19 +396,19 @@ export default function LostAndFoundPage() {
                   )}
                   {isResolved && (
                     <div className="absolute inset-0 flex justify-center items-center z-10" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                      <div style={{ backgroundColor: "#10b981", color: "white", padding: "0.4rem 1.25rem", borderRadius: "9999px", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "0.95rem" }}>RESOLVED</div>
+                      <div className="lost-found-resolved-badge" style={{ backgroundColor: "#10b981", color: "white", padding: "0.4rem 1.25rem", borderRadius: "9999px", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "0.95rem" }}>RESOLVED</div>
                     </div>
                   )}
                 </div>
 
                 {/* Content block stack */}
-                <div className="event-card-content">
+                <div className="event-card-content lost-found-card-content">
                   {/* Title & Type Badge Row */}
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
-                    <h3 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.25rem", fontWeight: 700, color: "#000000", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
+                  <div className="lost-found-item-header-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
+                    <h3 className="lost-found-item-title" style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.25rem", fontWeight: 700, color: "#000000", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
                       {report.title}
                     </h3>
-                    <span style={{ 
+                    <span className="lost-found-item-type-badge" style={{ 
                       backgroundColor: report.type === "Lost" ? "#a61c1c" : "#1b8a5a", 
                       color: "#ffffff", 
                       borderRadius: "9999px",
@@ -411,7 +422,7 @@ export default function LostAndFoundPage() {
                   </div>
 
                   {/* Description Box Container */}
-                  <div style={{ 
+                  <div className="lost-found-item-desc" style={{ 
                     backgroundColor: "#d6d9de", 
                     borderRadius: "1rem", 
                     padding: "0.75rem 1rem", 
@@ -430,33 +441,34 @@ export default function LostAndFoundPage() {
                   </div>
 
                   {/* Metadata List */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: "0.65rem", marginBottom: "1.5rem", fontFamily: "var(--font-syne), sans-serif", fontSize: "1.05rem", color: "#000000", fontWeight: 700 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                  <div className="lost-found-item-metadata" style={{ display: "flex", flexDirection: "column", gap: "0.65rem", marginBottom: "1.5rem", fontFamily: "var(--font-syne), sans-serif", fontSize: "1.05rem", color: "#000000", fontWeight: 700 }}>
+                    <div className="lost-found-meta-row" style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
                       <MapPin size={18} style={{ color: "#000000", flexShrink: 0 }} />
                       <span>{report.location}</span>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                    <div className="lost-found-meta-row" style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
                       <Clock size={18} style={{ color: "#000000", flexShrink: 0 }} />
                       <span>{formatReportDateTime(report.time_date)}</span>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                    <div className="lost-found-meta-row" style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
                         <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
                         <circle cx="12" cy="7" r="4" />
                       </svg>
                       <span>{report.reporter_name}</span>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                    <div className="lost-found-meta-row" style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
                       <Phone size={18} style={{ color: "#000000", flexShrink: 0 }} />
                       <span>{report.contact_number}</span>
                     </div>
                   </div>
 
                   {/* Actions Buttons */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", width: "100%", marginTop: "auto" }}>
+                  <div className="lost-found-item-actions" style={{ display: "flex", flexDirection: "column", gap: "0.75rem", width: "100%", marginTop: "auto" }}>
                     {!isResolved && (
                       <button 
-                        className="event-card-btn"
+                        className="lost-found-btn lost-found-contact-btn"
+                        onClick={() => setContactReport(report)}
                         style={{ 
                           backgroundColor: "#0d0e4aff", 
                           color: "#ffffff", 
@@ -476,14 +488,15 @@ export default function LostAndFoundPage() {
                           width: "100%"
                         }}
                       >
-                        <Eye size={18} style={{ display: "inline-block" }} />
-                        <span>View Details</span>
+                        <Phone size={18} style={{ display: "inline-block" }} />
+                        <span>Contact Reporter</span>
                       </button>
                     )}
 
                     {isMine && !isResolved && (
                       <button 
-                        onClick={(e) => { e.stopPropagation(); handleMarkResolved(report.id); }}
+                        className="lost-found-btn lost-found-resolve-btn"
+                        onClick={() => handleMarkResolved(report.id)}
                         style={{ 
                           backgroundColor: "#115e3b", 
                           color: "#ffffff", 
@@ -518,6 +531,7 @@ export default function LostAndFoundPage() {
       {/* Create Modal */}
       {showModal && (
         <div 
+          className="lost-found-modal-overlay"
           style={{ 
             position: "fixed", 
             inset: 0, 
@@ -532,6 +546,7 @@ export default function LostAndFoundPage() {
           onClick={() => setShowModal(false)}
         >
           <div 
+            className="lost-found-modal-card"
             style={{ 
               maxWidth: "600px", 
               width: "100%", 
@@ -545,15 +560,16 @@ export default function LostAndFoundPage() {
             onClick={e => e.stopPropagation()}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
-              <h2 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.75rem", fontWeight: 700, color: "#000000" }}>Report an Item</h2>
+              <h2 className="lost-found-modal-title" style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.75rem", fontWeight: 700, color: "#000000" }}>Report an Item</h2>
               <button onClick={() => setShowModal(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "#000000" }}><X size={22} /></button>
             </div>
 
-            <form onSubmit={handleCreateReport} style={{ fontFamily: "var(--font-syne), sans-serif", display: "flex", flexDirection: "column", gap: "1rem" }}>
+            <form className="lost-found-modal-form" onSubmit={handleCreateReport} style={{ fontFamily: "var(--font-syne), sans-serif", display: "flex", flexDirection: "column", gap: "1rem" }}>
               <div className="responsive-form-grid">
                 <div>
                   <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Report Type *</label>
                   <select 
+                    className="lost-found-modal-input"
                     value={form.type} 
                     onChange={e => setForm({...form, type: e.target.value})}
                     style={{
@@ -577,6 +593,7 @@ export default function LostAndFoundPage() {
                 <div>
                   <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Item Title *</label>
                   <input 
+                    className="lost-found-modal-input"
                     type="text" 
                     required 
                     value={form.title} 
@@ -603,6 +620,7 @@ export default function LostAndFoundPage() {
                 <div>
                   <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Location *</label>
                   <input 
+                    className="lost-found-modal-input"
                     type="text" 
                     required 
                     value={form.location} 
@@ -628,8 +646,17 @@ export default function LostAndFoundPage() {
                   <div className="responsive-date-time-flex">
                     {/* Month Dropdown */}
                     <select
+                      className="lost-found-modal-input"
                       value={selectedMonth}
-                      onChange={e => setSelectedMonth(e.target.value)}
+                      onChange={e => {
+                        const newMonth = e.target.value;
+                        setSelectedMonth(newMonth);
+                        const newMonthIndex = monthNames.indexOf(newMonth);
+                        const maxD = newMonthIndex === currentMonthIndex ? currentDay : new Date(currentYear, newMonthIndex + 1, 0).getDate();
+                        if (parseInt(selectedDay, 10) > maxD) {
+                          setSelectedDay(maxD.toString());
+                        }
+                      }}
                       style={{
                         flex: 1,
                         height: "45px",
@@ -644,13 +671,14 @@ export default function LostAndFoundPage() {
                         color: "#000000"
                       }}
                     >
-                      {["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"].map(m => (
+                      {availableMonths.map(m => (
                         <option key={m} value={m}>{m.toUpperCase()}</option>
                       ))}
                     </select>
 
                     {/* Day Dropdown */}
                     <select
+                      className="lost-found-modal-input"
                       value={selectedDay}
                       onChange={e => setSelectedDay(e.target.value)}
                       style={{
@@ -667,13 +695,14 @@ export default function LostAndFoundPage() {
                         color: "#000000"
                       }}
                     >
-                      {Array.from({ length: 31 }, (_, i) => (i + 1).toString()).map(d => (
+                      {availableDays.map(d => (
                         <option key={d} value={d}>{d}</option>
                       ))}
                     </select>
 
                     {/* Time Input */}
                     <input
+                      className="lost-found-modal-input"
                       type="time"
                       value={selectedTime}
                       onChange={e => setSelectedTime(e.target.value)}
@@ -699,16 +728,11 @@ export default function LostAndFoundPage() {
                 <div>
                   <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Contact Number *</label>
                   <input 
+                    className="lost-found-modal-input"
                     type="text" 
                     required 
-                    maxLength={10}
-                    pattern="[0-9]{10}"
-                    title="Phone number must be exactly 10 digits"
                     value={form.contact_number} 
-                    onChange={e => {
-                      const val = e.target.value.replace(/\D/g, '');
-                      setForm({...form, contact_number: val});
-                    }} 
+                    onChange={e => setForm({...form, contact_number: e.target.value})} 
                     placeholder="e.g., 0712345678" 
                     style={{
                       height: "45px",
@@ -728,6 +752,7 @@ export default function LostAndFoundPage() {
                 <div>
                   <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Contact Email</label>
                   <input 
+                    className="lost-found-modal-input"
                     type="email" 
                     value={form.contact_email} 
                     onChange={e => setForm({...form, contact_email: e.target.value})} 
@@ -752,6 +777,7 @@ export default function LostAndFoundPage() {
               <div>
                 <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Description *</label>
                 <textarea 
+                  className="lost-found-modal-textarea"
                   rows={4} 
                   required 
                   value={form.description} 
@@ -775,7 +801,7 @@ export default function LostAndFoundPage() {
 
               <div>
                 <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Images (Optional, Max 3)</label>
-                <div className="border-2 border-dashed border-border rounded-lg p-6 text-center text-muted flex flex-col items-center justify-center cursor-pointer relative hover:border-primary transition-colors" style={{ backgroundColor: "#f1f3f5", borderRadius: "1rem", border: "2px dashed rgba(0,0,0,0.15)" }}>
+                <div className="border-2 border-dashed border-border rounded-lg p-6 text-center text-muted flex flex-col items-center justify-center cursor-pointer relative hover:border-primary transition-colors lost-found-modal-upload-box" style={{ backgroundColor: "#f1f3f5", borderRadius: "1rem", border: "2px dashed rgba(0,0,0,0.15)" }}>
                   <Upload size={24} className="mb-2" />
                   <span style={{ fontWeight: 700, fontSize: "0.9rem" }}>Click to select images</span>
                   <input 
@@ -784,21 +810,37 @@ export default function LostAndFoundPage() {
                     multiple 
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
                     onChange={e => {
-                      if (e.target.files) {
-                        const newFiles = Array.from(e.target.files).slice(0, 3);
-                        setFiles(newFiles);
+                      setUploadError(null);
+                      if (e.target.files && e.target.files.length > 0) {
+                        const rawFiles = Array.from(e.target.files).slice(0, 3);
+                        for (const f of rawFiles) {
+                          const err = validateImageFile(f);
+                          if (err) {
+                            setUploadError(err);
+                            e.target.value = "";
+                            setFiles([]);
+                            return;
+                          }
+                        }
+                        setFiles(rawFiles);
                       }
                     }}
                   />
                 </div>
-                {files.length > 0 && (
-                  <div style={{ fontSize: "0.85rem", color: "var(--success)", marginTop: "0.5rem", fontWeight: 700 }}>
+                {uploadError && (
+                  <div style={{ fontSize: "0.85rem", color: "var(--danger)", marginTop: "0.5rem", fontWeight: 700, fontFamily: "var(--font-roboto), sans-serif" }}>
+                    {uploadError}
+                  </div>
+                )}
+                {files.length > 0 && !uploadError && (
+                  <div style={{ fontSize: "0.85rem", color: "var(--success)", marginTop: "0.5rem", fontWeight: 700, fontFamily: "var(--font-roboto), sans-serif" }}>
                     {files.length} file(s) selected
                   </div>
                 )}
               </div>
 
               <button 
+                className="lost-found-modal-submit-btn"
                 type="submit" 
                 disabled={formLoading} 
                 style={{ 
@@ -824,128 +866,10 @@ export default function LostAndFoundPage() {
         </div>
       )}
 
-      {/* Report Detail Modal */}
-      {detailReport && (
-        <div
-          style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.65)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: "1.5rem", backdropFilter: "blur(5px)" }}
-          onClick={() => setDetailReport(null)}
-        >
-          <div className="event-detail-modal-container" onClick={e => e.stopPropagation()}>
-            {/* Left Column - Image & Thumbnails */}
-            <div className="event-detail-modal-img-col" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-              <div style={{ flex: 1, position: "relative", borderRadius: "1.5rem", overflow: "hidden", backgroundColor: "#f8fafc" }}>
-                {detailReport.images && detailReport.images.length > 0 ? (
-                  <img src={detailReport.images[activeImageIndex]} alt={detailReport.title} style={{ width: "100%", height: "100%", objectFit: "contain", position: "absolute", inset: 0 }} />
-                ) : (
-                  <div style={{ height: "100%", background: "linear-gradient(135deg, #000c6622, #000c6611)", display: "flex", alignItems: "center", justifyContent: "center", position: "absolute", inset: 0 }}>
-                    <ImageIcon size={80} style={{ color: "#000c66", opacity: 0.4 }} />
-                  </div>
-                )}
-              </div>
-              
-              {/* Thumbnail Gallery */}
-              {detailReport.images && detailReport.images.length > 1 && (
-                <div style={{ display: "flex", gap: "0.75rem", height: "80px" }}>
-                  {detailReport.images.map((img, idx) => (
-                    <div 
-                      key={idx}
-                      onClick={() => setActiveImageIndex(idx)}
-                      style={{ 
-                        flex: 1, 
-                        borderRadius: "0.75rem", 
-                        overflow: "hidden", 
-                        cursor: "pointer",
-                        border: activeImageIndex === idx ? "3px solid #000c66" : "3px solid transparent",
-                        opacity: activeImageIndex === idx ? 1 : 0.6,
-                        transition: "all 0.2s"
-                      }}
-                    >
-                      <img src={img} alt={`${detailReport.title} - ${idx + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Right Column - Details */}
-            <div className="event-detail-modal-info-col">
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", marginBottom: "0.5rem" }}>
-                <h2 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "2.2rem", fontWeight: 800, color: "#000000", lineHeight: 1.2, margin: 0 }}>
-                  {detailReport.title}
-                </h2>
-                <span style={{ 
-                  backgroundColor: detailReport.type === "Lost" ? "#a61c1c" : "#1b8a5a", 
-                  color: "#ffffff", 
-                  borderRadius: "9999px",
-                  padding: "0.4rem 1.2rem",
-                  fontSize: "1rem",
-                  fontWeight: 700,
-                  fontFamily: "var(--font-syne), sans-serif",
-                  flexShrink: 0
-                }}>
-                  {detailReport.type}
-                </span>
-              </div>
-              
-              <div style={{ 
-                backgroundColor: "#d6d9de", 
-                borderRadius: "1rem", 
-                padding: "1.25rem", 
-                marginTop: "1.5rem", 
-                marginBottom: "1.5rem",
-                fontFamily: "var(--font-syne), sans-serif",
-                fontSize: "1.05rem",
-                fontWeight: 700,
-                color: "#000000",
-                lineHeight: 1.6,
-                whiteSpace: "pre-wrap"
-              }}>
-                {detailReport.description}
-              </div>
-              
-              <div style={{ backgroundColor: "#e6e9ec", borderRadius: "1.5rem", padding: "1.25rem 1.5rem", border: "1px solid rgba(0,0,0,0.03)", marginBottom: "1.25rem" }}>
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", fontFamily: "var(--font-syne), sans-serif", fontSize: "1rem", fontWeight: 700, color: "#000000" }}>
-                  <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}><MapPin size={18} style={{ color: "#000000", flexShrink: 0, marginTop: "2px" }} /><span>Location: {detailReport.location}</span></div>
-                  <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}><Clock size={18} style={{ color: "#000000", flexShrink: 0, marginTop: "2px" }} /><span>Time: {formatReportDateTime(detailReport.time_date)}</span></div>
-                  <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: "2px" }}>
-                      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-                      <circle cx="12" cy="7" r="4" />
-                    </svg>
-                    <span>Reporter: {detailReport.reporter_name}</span>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}><Phone size={18} style={{ color: "#000000", flexShrink: 0, marginTop: "2px" }} /><span>Phone: {detailReport.contact_number}</span></div>
-                  {detailReport.contact_email && (
-                    <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}><Mail size={18} style={{ color: "#000000", flexShrink: 0, marginTop: "2px" }} /><span>Email: {detailReport.contact_email}</span></div>
-                  )}
-                </div>
-              </div>
-
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: "1rem", marginTop: "auto" }}>
-                <button onClick={() => setDetailReport(null)} style={{ backgroundColor: "#ffffff", color: "#0d0e4aff", border: "1.5px solid #0d0e4aff", borderRadius: "9999px", padding: "0.6rem 2rem", fontSize: "1rem", fontWeight: 700, fontFamily: "var(--font-syne), sans-serif", cursor: "pointer", transition: "all 0.2s" }}>
-                  Close
-                </button>
-                {myId !== detailReport.user_id?.toString() && detailReport.status !== 'resolved' && (
-                  <button 
-                    onClick={() => { 
-                      setContactReport(detailReport); 
-                      setDetailReport(null); 
-                    }} 
-                    style={{ backgroundColor: "#0d0e4aff", color: "#ffffff", border: "none", borderRadius: "9999px", padding: "0.6rem 2.5rem", fontSize: "1rem", fontWeight: 700, fontFamily: "var(--font-syne), sans-serif", cursor: "pointer", transition: "background-color 0.2s", display: "flex", alignItems: "center", gap: "0.5rem" }}
-                  >
-                    <Phone size={18} style={{ display: "inline-block" }} />
-                    Contact Reporter
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Contact Via Modal */}
       {contactReport && (
         <div 
+          className="lost-found-modal-overlay"
           style={{ 
             position: "fixed", 
             inset: 0, 
@@ -960,6 +884,7 @@ export default function LostAndFoundPage() {
           onClick={() => setContactReport(null)}
         >
           <div 
+            className="lost-found-contact-modal-card"
             style={{ 
               maxWidth: "400px", 
               width: "100%", 
@@ -974,6 +899,7 @@ export default function LostAndFoundPage() {
           >
             {/* Close Button */}
             <button 
+              className="lost-found-contact-close-btn"
               onClick={() => setContactReport(null)} 
               style={{ 
                 position: "absolute",
@@ -996,14 +922,15 @@ export default function LostAndFoundPage() {
             </button>
 
             {/* Header */}
-            <h2 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "2.2rem", fontWeight: 700, color: "#000000", marginBottom: "2rem" }}>
+            <h2 className="lost-found-contact-title" style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "2.2rem", fontWeight: 700, color: "#000000", marginBottom: "2rem" }}>
               Contact Via
             </h2>
 
             {/* Options Grid */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+            <div className="lost-found-contact-options" style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
               {/* WhatsApp Button */}
               <button
+                className="lost-found-contact-option-btn"
                 onClick={() => {
                   const phone = contactReport.contact_number;
                   let clean = phone.replace(/\D/g, "");
@@ -1037,8 +964,13 @@ export default function LostAndFoundPage() {
 
               {/* Email Button */}
               <button
+                className="lost-found-contact-option-btn"
                 onClick={() => {
-                  window.location.href = `mailto:${contactReport.contact_email || contactReport.reporter_email}`;
+                  const email = contactReport.contact_email || contactReport.reporter_email;
+                  const subject = `Inquiry regarding your ${contactReport.type} report: ${contactReport.title} on UWU-nexus`;
+                  const body = `Hi ${contactReport.reporter_name || "Reporter"},\n\nI saw your report about "${contactReport.title}" on UWU-nexus Lost & Found. I would like to inquire about it.\n\nRegards`;
+                  const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                  window.open(gmailUrl, "_blank");
                 }}
                 style={{
                   width: "100%",
@@ -1064,31 +996,6 @@ export default function LostAndFoundPage() {
                   Email
                 </span>
               </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Custom Alert Modal */}
-      {alertMessage && (
-        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "1.5rem", backdropFilter: "blur(5px)" }}>
-          <div className="card" style={{ maxWidth: "400px", width: "100%", textAlign: "center", padding: "2rem" }}>
-            <h3 style={{ fontSize: "1.25rem", fontWeight: "bold", marginBottom: "1rem" }}>Notice</h3>
-            <p style={{ marginBottom: "1.5rem", color: "var(--muted)" }}>{alertMessage}</p>
-            <button onClick={() => setAlertMessage("")} className="btn btn-primary w-full justify-center">OK</button>
-          </div>
-        </div>
-      )}
-
-      {/* Custom Confirm Modal */}
-      {confirmDialog && (
-        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "1.5rem", backdropFilter: "blur(5px)" }}>
-          <div className="card" style={{ maxWidth: "400px", width: "100%", padding: "2rem" }}>
-            <h3 style={{ fontSize: "1.25rem", fontWeight: "bold", marginBottom: "1rem" }}>Confirm Action</h3>
-            <p style={{ marginBottom: "1.5rem", color: "var(--muted)" }}>{confirmDialog.message}</p>
-            <div style={{ display: "flex", gap: "1rem", justifyContent: "flex-end" }}>
-              <button onClick={() => setConfirmDialog(null)} className="btn btn-secondary">Cancel</button>
-              <button onClick={confirmDialog.onConfirm} className="btn btn-primary" style={{ backgroundColor: "var(--danger)", color: "white", border: "none" }}>Confirm</button>
             </div>
           </div>
         </div>
