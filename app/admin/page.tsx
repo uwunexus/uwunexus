@@ -2206,7 +2206,7 @@ function EventFormModal({ myId, initialData, onClose, onSaved }: { myId: string;
             </label>
             {imagePreview && (
               <div style={{ position: "relative", height: "160px", marginTop: "0.75rem", borderRadius: "1rem", overflow: "hidden", border: "1.5px solid rgba(0, 12, 102, 0.15)" }}>
-                <img src={imagePreview} alt="preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <Image src={imagePreview} alt="preview" fill style={{ objectFit: "cover" }} unoptimized />
                 <button type="button" onClick={() => { setImageFile(null); setImagePreview(""); }}
                   style={{ position: "absolute", top: "0.5rem", right: "0.5rem", backgroundColor: "rgba(0,0,0,0.7)", border: "none", borderRadius: "50%", width: "28px", height: "28px", cursor: "pointer", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <X size={14} />
@@ -2524,7 +2524,7 @@ function TicketFormModal({ myId, initialData, onClose, onSaved }: { myId: string
             </label>
             {imagePreview && (
               <div style={{ position: "relative", height: "160px", marginTop: "0.75rem", borderRadius: "1rem", overflow: "hidden", border: "1.5px solid rgba(0, 12, 102, 0.15)" }}>
-                <img src={imagePreview} alt="preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <Image src={imagePreview} alt="preview" fill style={{ objectFit: "cover" }} unoptimized />
                 <button type="button" onClick={() => { setImageFile(null); setImagePreview(""); }}
                   style={{ position: "absolute", top: "0.5rem", right: "0.5rem", backgroundColor: "rgba(0,0,0,0.7)", border: "none", borderRadius: "50%", width: "28px", height: "28px", cursor: "pointer", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}><X size={14} /></button>
               </div>

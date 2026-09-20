@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
@@ -171,7 +172,7 @@ export default function TicketsPage() {
               }}
             >
               <Ticket size={18} />
-              <span style={{ fontSize: "0.95rem", fontWeight: 600 }}>Buy Tickets</span>
+              <span style={{ fontSize: "0.95rem", fontWeight: 600, fontFamily: "var(--font-syne), sans-serif" }}>Buy Tickets</span>
             </button>
             <button
               onClick={() => setActiveTab("my-tickets")}
@@ -187,7 +188,7 @@ export default function TicketsPage() {
               }}
             >
               <QrCode size={18} />
-              <span style={{ fontSize: "0.95rem", fontWeight: 600 }}>My Tickets</span>
+              <span style={{ fontSize: "0.95rem", fontWeight: 600, fontFamily: "var(--font-syne), sans-serif" }}>My Tickets</span>
             </button>
           </div>
         </div>
@@ -219,7 +220,7 @@ export default function TicketsPage() {
                 {/* Image wrapper matching the visual layout */}
                 <div className="event-card-image-wrapper">
                   {event.image_url ? (
-                    <img src={event.image_url} alt={event.title} className="event-card-img" />
+                    <Image src={event.image_url} alt={event.title} className="event-card-img" fill style={{ objectFit: 'cover' }} unoptimized />
                   ) : (
                     <div className="event-card-no-img" style={{ background: "linear-gradient(135deg, #000c6622, #000c6611)" }}>
                       <Ticket size={40} style={{ color: "#000c66", opacity: 0.4 }} />
@@ -315,7 +316,7 @@ export default function TicketsPage() {
                   {/* Top image area */}
                   <div style={{ height: '120px', position: 'relative', backgroundColor: '#f1f5f9' }}>
                     {purchase.image_url ? (
-                      <img src={purchase.image_url} alt={purchase.event_title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <Image src={purchase.image_url} alt={purchase.event_title} fill style={{ objectFit: 'cover' }} unoptimized />
                     ) : (
                       <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #000c6622, #000c6611)' }}>
                         <Ticket size={48} style={{ color: '#000c66', opacity: 0.3 }} />
@@ -439,10 +440,12 @@ export default function TicketsPage() {
             {/* Left Column - Poster Image */}
             <div className="checkout-modal-img-col">
               {selectedEvent.image_url ? (
-                <img 
-                  src={selectedEvent.image_url} 
-                  alt={selectedEvent.title} 
-                  style={{ width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: 0 }} 
+                <Image
+                  src={selectedEvent.image_url}
+                  alt={selectedEvent.title}
+                  fill
+                  style={{ objectFit: "cover" }}
+                  unoptimized
                 />
               ) : (
                 <div style={{ height: "100%", background: "linear-gradient(135deg, #000c6622, #000c6611)", display: "flex", alignItems: "center", justifyContent: "center", position: "absolute", inset: 0 }}>

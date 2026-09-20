@@ -365,10 +365,13 @@ export default function EventsPage() {
                   {/* Image wrapper with padded container */}
                   <div className="event-card-image-wrapper">
                     {event.image_url ? (
-                      <img
+                      <Image
                         src={event.image_url}
                         alt={event.title}
                         className="event-card-img"
+                        fill
+                        style={{ objectFit: 'cover' }}
+                        unoptimized
                       />
                     ) : (
                       <div className="event-card-no-img" style={{ background: `linear-gradient(135deg, ${themeColor}22, ${themeColor}11)` }}>
@@ -570,10 +573,12 @@ export default function EventsPage() {
             {/* Left Column - Image */}
             <div className="event-detail-modal-img-col">
               {selectedEvent.image_url ? (
-                <img 
-                  src={selectedEvent.image_url} 
-                  alt={selectedEvent.title} 
-                  style={{ width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: 0 }} 
+                <Image
+                  src={selectedEvent.image_url}
+                  alt={selectedEvent.title}
+                  fill
+                  style={{ objectFit: "cover" }}
+                  unoptimized
                 />
               ) : (
                 <div style={{ height: "100%", background: `linear-gradient(135deg, ${CATEGORY_COLORS[selectedEvent.category] ?? "#8b5cf6"}33, ${CATEGORY_COLORS[selectedEvent.category] ?? "#8b5cf6"}11)`, display: "flex", alignItems: "center", justifyContent: "center", position: "absolute", inset: 0 }}>

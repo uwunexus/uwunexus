@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 
 import { useEffect, useState, use, useRef } from "react";
 import { Ticket, Calendar, Clock, MapPin, Loader2, AlertCircle, Download } from "lucide-react";

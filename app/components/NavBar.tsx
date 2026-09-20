@@ -1,3 +1,4 @@
+import Image from "next/image";
 "use client";
 
 import Link from "next/link";
@@ -44,7 +45,7 @@ export default function NavBar({ isAuthenticated, isAdmin }: NavBarProps) {
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 font-bold text-xl gradient-text" style={{ flexShrink: 0 }}>
-            <img src="/logo.png" alt="UWU-NEXUS Logo" style={{ height: "46px", width: "auto" }} />
+            <Image src="/logo.png" alt="UWU-NEXUS Logo" width={150} height={46} style={{ height: "46px", width: "auto" }} priority />
           </Link>
 
           {/* ── DESKTOP nav pills ── */}

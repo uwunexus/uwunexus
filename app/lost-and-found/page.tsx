@@ -391,7 +391,7 @@ export default function LostAndFoundPage() {
                 {/* Image visual wrapper with aspect ratio matching mockup */}
                 <div className="event-card-image-wrapper lost-found-card-image-wrapper">
                   {report.images && report.images.length > 0 ? (
-                    <img src={report.images[0]} alt={report.title} className="event-card-img" />
+                    <Image src={report.images[0]} alt={report.title} className="event-card-img" fill style={{ objectFit: 'cover' }} unoptimized />
                   ) : (
                     <div className="event-card-no-img" style={{ background: "linear-gradient(135deg, #000c6622, #000c6611)" }}>
                       <ImageIcon size={40} style={{ color: "#000c66", opacity: 0.4 }} />
@@ -880,7 +880,7 @@ export default function LostAndFoundPage() {
             <div className="event-detail-modal-img-col" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
               <div style={{ flex: 1, position: "relative", borderRadius: "1.5rem", overflow: "hidden", backgroundColor: "#f8fafc" }}>
                 {detailReport.images && detailReport.images.length > 0 ? (
-                  <img src={detailReport.images[activeImageIndex]} alt={detailReport.title} style={{ width: "100%", height: "100%", objectFit: "contain", position: "absolute", inset: 0 }} />
+                  <Image src={detailReport.images[activeImageIndex]} alt={detailReport.title} fill style={{ objectFit: "contain" }} unoptimized />
                 ) : (
                   <div style={{ height: "100%", background: "linear-gradient(135deg, #000c6622, #000c6611)", display: "flex", alignItems: "center", justifyContent: "center", position: "absolute", inset: 0 }}>
                     <ImageIcon size={80} style={{ color: "#000c66", opacity: 0.4 }} />
@@ -905,7 +905,7 @@ export default function LostAndFoundPage() {
                         transition: "all 0.2s"
                       }}
                     >
-                      <img src={img} alt={`${detailReport.title} - ${idx + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      <Image src={img} alt={`${detailReport.title} - ${idx + 1}`} fill style={{ objectFit: "cover" }} unoptimized />
                     </div>
                   ))}
                 </div>

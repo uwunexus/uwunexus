@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import Counter from "./components/Counter";
@@ -154,10 +155,11 @@ export default function Home() {
         <div className="services-grid grid md-grid-cols-2 lg-grid-cols-3 gap-6">
           {features.map((feature, index) => (
             <Link href={feature.link} key={index} className="service-card group">
-              <img
+              <Image
                 src={feature.icon}
                 alt={feature.title}
                 className="service-card-image"
+                fill
                 style={{ objectFit: 'cover' }}
               />
               <div className="service-card-overlay"></div>

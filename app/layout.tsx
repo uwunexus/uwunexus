@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { Metadata } from "next";
 import { Inter, Outfit, Syne, Nobile, Zain, Audiowide, DM_Sans, Inclusive_Sans, Roboto } from "next/font/google";
 import "./globals.css";
@@ -41,7 +42,7 @@ export default async function RootLayout({
         <nav className="navbar">
           <div className="container flex justify-between items-center" style={{ gap: '1rem' }}>
             <Link href="/" className="flex items-center gap-3 font-bold text-xl gradient-text">
-              <img src="/logo.png" alt="UWU-NEXUS Logo" style={{ height: '42px', width: 'auto', margin: '0' }} />
+              <Image src="/logo.png" alt="UWU-NEXUS Logo" width={150} height={42} style={{ height: '42px', width: 'auto', margin: '0' }} priority />
             </Link>
 
             <NavLinks isAuthenticated={isAuthenticated} isAdmin={isAdmin} logoutAction={logoutAction} />
@@ -115,7 +116,7 @@ export default async function RootLayout({
               <p className="text-muted copyright-text">© 2026 UWU - Nexus. All rights reserved.</p>
 
               <div className="footer-logo-center flex items-center justify-center">
-                <img src="/logo.png" alt="UWU-NEXUS Icon" style={{ height: '32px', width: 'auto' }} />
+                <Image src="/logo.png" alt="UWU-NEXUS Icon" width={115} height={32} style={{ height: '32px', width: 'auto' }} />
               </div>
 
               <div className="footer-legal-links flex gap-6">

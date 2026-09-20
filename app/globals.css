@@ -1030,8 +1030,8 @@ html {
   .events-search-wrapper {
     order: -1;
     flex: 0 0 100% !important;
-    min-width: 100% !important;
-    max-width: 100% !important;
+    min-flex: 1 !important; justify-content: center !important;
+    max-flex: 1 !important; justify-content: center !important;
   }
 
   .events-search-wrapper input {
@@ -1568,7 +1568,7 @@ html {
     font-size: 0.85rem !important;
     padding: 0.35rem 0.85rem !important;
     margin-bottom: 0.75rem !important;
-    max-width: 100% !important;
+    max-flex: 1 !important; justify-content: center !important;
     text-align: center !important;
     justify-content: center !important;
   }
@@ -1583,7 +1583,7 @@ html {
     text-align: center !important;
     line-height: 1.25 !important;
     margin-bottom: 0.75rem !important;
-    width: 100% !important;
+    flex: 1 !important; justify-content: center !important;
     word-break: normal !important;
     overflow-wrap: break-word !important;
     padding: 0 0.5rem !important;
@@ -1592,7 +1592,7 @@ html {
   .hero-subtitle {
     font-size: 0.9rem !important;
     text-align: center !important;
-    max-width: 100% !important;
+    max-flex: 1 !important; justify-content: center !important;
     margin-bottom: 1rem !important;
     line-height: 1.5 !important;
     padding: 0 0.5rem !important;
@@ -1619,14 +1619,14 @@ html {
   .stats-bar {
     padding: 1.25rem 0.5rem !important;
     margin: 0 !important;
-    width: 100% !important;
+    flex: 1 !important; justify-content: center !important;
   }
 
   .stats-container {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 1.25rem 0.75rem !important;
-    width: 100% !important;
+    flex: 1 !important; justify-content: center !important;
     max-width: 360px !important;
     margin: 0 auto !important;
     padding: 0 0.5rem !important;
@@ -1745,14 +1745,14 @@ html {
   .footer-links-group {
     justify-content: center !important;
     gap: 1.25rem !important;
-    width: 100% !important;
+    flex: 1 !important; justify-content: center !important;
     font-size: 0.9rem !important;
   }
 
   .footer-social-group {
     justify-content: center !important;
     gap: 1rem !important;
-    width: 100% !important;
+    flex: 1 !important; justify-content: center !important;
   }
 
   .footer-hr {
@@ -1791,19 +1791,19 @@ html {
     border: none !important;
     padding: 0 !important;
     gap: 0.75rem !important;
-    width: 100% !important;
+    flex: 1 !important; justify-content: center !important;
   }
 
   .subscribe-input {
     background-color: #ffffff !important;
-    width: 100% !important;
+    flex: 1 !important; justify-content: center !important;
     border-radius: 9999px !important;
     padding: 0.8rem 1.25rem !important;
     text-align: center;
   }
 
   .subscribe-button {
-    width: 100% !important;
+    flex: 1 !important; justify-content: center !important;
     text-align: center !important;
     justify-content: center !important;
     padding: 0.8rem 1.5rem !important;
@@ -2007,7 +2007,7 @@ html {
     padding: 1.5rem 1.15rem 2rem 1.15rem !important;
     max-height: 86vh !important;
     max-height: calc(100dvh - 3.5rem) !important;
-    width: 100% !important;
+    flex: 1 !important; justify-content: center !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
   }
@@ -2079,7 +2079,7 @@ html {
     gap: 0.5rem !important;
     margin-top: 0.75rem !important;
     margin-bottom: 1rem !important;
-    width: 100% !important;
+    flex: 1 !important; justify-content: center !important;
   }
 
   .marketplace-search-wrapper {
@@ -2093,7 +2093,7 @@ html {
     font-size: 0.85rem !important;
     padding-left: 1rem !important;
     padding-right: 2.25rem !important;
-    width: 100% !important;
+    flex: 1 !important; justify-content: center !important;
   }
 
   .marketplace-categories-row {
@@ -2160,7 +2160,7 @@ html {
     display: -webkit-box !important;
     -webkit-line-clamp: 2 !important;
     -webkit-box-orient: vertical !important;
-    width: 100% !important;
+    flex: 1 !important; justify-content: center !important;
     font-weight: 700 !important;
     color: #0f172a !important;
   }
@@ -2191,18 +2191,19 @@ html {
 
   .marketplace-item-actions {
     margin-top: auto !important;
-    width: 100% !important;
+    flex: 1 !important; justify-content: center !important;
   }
 
   .marketplace-item-btn {
     padding: 0.5rem 0.5rem !important;
     font-size: 0.78rem !important;
-    width: 100% !important;
+    flex: 1 !important; justify-content: center !important;
     border-radius: 9999px !important;
   }
 
   .marketplace-item-btn-secondary,
-  .marketplace-item-btn-success {
+  .marketplace-item-btn-success,
+  .marketplace-item-btn-danger {
     padding: 0.5rem 0.5rem !important;
     font-size: 0.78rem !important;
   }
@@ -2276,7 +2277,7 @@ html {
     margin-top: 0.75rem !important;
     margin-bottom: 1.25rem !important;
     padding-bottom: 2px !important;
-    width: 100% !important;
+    flex: 1 !important; justify-content: center !important;
     overflow-x: visible !important;
   }
 
@@ -2285,7 +2286,7 @@ html {
   }
 
   .lost-found-filter-btn {
-    width: 100% !important;
+    flex: 1 !important; justify-content: center !important;
     height: 34px !important;
     padding: 0 0.25rem !important;
     font-size: 0.78rem !important;
@@ -2405,7 +2406,7 @@ html {
 
   .lost-found-item-actions {
     margin-top: auto !important;
-    width: 100% !important;
+    flex: 1 !important; justify-content: center !important;
     display: flex !important;
     flex-direction: column !important;
     gap: 0.4rem !important;
@@ -2416,7 +2417,7 @@ html {
     font-size: 0.75rem !important;
     font-weight: 700 !important;
     border-radius: 9999px !important;
-    width: 100% !important;
+    flex: 1 !important; justify-content: center !important;
     height: 34px !important;
     display: inline-flex !important;
     align-items: center !important;
@@ -2439,7 +2440,7 @@ html {
     padding: 1.5rem 1.15rem 2rem 1.15rem !important;
     max-height: 86vh !important;
     max-height: calc(100dvh - 3.5rem) !important;
-    width: 100% !important;
+    flex: 1 !important; justify-content: center !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
   }
@@ -2588,7 +2589,7 @@ html {
   }
 
   .gpa-superadmin-box {
-    width: 100% !important;
+    flex: 1 !important; justify-content: center !important;
     align-items: flex-start !important;
     padding: 0.85rem 1rem !important;
     border-radius: 1rem !important;
@@ -2662,7 +2663,7 @@ html {
   }
 
   .gpa-level-tabs-container {
-    width: 100% !important;
+    flex: 1 !important; justify-content: center !important;
     display: grid !important;
     grid-template-columns: repeat(4, 1fr) !important;
     gap: 0.25rem !important;
@@ -2672,7 +2673,7 @@ html {
   }
 
   .gpa-level-tab-btn {
-    width: 100% !important;
+    flex: 1 !important; justify-content: center !important;
     padding: 0.55rem 0 !important;
     font-size: 0.78rem !important;
     display: flex !important;
@@ -2752,7 +2753,7 @@ html {
     display: flex !important;
     flex-direction: column !important;
     gap: 0.65rem !important;
-    width: 100% !important;
+    flex: 1 !important; justify-content: center !important;
   }
 
   .gpa-mobile-module-card {
@@ -2875,7 +2876,7 @@ html {
   }
 
   .gpa-mobile-grade-select {
-    width: 100% !important;
+    flex: 1 !important; justify-content: center !important;
     height: 100% !important;
     appearance: none !important;
     -webkit-appearance: none !important;
@@ -2941,8 +2942,8 @@ html {
   }
 
   .info-hub-search-wrapper {
-    max-width: 100% !important;
-    width: 100% !important;
+    max-flex: 1 !important; justify-content: center !important;
+    flex: 1 !important; justify-content: center !important;
   }
 
   .info-hub-search-input {
@@ -2956,7 +2957,7 @@ html {
   }
 
   .info-hub-tabs-container {
-    width: 100% !important;
+    flex: 1 !important; justify-content: center !important;
     display: grid !important;
     grid-template-columns: repeat(3, 1fr) !important;
     gap: 0.25rem !important;
@@ -2966,7 +2967,7 @@ html {
   }
 
   .info-hub-tab-btn {
-    width: 100% !important;
+    flex: 1 !important; justify-content: center !important;
     padding: 0.55rem 0.2rem !important;
     font-size: 0.78rem !important;
     display: flex !important;
@@ -3015,7 +3016,7 @@ html {
   }
 
   .info-hub-procedure-btn {
-    width: 100% !important;
+    flex: 1 !important; justify-content: center !important;
     justify-content: center !important;
     padding: 0.65rem 1rem !important;
     font-size: 0.85rem !important;
@@ -3046,7 +3047,7 @@ html {
 
   .info-hub-hotline-desc-pill {
     margin-right: 0 !important;
-    width: 100% !important;
+    flex: 1 !important; justify-content: center !important;
     text-align: center !important;
     font-size: 0.82rem !important;
     padding: 0.45rem 0.75rem !important;
@@ -3054,7 +3055,7 @@ html {
   }
 
   .info-hub-hotline-dial-pill {
-    width: 100% !important;
+    flex: 1 !important; justify-content: center !important;
     justify-content: center !important;
     font-size: 0.9rem !important;
     padding: 0.55rem 0.75rem !important;

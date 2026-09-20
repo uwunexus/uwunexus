@@ -50,3 +50,4 @@ backend/.env
 
 # Temporary tools directory
 tools/
+*.py
