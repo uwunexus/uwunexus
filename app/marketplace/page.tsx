@@ -590,7 +590,7 @@ export default function MarketplacePage() {
                           whiteSpace: "nowrap"
                         }}
                       >
-                        <span className="material-symbols-outlined" style={{ fontSize: "18px", color: "inherit", display: "inline-block" }}>call</span>
+                        <Phone size={18} />
                         <span>Contact Seller</span>
                       </button>
                     ) : (

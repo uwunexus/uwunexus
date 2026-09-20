@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, MapPin, Clock, X, Upload, Phone, CheckCircle, Image as ImageIcon, PlusCircle } from "lucide-react";
+import { Search, MapPin, Clock, X, Upload, Phone, CheckCircle, Image as ImageIcon, PlusCircle, Eye, Mail } from "lucide-react";
 import Image from "next/image";
 import { uploadToCloudinary } from "../lib/cloudinary";
 
@@ -447,7 +447,7 @@ export default function LostAndFoundPage() {
                       <span>{report.reporter_name}</span>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: "18px", color: "#000000", flexShrink: 0 }}>call</span>
+                      <Phone size={18} style={{ color: "#000000", flexShrink: 0 }} />
                       <span>{report.contact_number}</span>
                     </div>
                   </div>
@@ -476,7 +476,7 @@ export default function LostAndFoundPage() {
                           width: "100%"
                         }}
                       >
-                        <span className="material-symbols-outlined" style={{ fontSize: "18px", color: "inherit", display: "inline-block" }}>visibility</span>
+                        <Eye size={18} style={{ display: "inline-block" }} />
                         <span>View Details</span>
                       </button>
                     )}
@@ -914,9 +914,9 @@ export default function LostAndFoundPage() {
                     </svg>
                     <span>Reporter: {detailReport.reporter_name}</span>
                   </div>
-                  <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}><span className="material-symbols-outlined" style={{ fontSize: "18px", color: "#000000", flexShrink: 0, marginTop: "2px" }}>call</span><span>Phone: {detailReport.contact_number}</span></div>
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}><Phone size={18} style={{ color: "#000000", flexShrink: 0, marginTop: "2px" }} /><span>Phone: {detailReport.contact_number}</span></div>
                   {detailReport.contact_email && (
-                    <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}><span className="material-symbols-outlined" style={{ fontSize: "18px", color: "#000000", flexShrink: 0, marginTop: "2px" }}>mail</span><span>Email: {detailReport.contact_email}</span></div>
+                    <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}><Mail size={18} style={{ color: "#000000", flexShrink: 0, marginTop: "2px" }} /><span>Email: {detailReport.contact_email}</span></div>
                   )}
                 </div>
               </div>
@@ -933,7 +933,7 @@ export default function LostAndFoundPage() {
                     }} 
                     style={{ backgroundColor: "#0d0e4aff", color: "#ffffff", border: "none", borderRadius: "9999px", padding: "0.6rem 2.5rem", fontSize: "1rem", fontWeight: 700, fontFamily: "var(--font-syne), sans-serif", cursor: "pointer", transition: "background-color 0.2s", display: "flex", alignItems: "center", gap: "0.5rem" }}
                   >
-                    <span className="material-symbols-outlined" style={{ fontSize: "18px", color: "inherit", display: "inline-block" }}>call</span>
+                    <Phone size={18} style={{ display: "inline-block" }} />
                     Contact Reporter
                   </button>
                 )}
