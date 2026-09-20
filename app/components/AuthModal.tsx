@@ -86,6 +86,7 @@ export default function AuthModal() {
 
     setError("");
     setLoading(true);
+    setShowResendVerification(false);
 
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "/api/backend"}/login.php`, {

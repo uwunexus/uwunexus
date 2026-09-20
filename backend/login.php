@@ -18,26 +18,35 @@ try {
     $stmt->execute([$email]);
     $user = $stmt->fetch();
 
-    if ($user && password_verify($password, $user['password_hash'])) {
-        if (!$user['is_verified']) {
-            http_response_code(403);
-            echo json_encode(["success" => false, "message" => "Your account is not verified. Please verify your email or request a new verification link.", "is_unverified" => true]);
-            exit();
-        }
+    if ($user) {
+        if (password_verify($password, $user['password_hash'])) {
+            if (!$user['is_verified']) {
+                http_response_code(403);
+                echo json_encode(["success" => false, "message" => "Your account is not verified. Please verify your email or request a new verification link.", "is_unverified" => true]);
+                exit();
+            }
 
-        echo json_encode([
-            "success" => true,
-            "message" => "Login successful",
-            "user" => [
-                "id" => $user['id'],
-                "fullName" => $user['full_name'],
-                "email" => $email,
-                "role" => $user['role'],
-                "enrollmentNumber" => $user['enrollment_number'],
-                "batch" => $user['batch'],
-                "degree" => $user['degree']
-            ]
-        ]);
+            echo json_encode([
+                "success" => true,
+                "message" => "Login successful",
+                "user" => [
+                    "id" => $user['id'],
+                    "fullName" => $user['full_name'],
+                    "email" => $email,
+                    "role" => $user['role'],
+                    "enrollmentNumber" => $user['enrollment_number'],
+                    "batch" => $user['batch'],
+                    "degree" => $user['degree']
+                ]
+            ]);
+        } else {
+            http_response_code(401);
+            if (!$user['is_verified']) {
+                echo json_encode(["success" => false, "message" => "You already have an account that is not verified, and the password is incorrect. If you forgot your password, please use the forgot password option."]);
+            } else {
+                echo json_encode(["success" => false, "message" => "Invalid email or password"]);
+            }
+        }
     } else {
         http_response_code(401);
         echo json_encode(["success" => false, "message" => "Invalid email or password"]);
