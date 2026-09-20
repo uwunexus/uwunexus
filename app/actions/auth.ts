@@ -3,9 +3,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-// Sets auth cookies WITHOUT redirecting — use this from client components
-// so you can navigate with router.push() and avoid the NEXT_REDIRECT flash.
-export async function setAuthCookies(role: string = "student", userId: string = "") {
+export async function loginAction(role: string = "student", userId: string = "", enrollmentNumber: string = "") {
   const cookieStore = await cookies();
   cookieStore.set("uwu_auth", "true", {
     path: "/",
@@ -19,12 +17,11 @@ export async function setAuthCookies(role: string = "student", userId: string = 
     path: "/",
     maxAge: 60 * 60 * 24 * 7
   });
-}
-
-// Kept for any form-action usage (e.g. server-rendered forms)
-export async function loginAction(role: string = "student", userId: string = "") {
-  await setAuthCookies(role, userId);
-  redirect("/");
+  cookieStore.set("uwu_enrollment", enrollmentNumber, {
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7
+  });
+  return { success: true };
 }
 
 export async function logoutAction() {
@@ -32,5 +29,6 @@ export async function logoutAction() {
   cookieStore.delete("uwu_auth");
   cookieStore.delete("uwu_role");
   cookieStore.delete("uwu_user_id");
+  cookieStore.delete("uwu_enrollment");
   redirect("/");
 }

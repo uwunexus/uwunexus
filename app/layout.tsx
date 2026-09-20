@@ -6,28 +6,22 @@ import { cookies } from "next/headers";
 import { logoutAction } from "./actions/auth";
 import { Shield, ArrowRight } from "lucide-react";
 import NavLinks from "./components/NavLinks";
-import NavBar from "./components/NavBar";
 import AuthModal from "./components/AuthModal";
+import UserNavProfile from "./components/UserNavProfile";
 
-const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
-const outfit = Outfit({ subsets: ["latin"], variable: '--font-outfit' });
-const syne = Syne({ subsets: ["latin"], variable: '--font-syne' });
-const nobile = Nobile({ subsets: ["latin"], weight: ["400", "700"], variable: '--font-nobile' });
-const zain = Zain({ subsets: ["latin"], weight: ["400", "700"], variable: '--font-zain' });
-const audiowide = Audiowide({ subsets: ["latin"], weight: "400", variable: '--font-audiowide' });
-const dmSans = DM_Sans({ subsets: ["latin"], weight: ["400", "500"], variable: '--font-dm-sans' });
-const inclusiveSans = Inclusive_Sans({ subsets: ["latin"], weight: "400", variable: '--font-inclusive-sans' });
-const roboto = Roboto({ subsets: ["latin"], weight: ["400", "500", "700"], variable: '--font-roboto' });
+const inter = Inter({ subsets: ["latin"], variable: '--font-inter', display: 'swap' });
+const outfit = Outfit({ subsets: ["latin"], variable: '--font-outfit', display: 'swap' });
+const syne = Syne({ subsets: ["latin"], variable: '--font-syne', display: 'swap' });
+const nobile = Nobile({ subsets: ["latin"], weight: ["400", "700"], variable: '--font-nobile', display: 'swap' });
+const zain = Zain({ subsets: ["latin"], weight: ["400", "700"], variable: '--font-zain', display: 'swap' });
+const audiowide = Audiowide({ subsets: ["latin"], weight: "400", variable: '--font-audiowide', display: 'swap' });
+const dmSans = DM_Sans({ subsets: ["latin"], weight: ["400", "500"], variable: '--font-dm-sans', display: 'swap' });
+const inclusiveSans = Inclusive_Sans({ subsets: ["latin"], weight: "400", variable: '--font-inclusive-sans', display: 'swap' });
+const roboto = Roboto({ subsets: ["latin"], weight: ["400", "500", "700"], variable: '--font-roboto', display: 'swap' });
 
 export const metadata: Metadata = {
   title: "UWU-NEXUS",
   description: "Centralized Digital Ecosystem for Student Life Management",
-};
-
-export const viewport = {
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 1,
 };
 
 export default async function RootLayout({
@@ -38,28 +32,55 @@ export default async function RootLayout({
   const cookieStore = await cookies();
   const isAuthenticated = cookieStore.get("uwu_auth")?.value === "true";
   const role = cookieStore.get("uwu_role")?.value ?? "";
+  const enrollmentNumber = cookieStore.get("uwu_enrollment")?.value ?? "";
   const isAdmin = ["superadmin", "clubadmin"].includes(role);
 
   return (
-    <html lang="en">
-      <head>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
-      </head>
-      <body className={`${inter.variable} ${outfit.variable} ${syne.variable} ${nobile.variable} ${zain.variable} ${audiowide.variable} ${dmSans.variable} ${inclusiveSans.variable} ${roboto.variable} font-sans`}>
-        <NavBar isAuthenticated={isAuthenticated} isAdmin={isAdmin} />
-        <main style={{ minHeight: 'calc(100vh - 200px)' }}>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${inter.variable} ${outfit.variable} ${syne.variable} ${nobile.variable} ${zain.variable} ${audiowide.variable} ${dmSans.variable} ${inclusiveSans.variable} ${roboto.variable} font-sans`} style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }} suppressHydrationWarning>
+        <nav className="navbar">
+          <div className="container flex justify-between items-center" style={{ gap: '1rem' }}>
+            <Link href="/" className="flex items-center gap-3 font-bold text-xl gradient-text">
+              <img src="/logo.png" alt="UWU-NEXUS Logo" style={{ height: '42px', width: 'auto', margin: '0' }} />
+            </Link>
+
+            <NavLinks isAuthenticated={isAuthenticated} isAdmin={isAdmin} logoutAction={logoutAction} />
+
+            <div className="flex gap-3 items-center desktop-auth-buttons">
+              {isAuthenticated ? (
+                <>
+                  {isAdmin && (
+                    <Link href="/admin" className="btn flex items-center gap-2" style={{ backgroundColor: 'rgba(0, 12, 102, 0.1)', color: 'var(--primary)', border: '1px solid var(--primary)', whiteSpace: 'nowrap', fontFamily: 'var(--font-inter), sans-serif', fontWeight: 900 }}>
+                      <Shield size={16} />
+                      Admin
+                    </Link>
+                  )}
+                  <UserNavProfile role={role} enrollmentNumber={enrollmentNumber} logoutAction={logoutAction} />
+                </>
+              ) : (
+                <>
+                  <Link href="?auth=login" scroll={false} className="btn btn-secondary">Login</Link>
+                  <Link href="?auth=signup" scroll={false} className="btn btn-primary">
+                    <span>Sign Up</span>
+                    <ArrowRight size={16} />
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
+        </nav>
+        <main style={{ flex: 1 }}>
           {children}
         </main>
         {!isAuthenticated && <AuthModal />}
         <footer className="footer">
           <div className="container">
-            <div className="flex justify-between items-center" style={{ flexWrap: 'wrap', gap: '2rem', paddingBottom: '1.5rem' }}>
-              <div className="flex gap-8" style={{ flexWrap: 'wrap' }}>
+            <div className="footer-top-row flex justify-between items-center" style={{ flexWrap: 'wrap', gap: '2rem', paddingBottom: '1.5rem' }}>
+              <div className="footer-links-group flex gap-8" style={{ flexWrap: 'wrap' }}>
                 <Link href="/about" className="text-muted font-semibold hover:text-primary">About us</Link>
-                <Link href="/services" className="text-muted font-semibold hover:text-primary">Services</Link>
-                <Link href="/explore" className="text-muted font-semibold hover:text-primary">Explore</Link>
+                <a href="/#services" className="text-muted font-semibold hover:text-primary">Services</a>
               </div>
-              <div className="flex gap-4 items-center">
+              <div className="footer-social-group flex gap-4 items-center">
                 {/* Facebook custom SVG */}
                 <a href="#" className="text-muted hover:text-primary">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
@@ -88,16 +109,16 @@ export default async function RootLayout({
               </div>
             </div>
 
-            <hr style={{ border: 0, borderTop: '1px solid var(--border)', margin: '1.5rem 0' }} />
+            <hr className="footer-hr" style={{ border: 0, borderTop: '1px solid var(--border)', margin: '1.5rem 0' }} />
 
-            <div className="flex justify-between items-center" style={{ flexWrap: 'wrap', gap: '1rem', fontSize: '0.875rem' }}>
-              <p className="text-muted">© 2026 UWU - Nexus. All rights reserved.</p>
+            <div className="footer-bottom-row flex justify-between items-center" style={{ flexWrap: 'wrap', gap: '1rem', fontSize: '0.875rem' }}>
+              <p className="text-muted copyright-text">© 2026 UWU - Nexus. All rights reserved.</p>
 
-              <div className="flex items-center justify-center">
+              <div className="footer-logo-center flex items-center justify-center">
                 <img src="/logo.png" alt="UWU-NEXUS Icon" style={{ height: '32px', width: 'auto' }} />
               </div>
 
-              <div className="flex gap-6">
+              <div className="footer-legal-links flex gap-6">
                 <Link href="/terms" className="text-muted hover:text-primary">Terms of Service</Link>
                 <Link href="/privacy" className="text-muted hover:text-primary">Privacy Policy</Link>
               </div>
