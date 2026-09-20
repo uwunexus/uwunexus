@@ -1023,7 +1023,7 @@ export default function MarketplacePage() {
 
             {/* Product Details */}
             <div style={{ marginBottom: "2rem" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", marginBottom: "0.5rem" }}>
+              <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-2 sm:gap-4 mb-2">
                 <h2 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.6rem", fontWeight: 700, color: "#0f172a", margin: 0, lineHeight: 1.2 }}>
                   {contactProduct.title}
                 </h2>
