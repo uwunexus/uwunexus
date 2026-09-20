@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Search, Filter, Phone, X, Upload, Image as ImageIcon, Edit, Tag, Plus, Store, ChevronDown } from "lucide-react";
-import { uploadToCloudinary } from "../lib/cloudinary";
+import { uploadToCloudinary, validateImageFile } from "../lib/cloudinary";
 
 interface Category {
   id: number;
@@ -56,6 +56,7 @@ export default function MarketplacePage() {
     contact_email: ""
   });
   const [files, setFiles] = useState<File[]>([]);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   useEffect(() => {
     const parseCookie = (name: string) => document.cookie.split("; ").find(r => r.startsWith(name + "="))?.split("=")[1];
@@ -87,6 +88,7 @@ export default function MarketplacePage() {
     setEditingItem(null);
     setForm({ title: "", description: "", price: "", condition_state: "Used - Good", category_id: "", contact_number: "", contact_email: "" });
     setFiles([]);
+    setUploadError(null);
     setShowModal(true);
   };
 
@@ -97,11 +99,12 @@ export default function MarketplacePage() {
       description: item.description,
       price: item.price,
       condition_state: item.condition_state,
-      category_id: item.category_id.toString() || (categories.find(c => c.name === item.category_name)?.id.toString() || ""),
-      contact_number: item.contact_number || "",
-      contact_email: item.contact_email || ""
+      category_id: item.category_id.toString(),
+      contact_number: item.contact_number,
+      contact_email: item.contact_email
     });
     setFiles([]);
+    setUploadError(null);
     setShowModal(true);
   };
 
@@ -493,10 +496,12 @@ export default function MarketplacePage() {
       {loading ? (
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "5rem 0", color: "#64748b", fontFamily: "var(--font-syne), sans-serif", fontWeight: 700 }}>Loading marketplace items...</div>
       ) : filteredItems.length === 0 ? (
-        <div className="no-events-container" style={{ textAlign: "center", padding: "5rem 0", color: "#64748b", maxWidth: "600px", margin: "0 auto", fontFamily: "var(--font-syne), sans-serif" }}>
-          <Store size={48} className="no-events-icon" style={{ margin: "0 auto 1rem auto", opacity: 0.3 }} />
-          <h2 className="no-events-title" style={{ fontSize: "1.5rem", fontWeight: 800, color: "#000000", marginBottom: "0.5rem" }}>No Items Found</h2>
-          <p className="no-events-desc" style={{ fontWeight: 500 }}>{tab === "my-items" ? "You haven't listed any items yet." : "No listings match your search criteria."}</p>
+        <div className="no-events-container">
+          <div className="no-events-icon-badge">
+            <Store size={26} />
+          </div>
+          <h2 className="no-events-title">No Items Found</h2>
+          <p className="no-events-desc">{tab === "my-items" ? "You haven't listed any items yet." : "No listings match your search criteria."}</p>
         </div>
       ) : (
         <div className="grid gap-8 marketplace-items-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))" }}>
@@ -650,6 +655,7 @@ export default function MarketplacePage() {
       <button
         className="marketplace-fab"
         onClick={openCreateModal}
+        suppressHydrationWarning
       >
         <Plus size={20} />
         <span>List Item</span>
@@ -884,7 +890,7 @@ export default function MarketplacePage() {
                 {editingItem && files.length === 0 && (
                   <p style={{ fontSize: "0.75rem", color: "var(--warning)", marginBottom: "0.5rem", fontWeight: 600 }}>Note: Uploading new images will replace existing ones. Leave blank to keep existing images.</p>
                 )}
-                <div className="border-2 border-dashed border-border rounded-lg p-6 text-center text-muted flex flex-col items-center justify-center cursor-pointer relative hover:border-primary transition-colors" style={{ backgroundColor: "#f1f3f5", borderRadius: "1rem", border: "2px dashed rgba(0,0,0,0.15)" }}>
+                <div className="border-2 border-dashed border-border rounded-lg p-6 text-center text-muted flex flex-col items-center justify-center cursor-pointer relative hover:border-primary transition-colors marketplace-modal-upload-box" style={{ backgroundColor: "#f1f3f5", borderRadius: "1rem", border: "2px dashed rgba(0,0,0,0.15)" }}>
                   <Upload size={24} className="mb-2" />
                   <span style={{ fontWeight: 700, fontSize: "0.9rem" }}>Click to select images</span>
                   <input
@@ -893,15 +899,30 @@ export default function MarketplacePage() {
                     multiple
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     onChange={e => {
-                      if (e.target.files) {
-                        const newFiles = Array.from(e.target.files).slice(0, 3);
-                        setFiles(newFiles);
+                      setUploadError(null);
+                      if (e.target.files && e.target.files.length > 0) {
+                        const rawFiles = Array.from(e.target.files).slice(0, 3);
+                        for (const f of rawFiles) {
+                          const err = validateImageFile(f);
+                          if (err) {
+                            setUploadError(err);
+                            e.target.value = "";
+                            setFiles([]);
+                            return;
+                          }
+                        }
+                        setFiles(rawFiles);
                       }
                     }}
                   />
                 </div>
-                {files.length > 0 && (
-                  <div style={{ fontSize: "0.85rem", color: "var(--success)", marginTop: "0.5rem", fontWeight: 700 }}>
+                {uploadError && (
+                  <div style={{ fontSize: "0.85rem", color: "var(--danger)", marginTop: "0.5rem", fontWeight: 700, fontFamily: "var(--font-roboto), sans-serif" }}>
+                    {uploadError}
+                  </div>
+                )}
+                {files.length > 0 && !uploadError && (
+                  <div style={{ fontSize: "0.85rem", color: "var(--success)", marginTop: "0.5rem", fontWeight: 700, fontFamily: "var(--font-roboto), sans-serif" }}>
                     {files.length} file(s) selected
                   </div>
                 )}

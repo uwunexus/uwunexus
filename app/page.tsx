@@ -63,9 +63,14 @@ export default function Home() {
       <div className="hero-section-wrapper" style={{ background: 'linear-gradient(to bottom, #faf5ff 0%, #ffffff 100%)', paddingTop: '2rem', paddingBottom: '1.5rem' }}>
         <section className="container grid md-grid-cols-2 gap-8 items-center">
           <div className="hero-text-content">
-            <div className="hero-tag">
+            <a
+              href="https://www.google.com/maps/place//data=!4m2!3m1!1s0x3ae4618a1a9fec37:0x1dd900702229654b?entry=gemini&utm_source=gemini&utm_campaign=gem-default"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hero-tag"
+            >
               <IconlyLocation size={30} color="var(--primary)" /> Uva Wellassa University Sri Lanka
-            </div>
+            </a>
             <h1 className="hero-title text-5xl mb-6" style={{ fontFamily: 'var(--font-syne), sans-serif', fontWeight: 800, lineHeight: '1.1' }}>
               Centralized Digital<br />
               Platform<br />
