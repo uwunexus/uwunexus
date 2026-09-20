@@ -539,7 +539,7 @@ export default function LostAndFoundPage() {
             position: "fixed", 
             inset: 0, 
             backgroundColor: "rgba(0,0,0,0.65)", 
-            zIndex: 100, 
+            zIndex: 9999, 
             display: "flex", 
             alignItems: "center", 
             justifyContent: "center", 
@@ -872,7 +872,7 @@ export default function LostAndFoundPage() {
       {/* Report Detail Modal */}
       {detailReport && (
         <div
-          style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.65)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: "1.5rem", backdropFilter: "blur(5px)" }}
+          style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.65)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: "1.5rem", backdropFilter: "blur(5px)" }}
           onClick={() => setDetailReport(null)}
         >
           <div className="event-detail-modal-container" onClick={e => e.stopPropagation()}>
@@ -997,7 +997,7 @@ export default function LostAndFoundPage() {
             position: "fixed", 
             inset: 0, 
             backgroundColor: "rgba(0,0,0,0.65)", 
-            zIndex: 110, 
+            zIndex: 9999, 
             display: "flex", 
             alignItems: "center", 
             justifyContent: "center", 

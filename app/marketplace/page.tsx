@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { Search, Filter, Phone, X, Upload, Image as ImageIcon, Edit, Tag, Plus, Store, ChevronDown } from "lucide-react";
+import { Search, Filter, Phone, X, Upload, Image as ImageIcon, Edit, Tag, Plus, Store, ChevronDown, User, Sparkles } from "lucide-react";
 import { uploadToCloudinary, validateImageFile } from "../lib/cloudinary";
 
 interface Category {
@@ -45,6 +45,7 @@ export default function MarketplacePage() {
   const [formLoading, setFormLoading] = useState(false);
   const [myId, setMyId] = useState("");
   const [contactProduct, setContactProduct] = useState<Item | null>(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [copiedEmail, setCopiedEmail] = useState(false);
 
   const [form, setForm] = useState({
@@ -570,7 +571,10 @@ export default function MarketplacePage() {
                   <div className="marketplace-item-actions" style={{ display: "flex", justifyContent: "center", width: "100%", marginTop: "auto" }}>
                     {tab === "browse" ? (
                       <button
-                        onClick={() => setContactProduct(product)}
+                        onClick={() => {
+                          setSelectedImageIndex(0);
+                          setContactProduct(product);
+                        }}
                         className="marketplace-item-btn"
                         style={{
                           backgroundColor: "#0d0e4aff",
@@ -670,7 +674,7 @@ export default function MarketplacePage() {
             position: "fixed",
             inset: 0,
             backgroundColor: "rgba(0,0,0,0.65)",
-            zIndex: 100,
+            zIndex: 9999,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -955,169 +959,330 @@ export default function MarketplacePage() {
           </div>
         </div>
       )}
-      {/* Contact Via Modal */}
+      {/* Contact & Item Details Modal */}
       {contactProduct && (
         <div
           className="marketplace-modal-overlay"
           style={{
             position: "fixed",
             inset: 0,
-            backgroundColor: "rgba(0,0,0,0.65)",
-            zIndex: 110,
+            backgroundColor: "rgba(15, 23, 42, 0.75)",
+            zIndex: 9999,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             padding: "1.5rem",
-            backdropFilter: "blur(5px)"
+            backdropFilter: "blur(6px)",
+            overflowY: "auto"
           }}
           onClick={() => setContactProduct(null)}
         >
+          {/* Single Unified Card */}
           <div
-            className="marketplace-detail-modal-card"
             style={{
-              maxWidth: "500px",
+              display: "flex",
+              flexDirection: "row",
+              maxWidth: "1020px",
               width: "100%",
               backgroundColor: "#ffffff",
-              borderRadius: "2.2rem",
-              padding: "2.5rem",
-              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+              border: "1.5px solid #1e293b",
+              borderRadius: "2.5rem",
+              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.35)",
               position: "relative",
-              textAlign: "left",
-              maxHeight: "90vh",
-              overflowY: "auto"
+              overflow: "hidden",
+              maxHeight: "92vh"
             }}
+            className="flex-col md:flex-row"
             onClick={e => e.stopPropagation()}
           >
-            {/* Close Button */}
+            {/* Top-Right X Close Button */}
             <button
               onClick={() => setContactProduct(null)}
               style={{
                 position: "absolute",
-                top: "1.5rem",
-                right: "1.5rem",
-                background: "#f1f5f9",
+                top: "1.25rem",
+                right: "1.25rem",
+                background: "transparent",
                 border: "none",
-                borderRadius: "50%",
-                width: "36px",
-                height: "36px",
+                cursor: "pointer",
+                color: "#94a3b8",
+                padding: "0.25rem",
+                zIndex: 20
+              }}
+              aria-label="Close"
+            >
+              <X size={22} />
+            </button>
+
+            {/* Left Side: Poster / Product Flyer Image */}
+            <div
+              style={{
+                flex: "1 1 46%",
+                minHeight: "450px",
+                position: "relative",
+                backgroundColor: "#f8fafc",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                cursor: "pointer",
-                color: "#64748b",
-                transition: "background-color 0.2s"
+                overflow: "hidden"
               }}
             >
-              <X size={18} />
-            </button>
-
-            {/* Product Image */}
-            <div style={{ width: "100%", height: "220px", borderRadius: "1.2rem", overflow: "hidden", marginBottom: "1.5rem", position: "relative", backgroundColor: "#f8fafc" }}>
-              <Image
-                src={contactProduct.images?.[0] || "/placeholder-image.jpg"}
+              <img
+                src={contactProduct.images?.[selectedImageIndex] || contactProduct.images?.[0] || "/placeholder-image.jpg"}
                 alt={contactProduct.title}
-                fill
-                style={{ objectFit: "contain" }}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  display: "block"
+                }}
               />
+              {/* Multiple Image Thumbnails */}
+              {contactProduct.images && contactProduct.images.length > 1 && (
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: "1rem",
+                    left: "1rem",
+                    right: "1rem",
+                    display: "flex",
+                    gap: "0.5rem",
+                    overflowX: "auto",
+                    padding: "0.4rem",
+                    backgroundColor: "rgba(0,0,0,0.5)",
+                    backdropFilter: "blur(4px)",
+                    borderRadius: "1rem",
+                    zIndex: 10
+                  }}
+                >
+                  {contactProduct.images.map((imgUrl, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setSelectedImageIndex(idx)}
+                      style={{
+                        position: "relative",
+                        width: "48px",
+                        height: "48px",
+                        borderRadius: "0.5rem",
+                        overflow: "hidden",
+                        border: selectedImageIndex === idx ? "2px solid #ffffff" : "2px solid transparent",
+                        opacity: selectedImageIndex === idx ? 1 : 0.65,
+                        flexShrink: 0,
+                        cursor: "pointer",
+                        padding: 0,
+                        background: "none"
+                      }}
+                    >
+                      <img src={imgUrl} alt={`Thumb ${idx + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* Product Details */}
-            <div style={{ marginBottom: "2rem" }}>
-              <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-2 sm:gap-4 mb-2">
-                <h2 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.6rem", fontWeight: 700, color: "#0f172a", margin: 0, lineHeight: 1.2 }}>
+            {/* Right Side: Details Section */}
+            <div
+              style={{
+                flex: "1 1 54%",
+                padding: "2.5rem 2.2rem",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                overflowY: "auto",
+                backgroundColor: "#ffffff"
+              }}
+            >
+              <div>
+                {/* Title */}
+                <h2
+                  style={{
+                    fontFamily: "var(--font-syne), sans-serif",
+                    fontSize: "2rem",
+                    fontWeight: 800,
+                    color: "#000000",
+                    lineHeight: 1.2,
+                    marginBottom: "0.75rem",
+                    paddingRight: "1.5rem"
+                  }}
+                >
                   {contactProduct.title}
                 </h2>
-                <div style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.4rem", fontWeight: 800, color: "var(--primary)", whiteSpace: "nowrap" }}>
+
+                {/* Price */}
+                <div
+                  style={{
+                    fontFamily: "var(--font-syne), sans-serif",
+                    fontSize: "1.75rem",
+                    fontWeight: 800,
+                    color: "#202c59",
+                    marginBottom: "1rem"
+                  }}
+                >
                   LKR {Number(contactProduct.price).toFixed(2)}
+                </div>
+
+                {/* Description */}
+                <p
+                  style={{
+                    fontFamily: "var(--font-syne), sans-serif",
+                    fontSize: "0.95rem",
+                    fontWeight: 600,
+                    color: "#0f172a",
+                    lineHeight: 1.6,
+                    marginBottom: "1.5rem",
+                    maxHeight: "140px",
+                    overflowY: "auto"
+                  }}
+                >
+                  {contactProduct.description || "No description provided for this item."}
+                </p>
+
+                {/* 2x2 Metadata Capsule Box */}
+                <div
+                  style={{
+                    border: "1.5px solid #1e293b",
+                    borderRadius: "1.5rem",
+                    padding: "1.1rem 1.4rem",
+                    marginBottom: "1.5rem",
+                    backgroundColor: "#ffffff"
+                  }}
+                >
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4">
+                    {/* Left: Category & Seller */}
+                    <div className="flex flex-col gap-2">
+                      <div style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "0.95rem", color: "#000000", fontWeight: 700 }}>
+                        Category : <span style={{ fontWeight: 600 }}>{contactProduct.category_name || "Textbooks & Notes"}</span>
+                      </div>
+                      <div style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "0.95rem", color: "#000000", fontWeight: 700 }}>
+                        Seller : <span style={{ fontWeight: 600 }}>{contactProduct.seller_name || "Super Admin"}</span>
+                      </div>
+                    </div>
+
+                    {/* Right: Condition & Contact */}
+                    <div className="flex flex-col gap-2">
+                      <div style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "0.95rem", color: "#000000", fontWeight: 700 }}>
+                        Condition : <span style={{ fontWeight: 600 }}>{contactProduct.condition_state || "Brand New"}</span>
+                      </div>
+                      <div style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "0.95rem", color: "#000000", fontWeight: 700 }}>
+                        Contact : <span style={{ fontWeight: 600 }}>{contactProduct.contact_number || "Available"}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Contact Via Section */}
+                <h3
+                  style={{
+                    fontFamily: "var(--font-syne), sans-serif",
+                    fontSize: "1.35rem",
+                    fontWeight: 800,
+                    color: "#000000",
+                    textAlign: "center",
+                    marginBottom: "1rem"
+                  }}
+                >
+                  Contact Via
+                </h3>
+
+                {/* Contact Buttons */}
+                <div className="flex items-center justify-center gap-4 mb-3">
+                  {/* WhatsApp Button */}
+                  <button
+                    onClick={() => {
+                      const phone = contactProduct.contact_number || "";
+                      let clean = phone.replace(/\D/g, "");
+                      if (clean.startsWith("0")) {
+                        clean = "94" + clean.slice(1);
+                      }
+                      window.open(`https://wa.me/${clean}`, "_blank");
+                    }}
+                    style={{
+                      height: "46px",
+                      padding: "0 1.75rem",
+                      borderRadius: "9999px",
+                      border: "1.5px solid #1e293b",
+                      backgroundColor: "#ffffff",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "0.6rem",
+                      cursor: "pointer",
+                      transition: "all 0.2s"
+                    }}
+                    onMouseOver={e => (e.currentTarget.style.backgroundColor = "#f8fafc")}
+                    onMouseOut={e => (e.currentTarget.style.backgroundColor = "#ffffff")}
+                  >
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12.004 2C6.48 2 2 6.48 2 12.004c0 1.764.46 3.42 1.268 4.876L2 22l5.284-1.388c1.392.76 2.972 1.196 4.72 1.196 5.524 0 10.004-4.48 10.004-10.004C22.008 6.48 17.528 2 12.004 2z" fill="#25D366" />
+                      <path d="M17.508 14.304c-.304-.152-1.8-.888-2.076-.988-.276-.1-.476-.152-.676.152-.2.304-.776.988-.952 1.188-.176.2-.352.224-.656.072-1.14-.572-1.9-1.02-2.652-2.312-.2-.344.2-.32.572-1.064.092-.184.048-.344-.024-.496-.072-.152-.676-1.632-.928-2.236-.244-.588-.492-.508-.676-.516-.176-.008-.376-.008-.576-.008s-.524.076-.8.376c-.276.3-1.052 1.028-1.052 2.508s1.076 2.904 1.224 3.104c.148.2 2.116 3.232 5.128 4.532.716.308 1.276.492 1.712.632.72.228 1.376.196 1.896.116.58-.088 1.8-.736 2.052-1.44.252-.704.252-1.308.176-1.44-.076-.132-.276-.232-.58-.384z" fill="#FFF" />
+                    </svg>
+                    <span style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1rem", fontWeight: 700, color: "#000000" }}>
+                      Whatsapp
+                    </span>
+                  </button>
+
+                  {/* Email Button */}
+                  <button
+                    onClick={() => {
+                      const email = contactProduct.contact_email || contactProduct.email;
+                      const subject = `Inquiry regarding listing: ${contactProduct.title} on UWU-nexus`;
+                      const body = `Hi ${contactProduct.seller_name || "Seller"},\n\nI am interested in your item "${contactProduct.title}" listed on UWU-nexus marketplace. Is it still available?\n\nRegards`;
+                      const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                      window.open(gmailUrl, "_blank");
+                    }}
+                    style={{
+                      height: "46px",
+                      padding: "0 1.75rem",
+                      borderRadius: "9999px",
+                      border: "1.5px solid #1e293b",
+                      backgroundColor: "#ffffff",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "0.6rem",
+                      cursor: "pointer",
+                      transition: "all 0.2s"
+                    }}
+                    onMouseOver={e => (e.currentTarget.style.backgroundColor = "#f8fafc")}
+                    onMouseOut={e => (e.currentTarget.style.backgroundColor = "#ffffff")}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path fill="#4285F4" d="M20 18h2V6c0-1.1-.9-2-2-2h-3v14h3z" />
+                      <path fill="#34A853" d="M4 18h2V4H4c-1.1 0-2 0.9-2 2v12h2z" />
+                      <path fill="#EA4335" d="M12 13.5l8-6.5V4l-8 6.5L4 4v3l8 6.5z" />
+                      <path fill="#FBBC05" d="M17 4h-3v5l3-2.5V4zM7 4h3v5L7 6.5V4z" />
+                    </svg>
+                    <span style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1rem", fontWeight: 700, color: "#000000" }}>
+                      Email
+                    </span>
+                  </button>
                 </div>
               </div>
 
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "1rem" }}>
-                <span style={{ backgroundColor: "rgba(0,12,102,0.06)", color: "#000c66", padding: "0.3rem 0.8rem", borderRadius: "999px", fontSize: "0.8rem", fontWeight: 600 }}>
-                  {contactProduct.condition_state}
-                </span>
-                <span style={{ backgroundColor: "#f1f5f9", color: "#475569", padding: "0.3rem 0.8rem", borderRadius: "999px", fontSize: "0.8rem", fontWeight: 600 }}>
-                  Seller: {contactProduct.seller_name || "Super Admin"}
-                </span>
+              {/* Bottom Right: Solid Navy Close Button */}
+              <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem" }}>
+                <button
+                  onClick={() => setContactProduct(null)}
+                  style={{
+                    height: "44px",
+                    padding: "0 2.25rem",
+                    borderRadius: "9999px",
+                    backgroundColor: "#1c2452",
+                    color: "#ffffff",
+                    border: "none",
+                    fontFamily: "var(--font-syne), sans-serif",
+                    fontSize: "1rem",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    transition: "opacity 0.2s",
+                    boxShadow: "0 4px 14px rgba(28, 36, 82, 0.3)"
+                  }}
+                  onMouseOver={e => (e.currentTarget.style.opacity = "0.9")}
+                  onMouseOut={e => (e.currentTarget.style.opacity = "1")}
+                >
+                  Close
+                </button>
               </div>
-
-              <div style={{ backgroundColor: "#f8fafc", padding: "1rem", borderRadius: "0.8rem", fontSize: "0.95rem", color: "#334155", lineHeight: 1.5, whiteSpace: "pre-wrap" }}>
-                {contactProduct.description}
-              </div>
-            </div>
-
-            <h3 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.2rem", fontWeight: 700, color: "#000000", marginBottom: "1rem", textAlign: "center" }}>
-              Contact Seller
-            </h3>
-
-            {/* Options Grid */}
-            <div style={{ display: "flex", gap: "1rem" }}>
-              {/* WhatsApp Button */}
-              <button
-                onClick={() => {
-                  const phone = contactProduct.contact_number;
-                  let clean = phone.replace(/\D/g, "");
-                  if (clean.startsWith("0")) {
-                    clean = "94" + clean.slice(1);
-                  }
-                  window.open(`https://wa.me/${clean}`, "_blank");
-                }}
-                style={{
-                  flex: 1,
-                  height: "48px",
-                  borderRadius: "9999px",
-                  border: "1.5px solid #25D366",
-                  backgroundColor: "rgba(37, 211, 102, 0.08)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "0.5rem",
-                  cursor: "pointer",
-                  transition: "all 0.2s"
-                }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12.004 2C6.48 2 2 6.48 2 12.004c0 1.764.46 3.42 1.268 4.876L2 22l5.284-1.388c1.392.76 2.972 1.196 4.72 1.196 5.524 0 10.004-4.48 10.004-10.004C22.008 6.48 17.528 2 12.004 2z" fill="#25D366" />
-                  <path d="M17.508 14.304c-.304-.152-1.8-.888-2.076-.988-.276-.1-.476-.152-.676.152-.2.304-.776.988-.952 1.188-.176.2-.352.224-.656.072-1.14-.572-1.9-1.02-2.652-2.312-.2-.344.2-.32.572-1.064.092-.184.048-.344-.024-.496-.072-.152-.676-1.632-.928-2.236-.244-.588-.492-.508-.676-.516-.176-.008-.376-.008-.576-.008s-.524.076-.8.376c-.276.3-1.052 1.028-1.052 2.508s1.076 2.904 1.224 3.104c.148.2 2.116 3.232 5.128 4.532.716.308 1.276.492 1.712.632.72.228 1.376.196 1.896.116.58-.088 1.8-.736 2.052-1.44.252-.704.252-1.308.176-1.44-.076-.132-.276-.232-.58-.384z" fill="#FFF" />
-                </svg>
-                <span style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1rem", fontWeight: 700, color: "#166534" }}>
-                  Whatsapp
-                </span>
-              </button>
-
-              {/* Email Button */}
-              <button
-                onClick={() => {
-                  const email = contactProduct.contact_email || contactProduct.email;
-                  const subject = `Inquiry regarding your listing: ${contactProduct.title} on UWU-nexus`;
-                  const body = `Hi ${contactProduct.seller_name || "Seller"},\n\nI am interested in your item "${contactProduct.title}" listed on UWU-nexus marketplace. Is it still available?\n\nRegards`;
-                  const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-                  window.open(gmailUrl, "_blank");
-                }}
-                style={{
-                  flex: 1,
-                  height: "48px",
-                  borderRadius: "9999px",
-                  border: "1.5px solid #4285F4",
-                  backgroundColor: "rgba(66, 133, 244, 0.08)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "0.5rem",
-                  cursor: "pointer",
-                  transition: "all 0.2s"
-                }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path fill="#4285F4" d="M20 18h2V6c0-1.1-.9-2-2-2h-3v14h3z" />
-                  <path fill="#34A853" d="M4 18h2V4H4c-1.1 0-2 0.9-2 2v12h2z" />
-                  <path fill="#EA4335" d="M12 13.5l8-6.5V4l-8 6.5L4 4v3l8 6.5z" />
-                  <path fill="#FBBC05" d="M17 4h-3v5l3-2.5V4zM7 4h3v5L7 6.5V4z" />
-                </svg>
-                <span style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1rem", fontWeight: 700, color: "#1e40af" }}>
-                  Email
-                </span>
-              </button>
             </div>
           </div>
         </div>

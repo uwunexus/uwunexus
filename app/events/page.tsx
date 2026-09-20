@@ -564,7 +564,7 @@ export default function EventsPage() {
             position: "fixed", 
             inset: 0, 
             backgroundColor: "rgba(0,0,0,0.65)", 
-            zIndex: 100, 
+            zIndex: 9999, 
             display: "flex", 
             alignItems: "center", 
             justifyContent: "center", 

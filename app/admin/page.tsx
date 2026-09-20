@@ -1994,7 +1994,7 @@ export default function AdminPage() {
           backgroundColor: "rgba(0, 0, 0, 0.4)",
           backdropFilter: "blur(6px)",
           WebkitBackdropFilter: "blur(6px)",
-          zIndex: 200,
+          zIndex: 9999,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -2151,7 +2151,7 @@ function EventFormModal({ myId, initialData, onClose, onSaved }: { myId: string;
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
 
   return (
-    <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0, 0, 0, 0.4)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}
+    <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0, 0, 0, 0.4)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}
       onClick={onClose}>
       <div style={{
         maxWidth: "600px",
@@ -2470,7 +2470,7 @@ function TicketFormModal({ myId, initialData, onClose, onSaved }: { myId: string
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
 
   return (
-    <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0, 0, 0, 0.4)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={onClose}>
+    <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0, 0, 0, 0.4)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={onClose}>
       <div style={{
         maxWidth: "600px",
         width: "100%",
@@ -2761,7 +2761,7 @@ function InfoHubFormModal({ myId, initialData, onClose, onSaved }: { myId: strin
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
 
   return (
-    <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0, 0, 0, 0.4)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={onClose}>
+    <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0, 0, 0, 0.4)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={onClose}>
       <div style={{
         maxWidth: "600px",
         width: "100%",
@@ -3247,7 +3247,7 @@ function GPAManagerTab({ myId, apiUrl }: { myId: string; apiUrl: string }) {
 
       {/* ── Edit Module Modal ── */}
       {editingMod && (
-        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)", zIndex: 300, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={() => setEditingMod(null)}>
+        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={() => setEditingMod(null)}>
           <div style={{ backgroundColor: "#ffffff", borderRadius: "1.5rem", padding: "2rem", maxWidth: "480px", width: "100%", boxShadow: "0 25px 50px rgba(0,0,0,0.15)" }} onClick={e => e.stopPropagation()}>
             <h3 style={{ fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "1.3rem", color: "#000c66", marginBottom: "1.5rem" }}>Edit Module</h3>
             <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
@@ -3277,7 +3277,7 @@ function GPAManagerTab({ myId, apiUrl }: { myId: string; apiUrl: string }) {
 
       {/* ── Add Module Modal ── */}
       {addingToGroup && (
-        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)", zIndex: 300, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={() => setAddingToGroup(null)}>
+        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={() => setAddingToGroup(null)}>
           <div style={{ backgroundColor: "#ffffff", borderRadius: "1.5rem", padding: "2rem", maxWidth: "500px", width: "100%", boxShadow: "0 25px 50px rgba(0,0,0,0.15)" }} onClick={e => e.stopPropagation()}>
             <h3 style={{ fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "1.3rem", color: "#000c66", marginBottom: "0.25rem" }}>Add New Module</h3>
             <p style={{ color: "#64748b", fontSize: "0.85rem", marginBottom: "1.5rem", fontFamily: "var(--font-roboto), sans-serif" }}>Adding to: <strong>{addingToGroup.group_name}</strong></p>
@@ -3310,7 +3310,7 @@ function GPAManagerTab({ myId, apiUrl }: { myId: string; apiUrl: string }) {
 
       {/* ── Edit Group Modal ── */}
       {editingGroup && (
-        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)", zIndex: 300, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={() => setEditingGroup(null)}>
+        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={() => setEditingGroup(null)}>
           <div style={{ backgroundColor: "#ffffff", borderRadius: "1.5rem", padding: "2rem", maxWidth: "460px", width: "100%", boxShadow: "0 25px 50px rgba(0,0,0,0.15)" }} onClick={e => e.stopPropagation()}>
             <h3 style={{ fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "1.3rem", color: "#000c66", marginBottom: "1.5rem" }}>Edit Group</h3>
             <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
