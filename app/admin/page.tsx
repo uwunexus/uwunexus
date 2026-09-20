@@ -9,7 +9,7 @@ import { uploadToCloudinary } from "../lib/cloudinary";
 interface User {
   id: number; full_name: string; email: string;
   enrollment_number: string; batch: string; degree: string;
-  role: string; created_at: string;
+  role: string; created_at: string; is_verified: number | boolean;
 }
 interface Event {
   id: number; title: string; description: string;
@@ -722,7 +722,7 @@ export default function AdminPage() {
                   <table style={{ width: "100%", borderCollapse: "collapse" }}>
                     <thead style={{ backgroundColor: "#edf4fe", borderBottom: "1.5px solid rgba(0, 12, 102, 0.15)" }}>
                       <tr>
-                        {["No", "Full Name", "Email", "Enrollment No.", "Batch", "Degree", "Role", ...(myRole === "superadmin" ? ["Actions"] : [])].map(h => (
+                        {["No", "Full Name", "Email", "Enrollment No.", "Batch", "Degree", "Role", "Verification Status", ...(myRole === "superadmin" ? ["Actions"] : [])].map(h => (
                           <th key={h} style={{
                             padding: "1rem 1.25rem",
                             textAlign: "left",
@@ -766,6 +766,20 @@ export default function AdminPage() {
                                 fontFamily: "var(--font-roboto), sans-serif"
                               }}>
                                 {user.role === "superadmin" ? "SuperAdmin" : user.role === "clubadmin" ? "ClubAdmin" : user.role}
+                              </span>
+                            </td>
+                            <td style={{ padding: "1rem 1.25rem" }}>
+                              <span style={{
+                                backgroundColor: user.is_verified ? "#e6f4ea" : "#fce8e6",
+                                color: user.is_verified ? "#1e8e3e" : "#d93025",
+                                borderRadius: "9999px",
+                                padding: "0.25rem 1rem",
+                                fontSize: "0.85rem",
+                                fontWeight: 600,
+                                display: "inline-block",
+                                fontFamily: "var(--font-roboto), sans-serif"
+                              }}>
+                                {user.is_verified ? "Verified" : "Unverified"}
                               </span>
                             </td>
                             {myRole === "superadmin" && (

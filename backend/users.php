@@ -28,7 +28,7 @@ try {
         exit();
     }
 
-    $users = $pdo->query("SELECT id, full_name, email, enrollment_number, batch, degree, role, created_at FROM users ORDER BY created_at DESC")->fetchAll();
+    $users = $pdo->query("SELECT id, full_name, email, enrollment_number, batch, degree, role, is_verified, created_at FROM users ORDER BY created_at DESC")->fetchAll();
     echo json_encode(["success" => true, "users" => $users]);
 } catch (\PDOException $e) {
     http_response_code(500);
