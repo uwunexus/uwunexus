@@ -545,12 +545,12 @@ export default function MarketplacePage() {
                 {/* Content block stack */}
                 <div className="event-card-content">
                   {/* Title & Price Row */}
-                  <div className="marketplace-item-header-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "0.5rem", marginBottom: "1rem" }}>
-                    <h3 className="marketplace-item-title" style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.25rem", fontWeight: 700, color: "#000000", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
+                  <div className="marketplace-item-header-row" style={{ display: "flex", flexDirection: "column", gap: "0.3rem", marginBottom: "1.2rem" }}>
+                    <h3 className="marketplace-item-title" style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.25rem", fontWeight: 700, color: "#000000", margin: 0, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", lineHeight: 1.25 }}>
                       {product.title}
                     </h3>
-                    <span className="marketplace-item-price" style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.25rem", fontWeight: 700, color: "#000000", whiteSpace: "nowrap" }}>
-                      LKR.{formatPrice(product.price)}
+                    <span className="marketplace-item-price" style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.2rem", fontWeight: 800, color: "var(--primary)", whiteSpace: "nowrap" }}>
+                      LKR. {formatPrice(product.price)}
                     </span>
                   </div>
 
