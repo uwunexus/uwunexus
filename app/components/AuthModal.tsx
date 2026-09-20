@@ -67,6 +67,7 @@ export default function AuthModal() {
       if (!response.ok) throw new Error(data.message || "Failed to resend verification email");
       
       setToastMessage("Verification email sent! Please check your inbox.");
+      setTimeout(() => setToastMessage(null), 3000);
       setShowResendVerification(false);
       setError("");
     } catch (err: any) {
