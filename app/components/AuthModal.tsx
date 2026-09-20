@@ -24,7 +24,7 @@ export default function AuthModal() {
   // Status State
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [resendSuccess, setResendSuccess] = useState("");
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Sync modal view state with URL query parameter
   useEffect(() => {
@@ -34,10 +34,9 @@ export default function AuthModal() {
       setIsLoginView(true);
     }
     setError("");
-    setResendSuccess("");
   }, [authType]);
 
-  if (!isOpen) return null;
+  if (!isOpen && !toastMessage) return null;
 
   const closeModal = () => {
     const params = new URLSearchParams(searchParams.toString());
@@ -48,7 +47,6 @@ export default function AuthModal() {
 
   const handleToggleView = () => {
     setError("");
-    setResendSuccess("");
     const newType = isLoginView ? "signup" : "login";
     const params = new URLSearchParams(searchParams.toString());
     params.set("auth", newType);
@@ -64,7 +62,6 @@ export default function AuthModal() {
     }
 
     setError("");
-    setResendSuccess("");
     setLoading(true);
 
     try {
@@ -78,33 +75,16 @@ export default function AuthModal() {
       if (!response.ok) throw new Error(data.message || "Failed to log in");
 
       // Set cookie session in Next.js Server Action
-      await loginAction(data.user.role, String(data.user.id));
+      await loginAction(data.user.role, String(data.user.id), data.user.enrollmentNumber || "");
       
-      // Close modal and refresh session details on current page
-      closeModal();
-      window.location.reload();
+      // Trigger Welcome Back Toast for 1.2 seconds before reloading
+      setToastMessage("Welcome back!");
+      setTimeout(() => {
+        closeModal();
+        window.location.reload();
+      }, 1200);
     } catch (err: any) {
       setError(err.message || "An error occurred during login.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleResendEmail = async () => {
-    setResendSuccess("");
-    setError("");
-    setLoading(true);
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "/api/backend"}/resend_verification.php`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Failed to resend email");
-      setResendSuccess(data.message || "Verification email resent successfully. Please check your inbox.");
-    } catch (err: any) {
-      setError(err.message || "An error occurred while resending the email.");
     } finally {
       setLoading(false);
     }
@@ -136,12 +116,15 @@ export default function AuthModal() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Failed to sign up");
 
-      // Show success message
-      setResendSuccess(data.message || "Account created! Please check your email to verify.");
-      setFullName("");
-      setEmail("");
-      setPassword("");
-      setConfirmPassword("");
+      // Auto login
+      await loginAction(data.user.role, String(data.user.id), data.user.enrollmentNumber || "");
+      
+      // Trigger Account Created Toast for 1.2 seconds before reloading
+      setToastMessage("Account created successfully!");
+      setTimeout(() => {
+        closeModal();
+        window.location.reload();
+      }, 1200);
     } catch (err: any) {
       setError(err.message || "An error occurred during sign up.");
     } finally {
@@ -150,20 +133,92 @@ export default function AuthModal() {
   };
 
   return (
-    <div style={{
-      position: "fixed",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: "rgba(15, 23, 42, 0.4)",
-      backdropFilter: "blur(8px)",
-      zIndex: 99999,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      padding: "1rem"
-    }}>
+    <>
+      {/* Auth Success Toast Notification Pill */}
+      {toastMessage && (
+        <div
+          style={{
+            position: "fixed",
+            top: "24px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 9999999,
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            backgroundColor: "#000c66",
+            color: "#ffffff",
+            borderRadius: "9999px",
+            padding: "6px 22px 6px 8px",
+            boxShadow: "0 10px 30px rgba(0, 12, 102, 0.4)",
+            border: "1px solid rgba(255, 255, 255, 0.15)",
+            animation: "slideDownAuthToast 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards",
+            pointerEvents: "none",
+          }}
+        >
+          {/* Green Circle Checkmark Badge */}
+          <div
+            style={{
+              width: "28px",
+              height: "28px",
+              borderRadius: "50%",
+              backgroundColor: "#10b981",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
+
+          {/* Toast Message Text */}
+          <span
+            style={{
+              fontFamily: "var(--font-syne), sans-serif",
+              fontWeight: 800,
+              fontSize: "1.05rem",
+              color: "#ffffff",
+              letterSpacing: "-0.01em",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {toastMessage}
+          </span>
+
+          <style>{`
+            @keyframes slideDownAuthToast {
+              from {
+                opacity: 0;
+                transform: translate(-50%, -20px) scale(0.95);
+              }
+              to {
+                opacity: 1;
+                transform: translate(-50%, 0) scale(1);
+              }
+            }
+          `}</style>
+        </div>
+      )}
+
+      {/* Main Modal Backdrop & Form Card */}
+      {isOpen && !toastMessage && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(15, 23, 42, 0.4)",
+          backdropFilter: "blur(8px)",
+          zIndex: 99999,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "1rem"
+        }}>
       {/* Background overlay click-to-close */}
       <div 
         onClick={closeModal}
@@ -264,43 +319,6 @@ export default function AuthModal() {
               lineHeight: "1.4"
             }}>
               {error}
-              {error === "Please verify your email address before logging in." && (
-                <div style={{ marginTop: "0.5rem" }}>
-                  <button 
-                    onClick={handleResendEmail} 
-                    disabled={loading}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      color: "var(--primary)",
-                      fontWeight: "bold",
-                      textDecoration: "underline",
-                      cursor: loading ? "not-allowed" : "pointer",
-                      padding: 0,
-                      fontSize: "0.85rem"
-                    }}
-                  >
-                    {loading ? "Sending..." : "Resend Verification Email"}
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Success Alert for Resend */}
-          {resendSuccess && (
-            <div style={{
-              backgroundColor: "rgba(34, 197, 94, 0.08)",
-              border: "1px solid rgba(34, 197, 94, 0.2)",
-              color: "#166534",
-              borderRadius: "0.75rem",
-              padding: "0.75rem 1rem",
-              fontSize: "0.85rem",
-              marginBottom: "1.25rem",
-              fontWeight: 600,
-              lineHeight: "1.4"
-            }}>
-              {resendSuccess}
             </div>
           )}
 
@@ -553,7 +571,7 @@ export default function AuthModal() {
           className="auth-graphic-pane"
           style={{
             flex: 1,
-            backgroundImage: "url('/login&signup.jpg')",
+            backgroundImage: "url('/login&signup.png')",
             backgroundSize: "cover",
             backgroundPosition: "center center",
             backgroundColor: "#000c66"
@@ -575,7 +593,9 @@ export default function AuthModal() {
             }
           }
         `}</style>
+        </div>
       </div>
-    </div>
+    )}
+    </>
   );
 }
