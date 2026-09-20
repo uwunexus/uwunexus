@@ -983,6 +983,8 @@ html {
     margin-bottom: 0.75rem !important;
     padding-bottom: 0.25rem !important;
     gap: 0.5rem !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
   }
 
   .month-group-divider {
@@ -1009,7 +1011,12 @@ html {
 .desktop-filter-buttons {
   display: flex;
   gap: 0.5rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.desktop-filter-buttons::-webkit-scrollbar {
+  display: none;
 }
 
 .mobile-category-select {
@@ -1021,15 +1028,17 @@ html {
 
 @media (max-width: 768px) {
   .events-search-wrapper {
-    flex: 1 1 0% !important;
-    min-width: 0 !important;
+    order: -1;
+    flex: 0 0 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
   }
 
   .events-search-wrapper input {
-    height: 36px !important;
-    font-size: 0.85rem !important;
-    padding-left: 0.85rem !important;
-    padding-right: 2.25rem !important;
+    height: 40px !important;
+    font-size: 0.9rem !important;
+    padding-left: 1rem !important;
+    padding-right: 2.5rem !important;
   }
 
   .desktop-filter-buttons {
@@ -1038,8 +1047,8 @@ html {
 
   .mobile-category-select {
     display: block !important;
-    flex: 0 0 140px !important;
-    width: 140px !important;
+    flex: 0 0 150px !important;
+    width: 150px !important;
   }
 
   .mobile-category-select select {
