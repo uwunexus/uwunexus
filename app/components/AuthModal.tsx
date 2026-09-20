@@ -116,15 +116,10 @@ export default function AuthModal() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Failed to sign up");
 
-      // Auto login
-      await loginAction(data.user.role, String(data.user.id), data.user.enrollmentNumber || "");
-      
-      // Trigger Account Created Toast for 1.2 seconds before reloading
-      setToastMessage("Account created successfully!");
+      setToastMessage(data.message || "Account created! Please check your email to verify.");
       setTimeout(() => {
-        closeModal();
-        window.location.reload();
-      }, 1200);
+        setIsLoginView(true);
+      }, 3000);
     } catch (err: any) {
       setError(err.message || "An error occurred during sign up.");
     } finally {
