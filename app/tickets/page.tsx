@@ -167,11 +167,16 @@ export default function TicketsPage() {
                 gap: "0.5rem",
                 backgroundColor: activeTab === "buy" ? "#000c66" : "transparent",
                 color: activeTab === "buy" ? "white" : "#64748b",
+                border: "none",
+                cursor: "pointer",
+                fontFamily: "var(--font-syne), sans-serif",
+                fontSize: "0.95rem",
+                fontWeight: 700,
                 transition: "all 0.2s"
               }}
             >
               <Ticket size={18} />
-              <span style={{ fontSize: "0.95rem", fontWeight: 600 }}>Buy Tickets</span>
+              <span>Buy Tickets</span>
             </button>
             <button
               onClick={() => setActiveTab("my-tickets")}
@@ -183,11 +188,16 @@ export default function TicketsPage() {
                 gap: "0.5rem",
                 backgroundColor: activeTab === "my-tickets" ? "#000c66" : "transparent",
                 color: activeTab === "my-tickets" ? "white" : "#64748b",
+                border: "none",
+                cursor: "pointer",
+                fontFamily: "var(--font-syne), sans-serif",
+                fontSize: "0.95rem",
+                fontWeight: 700,
                 transition: "all 0.2s"
               }}
             >
               <QrCode size={18} />
-              <span style={{ fontSize: "0.95rem", fontWeight: 600 }}>My Tickets</span>
+              <span>My Tickets</span>
             </button>
           </div>
         </div>
