@@ -167,10 +167,6 @@ button {
   display: flex;
 }
 
-.flex-wrap {
-  flex-wrap: wrap;
-}
-
 .flex-col {
   flex-direction: column;
 }
@@ -404,7 +400,7 @@ button {
   border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
-  z-index: 50;
+  z-index: 1000;
   padding: 0.4rem 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
   transition: background-color 0.3s;
@@ -852,6 +848,16 @@ html {
   gap: 0.5rem;
   margin-bottom: 1.5rem;
   text-transform: capitalize;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hero-tag:hover {
+  background-color: #e2e8f0;
+  border-color: #cbd5e1;
+  color: var(--primary);
+  transform: translateY(-1px);
 }
 
 /* Footer Typography Rules */
@@ -1904,9 +1910,22 @@ html {
   }
 }
 
-/* Desktop: Hide Mobile Floating Action Button */
-.marketplace-fab {
+/* Desktop: Hide Mobile Floating Action Button & Mobile Elements */
+.marketplace-fab,
+.lost-found-fab,
+.gpa-fab,
+.gpa-mobile-cards-view,
+.info-hub-tab-label-short {
   display: none;
+}
+
+.lost-found-btn-suffix,
+.info-hub-tab-label-full {
+  display: inline;
+}
+
+.gpa-desktop-table-view {
+  display: block;
 }
 
 /* Marketplace Page Mobile Responsiveness - Sleek & Clean Layout */
@@ -1948,7 +1967,7 @@ html {
     justify-content: center !important;
     gap: 0.45rem !important;
     position: fixed !important;
-    bottom: 1.5rem !important;
+    bottom: 4.75rem !important;
     right: 1.25rem !important;
     background-color: #000c66 !important;
     color: #ffffff !important;
@@ -1958,8 +1977,8 @@ html {
     font-family: var(--font-syne), sans-serif !important;
     font-weight: 700 !important;
     font-size: 0.88rem !important;
-    box-shadow: 0 10px 25px rgba(0, 12, 102, 0.35), 0 4px 10px rgba(0, 0, 0, 0.15) !important;
-    z-index: 90 !important;
+    box-shadow: 0 10px 25px rgba(0, 12, 102, 0.4), 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+    z-index: 40 !important;
     cursor: pointer !important;
     transition: transform 0.2s ease, box-shadow 0.2s ease !important;
   }
@@ -1970,15 +1989,18 @@ html {
 
   /* Mobile View Modal Optimizations (Only Mobile) */
   .marketplace-modal-overlay {
-    padding: 0.75rem !important;
+    padding: 1rem 0.75rem !important;
     align-items: center !important;
   }
 
   .marketplace-modal-card {
-    border-radius: 1.35rem !important;
-    padding: 1.25rem 1rem !important;
-    max-height: 92vh !important;
+    border-radius: 1.5rem !important;
+    padding: 1.5rem 1.15rem 2rem 1.15rem !important;
+    max-height: 86vh !important;
+    max-height: calc(100dvh - 3.5rem) !important;
     width: 100% !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
   }
 
   .marketplace-modal-title {
@@ -1989,6 +2011,7 @@ html {
 
   .marketplace-modal-form {
     gap: 0.65rem !important;
+    padding-bottom: 0.5rem !important;
   }
 
   .marketplace-modal-form label {
@@ -2009,10 +2032,30 @@ html {
     border-radius: 0.65rem !important;
   }
 
+  .marketplace-modal-upload-box {
+    padding: 1rem !important;
+    border-radius: 0.75rem !important;
+  }
+
+  .marketplace-modal-upload-box svg {
+    width: 20px !important;
+    height: 20px !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  .marketplace-modal-upload-box span {
+    font-size: 0.8rem !important;
+  }
+
   .marketplace-modal-submit-btn {
-    padding: 0.65rem !important;
+    padding: 0.75rem !important;
     font-size: 0.95rem !important;
-    margin-top: 0.35rem !important;
+    margin-top: 0.75rem !important;
+    margin-bottom: 0.5rem !important;
+    height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
 
   .marketplace-contact-modal-card {
@@ -2154,6 +2197,938 @@ html {
     padding: 0.5rem 0.5rem !important;
     font-size: 0.78rem !important;
   }
+
+  /* Lost & Found Page Mobile Responsiveness - Matching Marketplace Mobile View */
+  .lost-found-container {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    margin-top: 0.25rem !important;
+    margin-bottom: 0.25rem !important;
+    padding-bottom: 6.5rem !important;
+  }
+
+  .lost-found-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.5rem !important;
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .lost-found-page-title {
+    font-size: 1.75rem !important;
+    line-height: 1.2 !important;
+    margin-bottom: 0.2rem !important;
+  }
+
+  .lost-found-page-subtitle {
+    font-size: 0.85rem !important;
+    line-height: 1.3 !important;
+  }
+
+  .lost-found-header .lost-found-report-btn {
+    display: none !important;
+  }
+
+  .lost-found-fab {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.45rem !important;
+    position: fixed !important;
+    bottom: 4.75rem !important;
+    right: 1.25rem !important;
+    background-color: #000c66 !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 9999px !important;
+    padding: 0.7rem 1.35rem !important;
+    font-family: var(--font-syne), sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 0.88rem !important;
+    box-shadow: 0 10px 25px rgba(0, 12, 102, 0.4), 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+    z-index: 40 !important;
+    cursor: pointer !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+  }
+
+  .lost-found-fab:active {
+    transform: scale(0.95) !important;
+  }
+
+  .lost-found-btn-suffix {
+    display: none !important;
+  }
+
+  .lost-found-filter-bar {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr)) !important;
+    gap: 0.35rem !important;
+    margin-top: 0.75rem !important;
+    margin-bottom: 1.25rem !important;
+    padding-bottom: 2px !important;
+    width: 100% !important;
+    overflow-x: visible !important;
+  }
+
+  .lost-found-filter-bar::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .lost-found-filter-btn {
+    width: 100% !important;
+    height: 34px !important;
+    padding: 0 0.25rem !important;
+    font-size: 0.78rem !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+
+  .lost-found-items-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.75rem !important;
+    padding: 0 !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .lost-found-items-grid .event-card {
+    border-radius: 1.4rem !important;
+    padding: 10px !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .lost-found-items-grid .event-card-image-wrapper {
+    border-radius: 1rem !important;
+    aspect-ratio: 1.05 !important;
+  }
+
+  .lost-found-resolved-badge {
+    padding: 0.25rem 0.65rem !important;
+    font-size: 0.7rem !important;
+  }
+
+  .lost-found-items-grid .event-card-content {
+    padding: 0.65rem 0.2rem 0.2rem 0.2rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+  }
+
+  .lost-found-item-header-row {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 0.35rem !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  .lost-found-item-title {
+    font-size: 0.9rem !important;
+    line-height: 1.25 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    flex: 1 !important;
+    font-weight: 700 !important;
+    color: #000000 !important;
+  }
+
+  .lost-found-item-type-badge {
+    font-size: 0.65rem !important;
+    padding: 0.15rem 0.55rem !important;
+    border-radius: 9999px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .lost-found-item-desc {
+    background-color: #d6d9de !important;
+    border-radius: 0.75rem !important;
+    padding: 0.45rem 0.65rem !important;
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    color: #000000 !important;
+    min-height: 36px !important;
+    margin-top: 0.3rem !important;
+    margin-bottom: 0.5rem !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    line-height: 1.3 !important;
+  }
+
+  .lost-found-item-metadata {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.35rem !important;
+    margin-bottom: 0.75rem !important;
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    color: #1e293b !important;
+  }
+
+  .lost-found-meta-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.4rem !important;
+    font-size: 0.72rem !important;
+  }
+
+  .lost-found-meta-row span {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    font-size: 0.72rem !important;
+  }
+
+  .lost-found-meta-row svg,
+  .lost-found-meta-row .material-symbols-outlined {
+    width: 13px !important;
+    height: 13px !important;
+    font-size: 13px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .lost-found-item-actions {
+    margin-top: auto !important;
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.4rem !important;
+  }
+
+  .lost-found-btn {
+    padding: 0.45rem 0.5rem !important;
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    border-radius: 9999px !important;
+    width: 100% !important;
+    height: 34px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.35rem !important;
+  }
+
+  .lost-found-btn span.material-symbols-outlined {
+    font-size: 14px !important;
+  }
+
+  /* Lost & Found Modal Optimizations (Only Mobile) */
+  .lost-found-modal-overlay {
+    padding: 1rem 0.75rem !important;
+    align-items: center !important;
+  }
+
+  .lost-found-modal-card {
+    border-radius: 1.5rem !important;
+    padding: 1.5rem 1.15rem 2rem 1.15rem !important;
+    max-height: 86vh !important;
+    max-height: calc(100dvh - 3.5rem) !important;
+    width: 100% !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .lost-found-modal-title {
+    font-size: 1.3rem !important;
+    line-height: 1.25 !important;
+    white-space: nowrap !important;
+  }
+
+  .lost-found-modal-form {
+    gap: 0.65rem !important;
+    padding-bottom: 0.5rem !important;
+  }
+
+  .lost-found-modal-form label {
+    font-size: 0.78rem !important;
+    margin-bottom: 0.2rem !important;
+  }
+
+  .lost-found-modal-input {
+    height: 38px !important;
+    font-size: 0.85rem !important;
+    padding: 0 0.75rem !important;
+    border-radius: 0.65rem !important;
+  }
+
+  .lost-found-modal-textarea {
+    font-size: 0.85rem !important;
+    padding: 0.5rem 0.75rem !important;
+    border-radius: 0.65rem !important;
+  }
+
+  .lost-found-modal-upload-box {
+    padding: 1rem !important;
+    border-radius: 0.75rem !important;
+  }
+
+  .lost-found-modal-upload-box svg {
+    width: 20px !important;
+    height: 20px !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  .lost-found-modal-upload-box span {
+    font-size: 0.8rem !important;
+  }
+
+  .lost-found-modal-submit-btn {
+    padding: 0.75rem !important;
+    font-size: 0.95rem !important;
+    margin-top: 0.75rem !important;
+    margin-bottom: 0.5rem !important;
+    height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .lost-found-contact-modal-card {
+    border-radius: 1.35rem !important;
+    padding: 2rem 1.25rem !important;
+  }
+
+  .lost-found-contact-close-btn {
+    top: 1rem !important;
+    right: 1rem !important;
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .lost-found-contact-title {
+    font-size: 1.5rem !important;
+    margin-bottom: 1.25rem !important;
+  }
+
+  .lost-found-contact-options {
+    gap: 0.75rem !important;
+  }
+
+  .lost-found-contact-option-btn {
+    height: 46px !important;
+    gap: 0.75rem !important;
+  }
+
+  .lost-found-contact-option-btn svg {
+    width: 22px !important;
+    height: 22px !important;
+  }
+
+  .lost-found-contact-option-btn span {
+    font-size: 1.05rem !important;
+  }
+
+  /* GPA Calculator Page Mobile Responsiveness */
+  .gpa-container {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    margin-top: 0.25rem !important;
+    margin-bottom: 0.25rem !important;
+    padding-bottom: 6.5rem !important;
+  }
+
+  .gpa-header-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.75rem !important;
+    margin-top: 0.5rem !important;
+    margin-bottom: 1.25rem !important;
+  }
+
+  .gpa-page-title {
+    font-size: 1.75rem !important;
+    line-height: 1.2 !important;
+    margin-bottom: 0.2rem !important;
+  }
+
+  .gpa-page-subtitle {
+    font-size: 0.85rem !important;
+    line-height: 1.3 !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .gpa-badges-row {
+    gap: 0.4rem !important;
+  }
+
+  .gpa-badge {
+    padding: 0.3rem 0.85rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  .gpa-spec-row {
+    margin-top: 0.65rem !important;
+    gap: 0.4rem !important;
+  }
+
+  .gpa-spec-badge {
+    padding: 0.3rem 0.75rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  .gpa-spec-btn {
+    padding: 0.35rem 0.85rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  .gpa-superadmin-box {
+    width: 100% !important;
+    align-items: flex-start !important;
+    padding: 0.85rem 1rem !important;
+    border-radius: 1rem !important;
+  }
+
+  .gpa-summary-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.65rem !important;
+    margin-bottom: 1.5rem !important;
+  }
+
+  .gpa-summary-card {
+    border-radius: 1.35rem !important;
+    padding: 1rem 0.65rem !important;
+    background-color: #e6e9ec !important;
+  }
+
+  .gpa-summary-card-pill {
+    padding: 0.35rem 0.75rem !important;
+    font-size: 0.75rem !important;
+    border-radius: 9999px !important;
+    white-space: nowrap !important;
+    width: auto !important;
+  }
+
+  .gpa-summary-card-value {
+    font-size: 1.85rem !important;
+    margin-top: 0.5rem !important;
+  }
+
+  .gpa-honors-card {
+    grid-column: span 2 !important;
+  }
+
+  .gpa-honors-value {
+    font-size: 1.35rem !important;
+    margin-top: 0.4rem !important;
+    white-space: normal !important;
+  }
+
+  .gpa-spec-choice-card {
+    border-radius: 1.35rem !important;
+    padding: 1.25rem 1rem !important;
+    margin-bottom: 1.5rem !important;
+  }
+
+  .gpa-spec-choice-title {
+    font-size: 1.25rem !important;
+  }
+
+  .gpa-spec-choice-desc {
+    font-size: 0.82rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .gpa-spec-choice-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.65rem !important;
+  }
+
+  .gpa-spec-choice-btn {
+    padding: 0.85rem 1rem !important;
+    border-radius: 0.85rem !important;
+  }
+
+  .gpa-controls-bar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.75rem !important;
+    margin-bottom: 1.25rem !important;
+  }
+
+  .gpa-level-tabs-container {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 0.25rem !important;
+    padding: 0.25rem !important;
+    border-radius: 9999px !important;
+    box-sizing: border-box !important;
+  }
+
+  .gpa-level-tab-btn {
+    width: 100% !important;
+    padding: 0.55rem 0 !important;
+    font-size: 0.78rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    border-radius: 9999px !important;
+    white-space: nowrap !important;
+  }
+
+  .gpa-save-btn {
+    display: none !important;
+  }
+
+  .gpa-fab {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.45rem !important;
+    position: fixed !important;
+    bottom: 4.75rem !important;
+    right: 1.25rem !important;
+    background-color: #000c66 !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 9999px !important;
+    padding: 0.7rem 1.35rem !important;
+    font-family: var(--font-syne), sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 0.88rem !important;
+    box-shadow: 0 10px 25px rgba(0, 12, 102, 0.4), 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+    z-index: 40 !important;
+    cursor: pointer !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+  }
+
+  .gpa-fab:active {
+    transform: scale(0.95) !important;
+  }
+
+  .gpa-fab.saved {
+    background-color: #059669 !important;
+    box-shadow: 0 10px 25px rgba(5, 150, 105, 0.4), 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+  }
+
+  .gpa-sem-toggle-btn {
+    padding: 0.7rem 1.25rem !important;
+    font-size: 0.98rem !important;
+    border-radius: 9999px !important;
+  }
+
+  .gpa-sem-content {
+    border-radius: 1.35rem !important;
+    padding: 1rem 0.75rem !important;
+    margin-top: 0.5rem !important;
+    gap: 1.25rem !important;
+  }
+
+  .gpa-group-header {
+    gap: 0.35rem !important;
+    margin-bottom: 0.65rem !important;
+  }
+
+  .gpa-group-title {
+    font-size: 0.95rem !important;
+  }
+
+  .gpa-group-credits {
+    font-size: 0.8rem !important;
+  }
+
+  .gpa-desktop-table-view {
+    display: none !important;
+  }
+
+  .gpa-mobile-cards-view {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.65rem !important;
+    width: 100% !important;
+  }
+
+  .gpa-mobile-module-card {
+    background-color: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 1.15rem !important;
+    padding: 0.85rem 0.95rem !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.35rem !important;
+  }
+
+  .gpa-mobile-module-top {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+  }
+
+  .gpa-mobile-module-info {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.3rem !important;
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+  }
+
+  .gpa-mobile-code-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.4rem !important;
+    flex-wrap: wrap !important;
+  }
+
+  .gpa-mobile-code-badge {
+    font-family: var(--font-syne), sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 0.85rem !important;
+    color: #000c66 !important;
+    background-color: rgba(0, 12, 102, 0.07) !important;
+    padding: 0.15rem 0.5rem !important;
+    border-radius: 0.45rem !important;
+    letter-spacing: normal !important;
+    line-height: 1.3 !important;
+    text-transform: none !important;
+  }
+
+  .gpa-mobile-credits-badge {
+    font-family: var(--font-inclusive-sans), sans-serif !important;
+    font-size: 0.75rem !important;
+    color: #475569 !important;
+    font-weight: 600 !important;
+  }
+
+  .gpa-mobile-type-badge {
+    font-family: var(--font-syne), sans-serif !important;
+    font-size: 0.68rem !important;
+    font-weight: 700 !important;
+    padding: 0.12rem 0.45rem !important;
+    border-radius: 9999px !important;
+    line-height: 1.2 !important;
+  }
+
+  .gpa-mobile-type-badge.gpa {
+    background-color: #e0e7ff !important;
+    color: #3730a3 !important;
+  }
+
+  .gpa-mobile-type-badge.non-gpa {
+    background-color: #f1f5f9 !important;
+    color: #64748b !important;
+  }
+
+  .gpa-mobile-module-title {
+    font-family: var(--font-syne), sans-serif !important;
+    font-size: 0.88rem !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    line-height: 1.3 !important;
+    margin: 0 !important;
+    word-break: break-word !important;
+  }
+
+  .gpa-mobile-grade-box {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    gap: 0.2rem !important;
+    flex-shrink: 0 !important;
+  }
+
+  .gpa-mobile-grade-label {
+    font-family: var(--font-syne), sans-serif !important;
+    font-size: 0.78rem !important;
+    font-weight: 700 !important;
+    color: #64748b !important;
+    text-transform: capitalize !important;
+    letter-spacing: normal !important;
+  }
+
+  .gpa-mobile-grade-select-wrapper {
+    position: relative !important;
+    width: 68px !important;
+    height: 36px !important;
+    background-color: #ffffff !important;
+    border: 1.5px solid #000c66 !important;
+    border-radius: 9999px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 0.5rem !important;
+    transition: all 0.2s ease !important;
+  }
+
+  .gpa-mobile-grade-select-wrapper.selected {
+    background-color: #000c66 !important;
+    border-color: #000c66 !important;
+    color: #ffffff !important;
+  }
+
+  .gpa-mobile-grade-select {
+    width: 100% !important;
+    height: 100% !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    border: none !important;
+    background: transparent !important;
+    font-family: var(--font-syne), sans-serif !important;
+    font-weight: 800 !important;
+    font-size: 0.95rem !important;
+    color: inherit !important;
+    cursor: pointer !important;
+    outline: none !important;
+    text-align: center !important;
+    padding-right: 12px !important;
+  }
+
+  .gpa-mobile-select-chevron {
+    position: absolute !important;
+    right: 0.45rem !important;
+    pointer-events: none !important;
+    color: inherit !important;
+  }
+
+  .gpa-admin-card {
+    border-radius: 1.35rem !important;
+    padding: 1.25rem 1rem !important;
+  }
+
+  .gpa-not-eligible-card {
+    border-radius: 1.35rem !important;
+    padding: 1.5rem 1rem !important;
+  }
+
+  /* Information Hub Page Mobile Responsiveness */
+  .info-hub-container {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    margin-top: 0.25rem !important;
+    margin-bottom: 0.25rem !important;
+    padding-bottom: 4.5rem !important;
+  }
+
+  .info-hub-header {
+    margin-bottom: 1.25rem !important;
+    margin-top: 0.5rem !important;
+  }
+
+  .info-hub-title {
+    font-size: 1.75rem !important;
+    line-height: 1.2 !important;
+    margin-bottom: 0.2rem !important;
+  }
+
+  .info-hub-subtitle {
+    font-size: 0.85rem !important;
+    line-height: 1.35 !important;
+  }
+
+  .info-hub-controls-bar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.75rem !important;
+    padding-bottom: 1rem !important;
+  }
+
+  .info-hub-search-wrapper {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  .info-hub-search-input {
+    height: 42px !important;
+    font-size: 0.88rem !important;
+    padding: 0 2.75rem 0 1.15rem !important;
+  }
+
+  .info-hub-search-icon {
+    right: 1rem !important;
+  }
+
+  .info-hub-tabs-container {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 0.25rem !important;
+    padding: 0.25rem !important;
+    border-radius: 9999px !important;
+    box-sizing: border-box !important;
+  }
+
+  .info-hub-tab-btn {
+    width: 100% !important;
+    padding: 0.55rem 0.2rem !important;
+    font-size: 0.78rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    gap: 0.35rem !important;
+    border-radius: 9999px !important;
+    white-space: nowrap !important;
+  }
+
+  .info-hub-tab-label-full {
+    display: none !important;
+  }
+
+  .info-hub-tab-label-short {
+    display: inline !important;
+  }
+
+  .info-hub-content-area {
+    margin-top: 1.25rem !important;
+    padding-bottom: 2rem !important;
+  }
+
+  /* Procedures Mobile */
+  .info-hub-procedure-card {
+    border-radius: 1.25rem !important;
+    padding: 1.15rem 1rem !important;
+  }
+
+  .info-hub-procedure-title {
+    font-size: 1.2rem !important;
+    margin-bottom: 0.65rem !important;
+    line-height: 1.25 !important;
+  }
+
+  .info-hub-procedure-desc {
+    border-radius: 0.85rem !important;
+    padding: 0.95rem !important;
+    font-size: 0.88rem !important;
+    line-height: 1.5 !important;
+  }
+
+  .info-hub-procedure-action-row {
+    margin-top: 0.75rem !important;
+  }
+
+  .info-hub-procedure-btn {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 0.65rem 1rem !important;
+    font-size: 0.85rem !important;
+  }
+
+  /* Hotlines Mobile */
+  .info-hub-hotlines-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  .info-hub-hotline-card {
+    border-radius: 1.25rem !important;
+    padding: 1.15rem 1rem !important;
+  }
+
+  .info-hub-hotline-title {
+    font-size: 1.25rem !important;
+    margin-bottom: 0.75rem !important;
+    line-height: 1.25 !important;
+  }
+
+  .info-hub-hotline-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.5rem !important;
+  }
+
+  .info-hub-hotline-desc-pill {
+    margin-right: 0 !important;
+    width: 100% !important;
+    text-align: center !important;
+    font-size: 0.82rem !important;
+    padding: 0.45rem 0.75rem !important;
+    box-sizing: border-box !important;
+  }
+
+  .info-hub-hotline-dial-pill {
+    width: 100% !important;
+    justify-content: center !important;
+    font-size: 0.9rem !important;
+    padding: 0.55rem 0.75rem !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Key Contacts Mobile */
+  .info-hub-contacts-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  .info-hub-contact-card {
+    border-radius: 1.25rem !important;
+    padding: 1.15rem 1rem !important;
+  }
+
+  .info-hub-contact-banner {
+    font-size: 0.95rem !important;
+    padding: 0.5rem 0.75rem !important;
+    margin-bottom: 0.85rem !important;
+  }
+
+  .info-hub-contact-row {
+    font-size: 0.85rem !important;
+    gap: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+}
+
+/* Global Floating Toast Notification Capsule (Desktop & Mobile) */
+.gpa-toast-success,
+.gpa-toast-error {
+  position: fixed !important;
+  top: 2rem !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 10000 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.65rem !important;
+  padding: 0.65rem 1.35rem 0.65rem 0.85rem !important;
+  border-radius: 9999px !important;
+  background-color: #000c66 !important;
+  color: #ffffff !important;
+  font-family: var(--font-syne), sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 0.95rem !important;
+  box-shadow: 0 12px 30px rgba(0, 12, 102, 0.35), 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  animation: gpaToastSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  white-space: nowrap !important;
+}
+
+.gpa-toast-error {
+  background-color: #991b1b !important;
+  box-shadow: 0 12px 30px rgba(153, 27, 27, 0.35), 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.gpa-toast-icon-wrapper {
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 50% !important;
+  background-color: #10b981 !important;
+  color: #ffffff !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+
+.gpa-toast-icon-wrapper.error {
+  background-color: #ef4444 !important;
+}
+
+@keyframes gpaToastSlide {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
 }
 
 /* Extra Small Phones (Under 480px) */
@@ -2182,6 +3157,35 @@ html {
 
   .marketplace-page-subtitle {
     font-size: 0.8rem !important;
+  }
+
+  .lost-found-page-title {
+    font-size: 1.45rem !important;
+  }
+
+  .lost-found-page-subtitle {
+    font-size: 0.8rem !important;
+  }
+
+  .gpa-page-title {
+    font-size: 1.45rem !important;
+  }
+
+  .gpa-page-subtitle {
+    font-size: 0.8rem !important;
+  }
+
+  .gpa-level-tab-btn {
+    font-size: 0.72rem !important;
+    padding: 0.5rem 0 !important;
+  }
+
+  .gpa-summary-card-value {
+    font-size: 1.6rem !important;
+  }
+
+  .gpa-honors-value {
+    font-size: 1.15rem !important;
   }
 
   .no-events-title {
@@ -2240,6 +3244,44 @@ html {
     font-size: 0.72rem !important;
     padding: 0.4rem 0.4rem !important;
   }
+
+  .lost-found-container {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  .lost-found-items-grid {
+    padding: 0 0.25rem !important;
+    gap: 0.75rem !important;
+  }
+
+  .lost-found-items-grid .event-card {
+    padding: 8px !important;
+    border-radius: 1.2rem !important;
+  }
+
+  .lost-found-item-title {
+    font-size: 0.78rem !important;
+  }
+
+  .lost-found-item-desc {
+    font-size: 0.68rem !important;
+    padding: 0.35rem 0.5rem !important;
+    min-height: 32px !important;
+  }
+
+  .lost-found-item-metadata {
+    gap: 0.25rem !important;
+  }
+
+  .lost-found-meta-row span {
+    font-size: 0.65rem !important;
+  }
+
+  .lost-found-btn {
+    font-size: 0.72rem !important;
+    padding: 0.4rem 0.4rem !important;
+  }
 }
 
 /* --- Mobile Hamburger Menu Styles --- */
@@ -2288,7 +3330,7 @@ html {
   background-color: rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
-  z-index: 100;
+  z-index: 9999;
   display: flex;
   justify-content: flex-end;
   animation: fadeIn 0.2s ease-out;
@@ -2298,13 +3340,16 @@ html {
   width: 290px;
   max-width: 85vw;
   height: 100%;
+  height: 100dvh;
   background-color: #ffffff;
-  padding: 1.5rem;
+  padding: 1.5rem 1.25rem 2rem 1.25rem;
   display: flex;
   flex-direction: column;
   box-shadow: -8px 0 30px rgba(0, 0, 0, 0.15);
   border-left: 1px solid var(--border);
   animation: slideDrawer 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+  overflow-y: auto;
 }
 
 @keyframes slideDrawer {
@@ -2324,6 +3369,7 @@ html {
   padding-bottom: 1rem;
   margin-bottom: 1rem;
   border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
 }
 
 .mobile-menu-title {
@@ -2351,6 +3397,7 @@ html {
   flex-direction: column;
   gap: 0.5rem;
   overflow-y: auto;
+  flex: 1;
 }
 
 .mobile-nav-link {
@@ -2382,10 +3429,12 @@ html {
 .mobile-menu-footer {
   margin-top: auto;
   padding-top: 1rem;
+  padding-bottom: 4.5rem;
   border-top: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  flex-shrink: 0;
 }
 
 .mobile-auth-btn {
@@ -2394,30 +3443,37 @@ html {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  border-radius: 0.75rem;
-  font-family: var(--font-inter), sans-serif;
+  padding: 0.75rem 1.25rem;
+  border-radius: 9999px;
+  font-family: var(--font-syne), sans-serif;
   font-weight: 700;
   font-size: 0.95rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
 
 .mobile-logout-btn {
-  background-color: #fee2e2;
+  background-color: #ffffff;
   color: #dc2626;
-  border: 1px solid #fca5a5;
+  border: 1.5px solid #dc2626;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.08);
 }
 
-.mobile-logout-btn:hover {
-  background-color: #fca5a5;
-  color: #991b1b;
+.mobile-logout-btn:hover,
+.mobile-logout-btn:active {
+  background-color: #dc2626;
+  color: #ffffff;
+  border-color: #dc2626;
 }
 
 .mobile-admin-btn {
-  background-color: rgba(0, 12, 102, 0.08);
-  color: var(--primary);
-  border: 1px solid var(--primary);
+  background-color: #000c66;
+  color: #ffffff;
+  border: 1.5px solid #000c66;
+}
+
+.mobile-admin-btn:hover {
+  background-color: #000a50;
 }
 
 .mobile-unauth-buttons {
@@ -2438,6 +3494,55 @@ html {
   color: #ffffff;
   border: none;
 }
+
+/* Universal Clean Empty States (Events, Tickets, Marketplace, Lost & Found, Info Hub) */
+.no-events-container,
+.empty-state-box {
+  text-align: center !important;
+  padding: 4.5rem 1.5rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.6rem !important;
+  max-width: 500px !important;
+  margin: 0 auto !important;
+  background-color: transparent !important;
+}
+
+.no-events-icon-badge,
+.empty-state-icon-badge {
+  width: 56px !important;
+  height: 56px !important;
+  border-radius: 50% !important;
+  background-color: rgba(0, 12, 102, 0.06) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #000c66 !important;
+  margin-bottom: 0.25rem !important;
+}
+
+.no-events-title,
+.empty-state-title {
+  font-family: var(--font-syne), sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 1.25rem !important;
+  color: #0f172a !important;
+  margin: 0 !important;
+  line-height: 1.25 !important;
+}
+
+.no-events-desc,
+.empty-state-desc {
+  font-family: var(--font-roboto), sans-serif !important;
+  font-size: 0.92rem !important;
+  color: #64748b !important;
+  margin: 0 !important;
+  max-width: 360px !important;
+  line-height: 1.5 !important;
+  font-weight: 400 !important;
+}
 /* Responsive Nav Utility Classes */
 @media (max-width: 990px) {
   .desktop-only {
@@ -2448,20 +3553,5 @@ html {
 @media (min-width: 991px) {
   .mobile-only {
     display: none !important;
-  }
-}
-
-.page-main-title {
-  font-family: var(--font-syne), sans-serif;
-  font-size: 3rem;
-  font-weight: 700;
-  color: #000000;
-  letter-spacing: 0.02em;
-  margin-bottom: 0.25rem;
-}
-
-@media (max-width: 768px) {
-  .page-main-title {
-    font-size: 2rem;
   }
 }
