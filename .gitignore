@@ -47,3 +47,6 @@ next-env.d.ts
 uwunexus.sql
 *.sql
 backend/.env
+
+# Temporary tools directory
+tools/
