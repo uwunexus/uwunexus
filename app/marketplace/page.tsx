@@ -130,6 +130,12 @@ export default function MarketplacePage() {
   const handleSaveListing = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!myId) return alert("You must be logged in.");
+
+    if (!/^[0-9]{10}$/.test(form.contact_number)) {
+      alert("Phone number must be exactly 10 digits.");
+      return;
+    }
+
     setFormLoading(true);
 
     try {
@@ -801,8 +807,11 @@ export default function MarketplacePage() {
                   <input
                     type="text"
                     required
+                    maxLength={10}
+                    pattern="[0-9]{10}"
+                    title="Phone number must be exactly 10 digits"
                     value={form.contact_number}
-                    onChange={e => setForm({ ...form, contact_number: e.target.value })}
+                    onChange={e => setForm({ ...form, contact_number: e.target.value.replace(/\D/g, "").slice(0, 10) })}
                     placeholder="e.g., 0712345678"
                     className="marketplace-modal-input"
                     style={{

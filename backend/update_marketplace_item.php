@@ -57,10 +57,16 @@ try {
     $category_id = intval($data['category_id']);
     $contact_number = trim($data['contact_number']);
     $contact_email = isset($data['contact_email']) ? trim($data['contact_email']) : '';
+
+    if (!preg_match('/^[0-9]{10}$/', $contact_number)) {
+        http_response_code(400);
+        echo json_encode(["success" => false, "message" => "Phone number must be exactly 10 digits."]);
+        exit();
+    }
     
     // If they edit the item, we reset status to pending so it can be re-approved
     // Unless it was already pending or rejected.
-    $stmt = $pdo->prepare("UPDATE marketplace_items SET title = ?, description = ?, price = ?, condition_state = ?, category_id = ?, contact_number = ?, contact_email = ?, status = 'pending' WHERE id = ?");
+    $stmt = $pdo->prepare("UPDATE marketplace_items SET title = ?, description = ?, price = ?, condition_state = ?, category_id = ?, contact_number = ?, contact_email = ?, status = 'active' WHERE id = ?");
     $stmt->execute([$title, $description, $price, $condition_state, $category_id, $contact_number, $contact_email, $id]);
 
     // Handle new images if provided (optional)

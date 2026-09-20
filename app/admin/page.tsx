@@ -239,6 +239,25 @@ export default function AdminPage() {
     } finally { setPurchasesLoading(false); }
   }, [myId]);
 
+  const deletePurchase = async (id: number) => {
+    if (!confirm("Are you sure you want to delete this purchase? If it was successful, the ticket will be refunded to the event's available tickets.")) return;
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/delete_ticket_purchase.php`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, user_id: myId })
+      });
+      const d = await res.json();
+      if (d.success) {
+        setPurchases(prev => prev.filter(p => p.id !== id));
+      } else {
+        alert(d.message);
+      }
+    } catch (e) {
+      alert("Error deleting purchase");
+    }
+  };
+
   useEffect(() => { if (myId && tab === "tickets" && ticketSubTab === "events") fetchTickets(); }, [myId, tab, ticketSubTab, fetchTickets]);
   useEffect(() => { if (myId && tab === "tickets" && ticketSubTab === "purchases") fetchPurchases(); }, [myId, tab, ticketSubTab, fetchPurchases]);
 
@@ -1346,7 +1365,7 @@ export default function AdminPage() {
                   <table style={{ width: "100%", textAlign: "left", borderCollapse: "collapse" }}>
                     <thead style={{ backgroundColor: "#edf4fe", borderBottom: "1.5px solid rgba(0, 12, 102, 0.15)" }}>
                       <tr>
-                        {["Order ID", "Event", "Customer", "Contact", "Amount", "Status", "Date"].map(h => (
+                        {["Order ID", "Event", "Customer", "Contact", "Amount", "Status", "Date", "Actions"].map(h => (
                           <th key={h} style={{
                             padding: "1rem 1.25rem",
                             fontFamily: "var(--font-roboto), sans-serif",
@@ -1389,6 +1408,28 @@ export default function AdminPage() {
                             </span>
                           </td>
                           <td style={{ padding: "1rem 1.25rem", color: "#64748b", fontFamily: "var(--font-roboto), sans-serif", fontSize: "0.95rem" }}>{new Date(p.created_at).toLocaleString()}</td>
+                          <td style={{ padding: "1rem 1.25rem" }}>
+                            <button onClick={() => deletePurchase(p.id)}
+                              title="Delete Purchase"
+                              style={{ 
+                                backgroundColor: "#d32f2f", 
+                                color: "#ffffff", 
+                                border: "none", 
+                                borderRadius: "50%", 
+                                width: "32px", 
+                                height: "32px", 
+                                display: "inline-flex", 
+                                alignItems: "center", 
+                                justifyContent: "center",
+                                cursor: "pointer",
+                                transition: "transform 0.1s"
+                              }}
+                              onMouseEnter={e => e.currentTarget.style.transform = "scale(1.05)"}
+                              onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </td>
                         </tr>
                       ))}
                     </tbody>

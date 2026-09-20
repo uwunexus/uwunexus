@@ -29,6 +29,12 @@ $contact_number = trim($data['contact_number']);
 $contact_email = isset($data['contact_email']) ? trim($data['contact_email']) : '';
 $images = isset($data['images']) && is_array($data['images']) ? $data['images'] : [];
 
+if (!preg_match('/^[0-9]{10}$/', $contact_number)) {
+    http_response_code(400);
+    echo json_encode(["success" => false, "message" => "Phone number must be exactly 10 digits."]);
+    exit();
+}
+
 try {
     $pdo->beginTransaction();
 

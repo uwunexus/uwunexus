@@ -25,6 +25,7 @@ try {
 
     if ($user) {
         $reset_token = bin2hex(random_bytes(32));
+        
         $updateStmt = $pdo->prepare("UPDATE users SET reset_token = ?, reset_token_expires_at = DATE_ADD(NOW(), INTERVAL 1 HOUR) WHERE id = ?");
         $updateStmt->execute([$reset_token, $user['id']]);
 

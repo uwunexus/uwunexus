@@ -137,6 +137,11 @@ export default function LostAndFoundPage() {
       return;
     }
 
+    if (!/^[0-9]{10}$/.test(form.contact_number)) {
+      setAlertMessage("Phone number must be exactly 10 digits.");
+      return;
+    }
+
     setFormLoading(true);
 
     try {

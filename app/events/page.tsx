@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { Calendar, MapPin, Clock, Users, Search, Filter, X, ChevronDown } from "lucide-react";
+import { Calendar, MapPin, Clock, Users, Search, Filter, X, ChevronDown, LayoutGrid, List, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface Event {
   id: number;
@@ -61,6 +61,8 @@ export const Iconlyuser = ({ size = 24, color = "#000000", style = {} }: { size?
 };
 
 export default function EventsPage() {
+  const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
+  const [currentMonthDate, setCurrentMonthDate] = useState(new Date());
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -135,6 +137,42 @@ export default function EventsPage() {
             onChange={e => setSearch(e.target.value)}
           />
           <Search size={18} style={{ position: "absolute", right: "1.25rem", top: "50%", transform: "translateY(-50%)", color: "#64748b" }} />
+        </div>
+
+        {/* View Toggle */}
+        <div className="flex bg-white rounded-full border border-slate-200 p-1" style={{ height: "43px" }}>
+          <button
+            onClick={() => setViewMode("list")}
+            style={{
+              padding: "0 1rem",
+              borderRadius: "9999px",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              backgroundColor: viewMode === "list" ? "#000c66" : "transparent",
+              color: viewMode === "list" ? "white" : "#64748b",
+              transition: "all 0.2s"
+            }}
+          >
+            <List size={16} />
+            <span style={{ fontSize: "0.85rem", fontWeight: 600 }}>List</span>
+          </button>
+          <button
+            onClick={() => setViewMode("calendar")}
+            style={{
+              padding: "0 1rem",
+              borderRadius: "9999px",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              backgroundColor: viewMode === "calendar" ? "#000c66" : "transparent",
+              color: viewMode === "calendar" ? "white" : "#64748b",
+              transition: "all 0.2s"
+            }}
+          >
+            <LayoutGrid size={16} />
+            <span style={{ fontSize: "0.85rem", fontWeight: 600 }}>Calendar</span>
+          </button>
         </div>
 
         {/* Desktop Filter Buttons */}
@@ -286,7 +324,7 @@ export default function EventsPage() {
       )}
 
       {/* No Events */}
-      {!loading && !error && filtered.length === 0 && (
+      {!loading && !error && filtered.length === 0 && viewMode === "list" && (
         <div className="text-center py-20 text-muted">
           <Calendar size={48} style={{ margin: "0 auto 1rem", opacity: 0.3 }} />
           <p>No events found. Check back later!</p>
@@ -294,7 +332,7 @@ export default function EventsPage() {
       )}
 
       {/* Events grouped by month */}
-      {!loading && Object.entries(grouped).map(([month, monthEvents]) => (
+      {!loading && viewMode === "list" && Object.entries(grouped).map(([month, monthEvents]) => (
         <div key={month} className="month-group-wrapper">
           {/* Monthly group header divider */}
           <div className="flex items-center gap-3 mb-8 month-group-divider" style={{ width: '100%' }}>
@@ -377,6 +415,137 @@ export default function EventsPage() {
           </div>
         </div>
       ))}
+
+      {/* Calendar View */}
+      {!loading && !error && viewMode === "calendar" && (
+        <div className="calendar-view-container" style={{ width: '100%', marginBottom: '3rem', backgroundColor: '#ffffff', borderRadius: '1.5rem', border: '1.5px solid #e2e8f0', overflow: 'hidden' }}>
+          {/* Calendar Header */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.5rem 2rem', borderBottom: '1px solid #e2e8f0' }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#000c66', fontFamily: 'var(--font-syne), sans-serif', margin: 0 }}>
+              {currentMonthDate.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+            </h2>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button 
+                onClick={() => {
+                  const d = new Date(currentMonthDate);
+                  d.setMonth(d.getMonth() - 1);
+                  setCurrentMonthDate(d);
+                }}
+                style={{ width: '36px', height: '36px', borderRadius: '50%', border: '1.5px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffff', cursor: 'pointer', color: '#000c66' }}
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <button 
+                onClick={() => {
+                  const d = new Date(currentMonthDate);
+                  d.setMonth(d.getMonth() + 1);
+                  setCurrentMonthDate(d);
+                }}
+                style={{ width: '36px', height: '36px', borderRadius: '50%', border: '1.5px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffff', cursor: 'pointer', color: '#000c66' }}
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
+          </div>
+          
+          {/* Calendar Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', backgroundColor: '#e2e8f0', gap: '1px' }}>
+            {/* Weekday Headers */}
+            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+              <div key={day} style={{ backgroundColor: '#f8fafc', padding: '1rem 0.5rem', textAlign: 'center', fontSize: '0.85rem', fontWeight: 600, color: '#64748b', fontFamily: 'var(--font-inter), sans-serif' }}>
+                {day}
+              </div>
+            ))}
+            
+            {/* Days */}
+            {(() => {
+              const year = currentMonthDate.getFullYear();
+              const month = currentMonthDate.getMonth();
+              const firstDay = new Date(year, month, 1).getDay();
+              const daysInMonth = new Date(year, month + 1, 0).getDate();
+              
+              const now = new Date();
+              const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+              
+              const cells = [];
+              // Empty cells
+              for (let i = 0; i < firstDay; i++) {
+                cells.push(<div key={`empty-${i}`} style={{ backgroundColor: '#ffffff', minHeight: '120px' }} />);
+              }
+              // Day cells
+              for (let i = 1; i <= daysInMonth; i++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                const dayEvents = filtered.filter(e => e.event_date === dateStr);
+                const isToday = dateStr === todayStr;
+                
+                cells.push(
+                  <div key={`day-${i}`} style={{ backgroundColor: '#ffffff', minHeight: '120px', padding: '0.75rem', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ 
+                      fontSize: '0.9rem', 
+                      fontWeight: 600, 
+                      fontFamily: 'var(--font-inter), sans-serif',
+                      color: isToday ? '#ffffff' : '#0f172a',
+                      backgroundColor: isToday ? '#000c66' : 'transparent',
+                      width: '28px',
+                      height: '28px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: '50%',
+                      marginBottom: '0.5rem',
+                      alignSelf: 'flex-start'
+                    }}>
+                      {i}
+                    </div>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                      {dayEvents.slice(0, 3).map(event => {
+                        const themeColor = CATEGORY_COLORS[event.category] ?? "#64748b";
+                        return (
+                          <div 
+                            key={event.id}
+                            onClick={() => setSelectedEvent(event)}
+                            style={{
+                              backgroundColor: `${themeColor}15`,
+                              borderLeft: `3px solid ${themeColor}`,
+                              padding: '0.25rem 0.5rem',
+                              borderRadius: '0 0.25rem 0.25rem 0',
+                              fontSize: '0.75rem',
+                              fontWeight: 600,
+                              color: themeColor,
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              cursor: 'pointer',
+                              fontFamily: 'var(--font-inter), sans-serif'
+                            }}
+                            title={event.title}
+                          >
+                            {event.title}
+                          </div>
+                        );
+                      })}
+                      {dayEvents.length > 3 && (
+                        <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 500, paddingLeft: '0.25rem', marginTop: '0.1rem' }}>
+                          +{dayEvents.length - 3} more
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              }
+              // Fill remaining to complete grid (up to 42 cells)
+              const totalCells = cells.length;
+              const remainingCells = (7 - (totalCells % 7)) % 7;
+              for (let i = 0; i < remainingCells; i++) {
+                cells.push(<div key={`end-empty-${i}`} style={{ backgroundColor: '#ffffff', minHeight: '120px' }} />);
+              }
+              
+              return cells;
+            })()}
+          </div>
+        </div>
+      )}
 
       {/* Modal Details Dialog */}
       {selectedEvent && (

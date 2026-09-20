@@ -51,13 +51,35 @@ export default async function SuccessPage({ searchParams }: { searchParams: Prom
             <div className="mx-auto flex justify-center items-center mb-6" style={{ width: "80px", height: "80px", borderRadius: "50%", backgroundColor: "rgba(34,197,94,0.1)", color: "var(--success)" }}>
               <CheckCircle size={40} />
             </div>
-            <h1 className="text-3xl font-bold mb-4">Payment Successful!</h1>
-            <p className="text-muted mb-8">
+            <h1 className="text-3xl font-bold mb-2 text-[#000c66]">Payment Successful!</h1>
+            <p className="text-muted mb-6">
               Your ticket order ({order_id}) has been confirmed. A receipt will be sent to your email.
             </p>
-            <Link href="/tickets" className="btn btn-primary w-full justify-center">
-              View More Events
-            </Link>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '2rem', padding: '1.5rem', backgroundColor: '#f8fafc', borderRadius: '1rem', border: '1.5px dashed #cbd5e1' }}>
+              <div style={{ width: '150px', height: '150px', backgroundColor: '#ffffff', padding: '0.5rem', borderRadius: '0.5rem', border: '1px solid #e2e8f0', marginBottom: '1rem' }}>
+                <img 
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(order_id as string)}`} 
+                  alt="Ticket QR Code" 
+                  style={{ width: '100%', height: '100%' }}
+                />
+              </div>
+              <p style={{ fontSize: '0.85rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Your Entry Ticket</p>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <a 
+                href={`/tickets/print/${order_id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-primary w-full justify-center text-center"
+              >
+                Download Ticket
+              </a>
+              <Link href="/tickets" className="btn btn-secondary w-full justify-center">
+                View My Tickets
+              </Link>
+            </div>
           </>
         ) : (
           <>

@@ -19,15 +19,18 @@ if (!isset($data['token']) || empty(trim($data['token']))) {
 $token = trim($data['token']);
 
 try {
-    $stmt = $pdo->prepare("SELECT id FROM users WHERE verification_token = ? AND is_verified = FALSE");
+    $stmt = $pdo->prepare("SELECT id, is_verified FROM users WHERE verification_token = ?");
     $stmt->execute([$token]);
     $user = $stmt->fetch();
 
     if ($user) {
-        $updateStmt = $pdo->prepare("UPDATE users SET is_verified = TRUE, verification_token = NULL WHERE id = ?");
-        $updateStmt->execute([$user['id']]);
-
-        echo json_encode(["success" => true, "message" => "Email successfully verified! You can now log in."]);
+        if ($user['is_verified']) {
+            echo json_encode(["success" => true, "message" => "Email already verified! You can now log in."]);
+        } else {
+            $updateStmt = $pdo->prepare("UPDATE users SET is_verified = TRUE WHERE id = ?");
+            $updateStmt->execute([$user['id']]);
+            echo json_encode(["success" => true, "message" => "Email successfully verified! You can now log in."]);
+        }
     } else {
         http_response_code(400);
         echo json_encode(["success" => false, "message" => "Invalid or expired verification token."]);
