@@ -53,4 +53,5 @@ tools/
 *.py
 
 AGENTS.md
-@AGENTS.md
+@AGENTS.mdAGENTS.md
+CLAUDE.md
