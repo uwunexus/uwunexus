@@ -46,6 +46,7 @@ try {
     try {
         $alt_user = ($user === 'root') ? 'nilesh' : 'root';
         $alt_pass = ($user === 'root') ? '12345678' : '';
+        //oop concept
         $pdo = new PDO($dsn, $alt_user, $alt_pass, $options);
     } catch (\PDOException $e2) {
         http_response_code(500);
