@@ -1617,6 +1617,7 @@ export default function AdminPage() {
                         {["Order ID", "Event", "Customer", "Contact", "Amount", "Status", "Date", "Actions"].map(h => (
                           <th key={h} style={{
                             padding: "1rem 1.25rem",
+                            textAlign: h === "Actions" || h === "Status" ? "center" : "left",
                             fontFamily: "var(--font-roboto), sans-serif",
                             fontWeight: 600,
                             fontSize: "0.95rem",
@@ -1641,7 +1642,7 @@ export default function AdminPage() {
                             <div style={{ fontSize: "0.85rem", marginTop: "2px" }}>{p.customer_phone}</div>
                           </td>
                           <td style={{ padding: "1rem 1.25rem", fontWeight: 600, color: "#000000", fontFamily: "var(--font-roboto), sans-serif", fontSize: "0.95rem" }}>{p.currency} {parseFloat(p.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                          <td style={{ padding: "1rem 1.25rem" }}>
+                          <td style={{ padding: "1rem 1.25rem", textAlign: "center" }}>
                             <span style={{
                               backgroundColor: p.status === "success" ? "#e8f5e9" : p.status === "pending" ? "#fef3c7" : "#ffebee",
                               color: p.status === "success" ? "#00875a" : p.status === "pending" ? "#b45309" : "#d32f2f",
@@ -1657,7 +1658,7 @@ export default function AdminPage() {
                             </span>
                           </td>
                           <td style={{ padding: "1rem 1.25rem", color: "#64748b", fontFamily: "var(--font-roboto), sans-serif", fontSize: "0.95rem" }}>{new Date(p.created_at).toLocaleString()}</td>
-                          <td style={{ padding: "1rem 1.25rem" }}>
+                          <td style={{ padding: "1rem 1.25rem", textAlign: "center" }}>
                             <button onClick={() => deletePurchase(p.id)}
                               title="Delete Purchase"
                               style={{ 
@@ -1728,6 +1729,7 @@ export default function AdminPage() {
                       {["Item", "Price", "Seller", "Status", "Actions"].map(h => (
                         <th key={h} style={{
                           padding: "1rem 1.25rem",
+                          textAlign: h === "Actions" || h === "Status" ? "center" : "left",
                           fontFamily: "var(--font-roboto), sans-serif",
                           fontWeight: 600,
                           fontSize: "0.95rem",
@@ -1764,7 +1766,7 @@ export default function AdminPage() {
                             <div style={{ fontWeight: 500, color: "#000000" }}>{item.seller_name}</div>
                             <div style={{ color: "#64748b", fontSize: "0.85rem" }}>{item.seller_email}</div>
                           </td>
-                          <td style={{ padding: "1rem 1.25rem" }}>
+                          <td style={{ padding: "1rem 1.25rem", textAlign: "center" }}>
                             <span style={{ 
                               backgroundColor: statusColor.bg, 
                               color: statusColor.text, 
@@ -1779,8 +1781,8 @@ export default function AdminPage() {
                               {statusColor.label}
                             </span>
                           </td>
-                          <td style={{ padding: "1rem 1.25rem", textAlign: "right" }}>
-                            <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
+                          <td style={{ padding: "1rem 1.25rem", textAlign: "center" }}>
+                            <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
                               {isPending && (
                                 <>
                                   <button 
@@ -1939,9 +1941,10 @@ export default function AdminPage() {
                     <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
                   <thead style={{ backgroundColor: "#edf4fe", borderBottom: "1.5px solid rgba(0, 12, 102, 0.15)" }}>
                     <tr>
-                      {["Title", "Type", "Status", "Reporter", "Status"].map((h, idx) => (
-                        <th key={idx} style={{
+                      {["Title", "Type", "Status", "Reporter", "Actions"].map(h => (
+                        <th key={h} style={{
                           padding: "1rem 1.25rem",
+                          textAlign: h === "Actions" || h === "Status" || h === "Type" ? "center" : "left",
                           fontFamily: "var(--font-roboto), sans-serif",
                           fontWeight: 600,
                           fontSize: "0.95rem",
@@ -1965,7 +1968,7 @@ export default function AdminPage() {
                             <div style={{ fontWeight: 600, color: "#000000", fontFamily: "var(--font-roboto), sans-serif", fontSize: "0.95rem" }}>{item.title}</div>
                             <div style={{ fontSize: "0.85rem", color: "#64748b", fontFamily: "var(--font-roboto), sans-serif", marginTop: "2px" }}>{item.time_date} at {item.location}</div>
                           </td>
-                          <td style={{ padding: "1rem 1.25rem" }}>
+                          <td style={{ padding: "1rem 1.25rem", textAlign: "center" }}>
                             <span style={{ 
                               backgroundColor: typeStyle.bg, 
                               color: typeStyle.text, 
@@ -1980,7 +1983,7 @@ export default function AdminPage() {
                               {item.type}
                             </span>
                           </td>
-                          <td style={{ padding: "1rem 1.25rem" }}>
+                          <td style={{ padding: "1rem 1.25rem", textAlign: "center" }}>
                             <span style={{ 
                               backgroundColor: statusStyle.bg, 
                               color: statusStyle.text, 
@@ -1999,7 +2002,7 @@ export default function AdminPage() {
                             <div style={{ fontWeight: 500, color: "#000000" }}>{item.reporter_name}</div>
                             <div style={{ color: "#64748b", fontSize: "0.85rem" }}>{item.reporter_email}</div>
                           </td>
-                          <td style={{ padding: "1rem 1.25rem", textAlign: "left" }}>
+                          <td style={{ padding: "1rem 1.25rem", textAlign: "center" }}>
                             <button 
                               onClick={() => deleteLostFoundItem(item.id)}
                               style={{
@@ -2072,6 +2075,7 @@ export default function AdminPage() {
                       {["Title", "Category", "Details", "Actions"].map(h => (
                         <th key={h} style={{
                           padding: "1rem 1.25rem",
+                          textAlign: h === "Actions" || h === "Category" ? "center" : "left",
                           fontFamily: "var(--font-roboto), sans-serif",
                           fontWeight: 600,
                           fontSize: "0.95rem",
@@ -2093,7 +2097,7 @@ export default function AdminPage() {
                           onMouseEnter={e => (e.currentTarget.style.backgroundColor = "rgba(0, 12, 102, 0.02)")}
                           onMouseLeave={e => (e.currentTarget.style.backgroundColor = "")}>
                           <td style={{ padding: "1rem 1.25rem", fontWeight: 600, color: "#000000", fontFamily: "var(--font-roboto), sans-serif", fontSize: "0.95rem" }}>{item.title}</td>
-                          <td style={{ padding: "1rem 1.25rem" }}>
+                          <td style={{ padding: "1rem 1.25rem", textAlign: "center" }}>
                             <span style={{ 
                               backgroundColor: catStyle.bg, 
                               color: catStyle.text, 
@@ -2112,8 +2116,8 @@ export default function AdminPage() {
                             <div style={{ color: "#000000", lineHeight: "1.4" }}>{item.description}</div>
                             {item.contact_info && <div style={{ color: "#64748b", fontSize: "0.85rem", marginTop: "2px" }}>Contact: {item.contact_info}</div>}
                           </td>
-                          <td style={{ padding: "1rem 1.25rem", textAlign: "right" }}>
-                            <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
+                          <td style={{ padding: "1rem 1.25rem", textAlign: "center" }}>
+                            <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
                               <button 
                                 onClick={() => { setEditingInfoHub(item); setShowInfoHubModal(true); }}
                                 style={{
@@ -3441,7 +3445,15 @@ function GPAManagerTab({ myId, apiUrl }: { myId: string; apiUrl: string }) {
                             <thead style={{ backgroundColor: "#f8fafc" }}>
                               <tr>
                                 {["Module Code", "Module Name", "Credits", "GPA Type", "Mandatory", "Actions"].map(h => (
-                                  <th key={h} style={{ padding: "0.6rem 1rem", textAlign: "left", fontFamily: "var(--font-syne), sans-serif", fontSize: "0.8rem", fontWeight: 700, color: "#64748b", whiteSpace: "nowrap" }}>{h}</th>
+                                  <th key={h} style={{
+                                    padding: "0.6rem 1rem",
+                                    textAlign: h === "Credits" || h === "GPA Type" || h === "Mandatory" ? "center" : h === "Actions" ? "right" : "left",
+                                    fontFamily: "var(--font-syne), sans-serif",
+                                    fontSize: "0.8rem",
+                                    fontWeight: 700,
+                                    color: "#64748b",
+                                    whiteSpace: "nowrap"
+                                  }}>{h}</th>
                                 ))}
                               </tr>
                             </thead>
