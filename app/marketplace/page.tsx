@@ -979,20 +979,7 @@ export default function MarketplacePage() {
         >
           {/* Single Unified Card */}
           <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              maxWidth: "1020px",
-              width: "100%",
-              backgroundColor: "#ffffff",
-              border: "1.5px solid #1e293b",
-              borderRadius: "2.5rem",
-              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.35)",
-              position: "relative",
-              overflow: "hidden",
-              maxHeight: "92vh"
-            }}
-            className="flex-col md:flex-row"
+            className="marketplace-detail-modal-container"
             onClick={e => e.stopPropagation()}
           >
             {/* Top-Right X Close Button */}
@@ -1015,18 +1002,7 @@ export default function MarketplacePage() {
             </button>
 
             {/* Left Side: Poster / Product Flyer Image */}
-            <div
-              style={{
-                flex: "1 1 46%",
-                minHeight: "450px",
-                position: "relative",
-                backgroundColor: "#f8fafc",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                overflow: "hidden"
-              }}
-            >
+            <div className="marketplace-detail-modal-img-col">
               <img
                 src={contactProduct.images?.[selectedImageIndex] || contactProduct.images?.[0] || "/placeholder-image.jpg"}
                 alt={contactProduct.title}
@@ -1081,20 +1057,11 @@ export default function MarketplacePage() {
             </div>
 
             {/* Right Side: Details Section */}
-            <div
-              style={{
-                flex: "1 1 54%",
-                padding: "2.5rem 2.2rem",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-                overflowY: "auto",
-                backgroundColor: "#ffffff"
-              }}
-            >
+            <div className="marketplace-detail-modal-info-col">
               <div>
                 {/* Title */}
                 <h2
+                  className="marketplace-detail-modal-title"
                   style={{
                     fontFamily: "var(--font-syne), sans-serif",
                     fontSize: "2rem",
@@ -1110,6 +1077,7 @@ export default function MarketplacePage() {
 
                 {/* Price */}
                 <div
+                  className="marketplace-detail-modal-price"
                   style={{
                     fontFamily: "var(--font-syne), sans-serif",
                     fontSize: "1.75rem",
@@ -1123,6 +1091,7 @@ export default function MarketplacePage() {
 
                 {/* Description */}
                 <p
+                  className="marketplace-detail-modal-desc"
                   style={{
                     fontFamily: "var(--font-syne), sans-serif",
                     fontSize: "0.95rem",
@@ -1139,6 +1108,7 @@ export default function MarketplacePage() {
 
                 {/* 2x2 Metadata Capsule Box */}
                 <div
+                  className="marketplace-detail-modal-meta-box"
                   style={{
                     border: "1.5px solid #1e293b",
                     borderRadius: "1.5rem",
@@ -1185,9 +1155,10 @@ export default function MarketplacePage() {
                 </h3>
 
                 {/* Contact Buttons */}
-                <div className="flex items-center justify-center gap-4 mb-3">
+                <div className="flex items-center justify-center gap-4 mb-3 marketplace-detail-modal-contact-row">
                   {/* WhatsApp Button */}
                   <button
+                    className="marketplace-detail-modal-contact-btn"
                     onClick={() => {
                       const phone = contactProduct.contact_number || "";
                       let clean = phone.replace(/\D/g, "");
@@ -1223,6 +1194,7 @@ export default function MarketplacePage() {
 
                   {/* Email Button */}
                   <button
+                    className="marketplace-detail-modal-contact-btn"
                     onClick={() => {
                       const email = contactProduct.contact_email || contactProduct.email;
                       const subject = `Inquiry regarding listing: ${contactProduct.title} on UWU-nexus`;
@@ -1262,6 +1234,7 @@ export default function MarketplacePage() {
               {/* Bottom Right: Solid Navy Close Button */}
               <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem" }}>
                 <button
+                  className="marketplace-detail-modal-close-btn"
                   onClick={() => setContactProduct(null)}
                   style={{
                     height: "44px",
