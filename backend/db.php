@@ -4,8 +4,8 @@ $allowed_origin  = 'http://localhost:3000';
 $frontend_url    = 'http://localhost:3000'; // Used for email links – override in config-prod.php
 $host = '127.0.0.1';
 $db   = 'uwunexus';
-$user = 'nilesh';
-$pass = '12345678';
+$user = 'root';
+$pass = '';
 
 if (file_exists(__DIR__ . '/config-prod.php')) {
     include __DIR__ . '/config-prod.php';
@@ -42,8 +42,15 @@ $options = [
 try {
     $pdo = new PDO($dsn, $user, $pass, $options);
 } catch (\PDOException $e) {
-    http_response_code(500);
-    echo json_encode(["success" => false, "message" => "Database connection failed"]);
-    exit();
+    // Local dev fallback: try alternative local dev credentials (root without password vs nilesh/12345678)
+    try {
+        $alt_user = ($user === 'root') ? 'nilesh' : 'root';
+        $alt_pass = ($user === 'root') ? '12345678' : '';
+        $pdo = new PDO($dsn, $alt_user, $alt_pass, $options);
+    } catch (\PDOException $e2) {
+        http_response_code(500);
+        echo json_encode(["success" => false, "message" => "Database connection failed"]);
+        exit();
+    }
 }
 ?>

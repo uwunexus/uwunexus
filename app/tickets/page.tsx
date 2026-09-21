@@ -168,6 +168,11 @@ export default function TicketsPage() {
                 gap: "0.5rem",
                 backgroundColor: activeTab === "buy" ? "#000c66" : "transparent",
                 color: activeTab === "buy" ? "white" : "#64748b",
+                border: "none",
+                cursor: "pointer",
+                fontFamily: "var(--font-syne), sans-serif",
+                fontSize: "0.95rem",
+                fontWeight: 700,
                 transition: "all 0.2s"
               }}
             >
@@ -184,6 +189,11 @@ export default function TicketsPage() {
                 gap: "0.5rem",
                 backgroundColor: activeTab === "my-tickets" ? "#000c66" : "transparent",
                 color: activeTab === "my-tickets" ? "white" : "#64748b",
+                border: "none",
+                cursor: "pointer",
+                fontFamily: "var(--font-syne), sans-serif",
+                fontSize: "0.95rem",
+                fontWeight: 700,
                 transition: "all 0.2s"
               }}
             >
@@ -422,7 +432,7 @@ export default function TicketsPage() {
             position: "fixed", 
             inset: 0, 
             backgroundColor: "rgba(0,0,0,0.65)", 
-            zIndex: 100, 
+            zIndex: 9999, 
             display: "flex", 
             alignItems: "center", 
             justifyContent: "center", 

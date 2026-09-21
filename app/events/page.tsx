@@ -151,11 +151,16 @@ export default function EventsPage() {
               gap: "0.5rem",
               backgroundColor: viewMode === "list" ? "#000c66" : "transparent",
               color: viewMode === "list" ? "white" : "#64748b",
+              border: "none",
+              cursor: "pointer",
+              fontFamily: "var(--font-inter), sans-serif",
+              fontSize: "0.9rem",
+              fontWeight: 500,
               transition: "all 0.2s"
             }}
           >
             <List size={16} />
-            <span style={{ fontSize: "0.85rem", fontWeight: 600 }}>List</span>
+            <span>List</span>
           </button>
           <button
             onClick={() => setViewMode("calendar")}
@@ -167,11 +172,16 @@ export default function EventsPage() {
               gap: "0.5rem",
               backgroundColor: viewMode === "calendar" ? "#000c66" : "transparent",
               color: viewMode === "calendar" ? "white" : "#64748b",
+              border: "none",
+              cursor: "pointer",
+              fontFamily: "var(--font-inter), sans-serif",
+              fontSize: "0.9rem",
+              fontWeight: 500,
               transition: "all 0.2s"
             }}
           >
             <LayoutGrid size={16} />
-            <span style={{ fontSize: "0.85rem", fontWeight: 600 }}>Calendar</span>
+            <span>Calendar</span>
           </button>
         </div>
 
@@ -327,7 +337,7 @@ export default function EventsPage() {
       {!loading && !error && filtered.length === 0 && viewMode === "list" && (
         <div className="text-center py-20 text-muted">
           <Calendar size={48} style={{ margin: "0 auto 1rem", opacity: 0.3 }} />
-          <p>No events found. Check back later!</p>
+          <p style={{ fontFamily: "var(--font-roboto), sans-serif" }}>No events found. Check back later!</p>
         </div>
       )}
 
@@ -557,7 +567,7 @@ export default function EventsPage() {
             position: "fixed", 
             inset: 0, 
             backgroundColor: "rgba(0,0,0,0.65)", 
-            zIndex: 100, 
+            zIndex: 9999, 
             display: "flex", 
             alignItems: "center", 
             justifyContent: "center", 

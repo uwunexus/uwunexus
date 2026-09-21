@@ -847,19 +847,17 @@ export default function AdminPage() {
                     <table style={{ width: "100%", borderCollapse: "collapse" }}>
                     <thead style={{ backgroundColor: "#edf4fe", borderBottom: "1.5px solid rgba(0, 12, 102, 0.15)" }}>
                       <tr>
-                        {["No", "Full Name", "Email", "Enrollment No.", "Batch", "Degree", "Role", "Verification Status", ...(myRole === "superadmin" ? ["Actions"] : [])].map(h => (
-                          <th key={h} style={{
-                            padding: "1rem 1.25rem",
-                            textAlign: "left",
-                            fontFamily: "var(--font-roboto), sans-serif",
-                            fontWeight: 600,
-                            fontSize: "0.95rem",
-                            color: "#000c66",
-                            whiteSpace: "nowrap"
-                          }}>
-                            {h}
-                          </th>
-                        ))}
+                        <th style={{ padding: "0.85rem 0.5rem 0.85rem 1.25rem", textAlign: "center", fontFamily: "var(--font-roboto), sans-serif", fontWeight: 600, fontSize: "0.9rem", color: "#000c66", whiteSpace: "nowrap", width: "40px" }}>No</th>
+                        <th style={{ padding: "0.85rem 0.5rem", textAlign: "left", fontFamily: "var(--font-roboto), sans-serif", fontWeight: 600, fontSize: "0.9rem", color: "#000c66", whiteSpace: "nowrap" }}>Full Name</th>
+                        <th style={{ padding: "0.85rem 0.5rem", textAlign: "left", fontFamily: "var(--font-roboto), sans-serif", fontWeight: 600, fontSize: "0.9rem", color: "#000c66", whiteSpace: "nowrap" }}>Email</th>
+                        <th style={{ padding: "0.85rem 0.5rem", textAlign: "left", fontFamily: "var(--font-roboto), sans-serif", fontWeight: 600, fontSize: "0.9rem", color: "#000c66", whiteSpace: "nowrap" }}>Enrollment No.</th>
+                        <th style={{ padding: "0.85rem 0.5rem", textAlign: "center", fontFamily: "var(--font-roboto), sans-serif", fontWeight: 600, fontSize: "0.9rem", color: "#000c66", whiteSpace: "nowrap" }}>Batch</th>
+                        <th style={{ padding: "0.85rem 0.5rem", textAlign: "center", fontFamily: "var(--font-roboto), sans-serif", fontWeight: 600, fontSize: "0.9rem", color: "#000c66", whiteSpace: "nowrap" }}>Degree</th>
+                        <th style={{ padding: "0.85rem 0.5rem", textAlign: "center", fontFamily: "var(--font-roboto), sans-serif", fontWeight: 600, fontSize: "0.9rem", color: "#000c66", whiteSpace: "nowrap" }}>Role</th>
+                        <th style={{ padding: "0.85rem 0.5rem", textAlign: "center", fontFamily: "var(--font-roboto), sans-serif", fontWeight: 600, fontSize: "0.9rem", color: "#000c66", whiteSpace: "nowrap" }}>Verification Status</th>
+                        {myRole === "superadmin" && (
+                          <th style={{ padding: "0.85rem 1.25rem 0.85rem 0.5rem", textAlign: "right", fontFamily: "var(--font-roboto), sans-serif", fontWeight: 600, fontSize: "0.9rem", color: "#000c66", whiteSpace: "nowrap" }}>Actions</th>
+                        )}
                       </tr>
                     </thead>
                     <tbody>
@@ -872,19 +870,19 @@ export default function AdminPage() {
                           <tr key={user.id} style={{ borderBottom: "1px solid rgba(0, 12, 102, 0.1)" }}
                             onMouseEnter={e => (e.currentTarget.style.backgroundColor = "rgba(0, 12, 102, 0.02)")}
                             onMouseLeave={e => (e.currentTarget.style.backgroundColor = "")}>
-                            <td style={{ padding: "1rem 1.25rem", color: "#64748b", fontFamily: "var(--font-roboto), sans-serif", fontSize: "0.95rem" }}>{i + 1}</td>
-                            <td style={{ padding: "1rem 1.25rem", fontWeight: 600, color: "#000000", fontFamily: "var(--font-roboto), sans-serif", fontSize: "0.95rem" }}>{user.full_name}</td>
-                            <td style={{ padding: "1rem 1.25rem", color: "#64748b", fontFamily: "var(--font-roboto), sans-serif", fontSize: "0.95rem" }}>{user.email}</td>
-                            <td style={{ padding: "1rem 1.25rem", color: "#000000", fontFamily: "var(--font-roboto), sans-serif", fontSize: "0.95rem" }}>{user.enrollment_number}</td>
-                            <td style={{ padding: "1rem 1.25rem", color: "#000000", fontFamily: "var(--font-roboto), sans-serif", fontSize: "0.95rem" }}>{user.batch}</td>
-                            <td style={{ padding: "1rem 1.25rem", color: "#000000", fontFamily: "var(--font-roboto), sans-serif", fontSize: "0.95rem" }}>{user.degree}</td>
-                            <td style={{ padding: "1rem 1.25rem" }}>
+                            <td style={{ padding: "0.85rem 0.5rem 0.85rem 1.25rem", textAlign: "center", color: "#64748b", fontFamily: "var(--font-roboto), sans-serif", fontSize: "0.9rem", whiteSpace: "nowrap" }}>{i + 1}</td>
+                            <td style={{ padding: "0.85rem 0.5rem", fontWeight: 600, color: "#000000", fontFamily: "var(--font-roboto), sans-serif", fontSize: "0.9rem", whiteSpace: "nowrap" }}>{user.full_name}</td>
+                            <td style={{ padding: "0.85rem 0.5rem", color: "#64748b", fontFamily: "var(--font-roboto), sans-serif", fontSize: "0.9rem", whiteSpace: "nowrap" }}>{user.email}</td>
+                            <td style={{ padding: "0.85rem 0.5rem", color: "#000000", fontFamily: "var(--font-roboto), sans-serif", fontSize: "0.9rem", whiteSpace: "nowrap" }}>{user.enrollment_number}</td>
+                            <td style={{ padding: "0.85rem 0.5rem", textAlign: "center", color: "#000000", fontFamily: "var(--font-roboto), sans-serif", fontSize: "0.9rem", whiteSpace: "nowrap" }}>{user.batch}</td>
+                            <td style={{ padding: "0.85rem 0.5rem", textAlign: "center", color: "#000000", fontFamily: "var(--font-roboto), sans-serif", fontSize: "0.9rem", whiteSpace: "nowrap" }}>{user.degree}</td>
+                            <td style={{ padding: "0.85rem 0.5rem", textAlign: "center", whiteSpace: "nowrap" }}>
                               <span style={{ 
                                 backgroundColor: rc.bg, 
                                 color: rc.text, 
                                 borderRadius: "9999px",
-                                padding: "0.25rem 1rem",
-                                fontSize: "0.85rem",
+                                padding: "0.2rem 0.75rem",
+                                fontSize: "0.8rem",
                                 fontWeight: 600,
                                 textTransform: "capitalize",
                                 display: "inline-block",
@@ -893,13 +891,13 @@ export default function AdminPage() {
                                 {user.role === "superadmin" ? "SuperAdmin" : user.role === "clubadmin" ? "ClubAdmin" : user.role}
                               </span>
                             </td>
-                            <td style={{ padding: "1rem 1.25rem" }}>
+                            <td style={{ padding: "0.85rem 0.5rem", textAlign: "center", whiteSpace: "nowrap" }}>
                               <span style={{
                                 backgroundColor: user.is_verified ? "#e6f4ea" : "#fce8e6",
                                 color: user.is_verified ? "#1e8e3e" : "#d93025",
                                 borderRadius: "9999px",
-                                padding: "0.25rem 1rem",
-                                fontSize: "0.85rem",
+                                padding: "0.2rem 0.75rem",
+                                fontSize: "0.8rem",
                                 fontWeight: 600,
                                 display: "inline-block",
                                 fontFamily: "var(--font-roboto), sans-serif"
@@ -908,21 +906,21 @@ export default function AdminPage() {
                               </span>
                             </td>
                             {myRole === "superadmin" && (
-                              <td style={{ padding: "1rem 1.25rem" }}>
-                                {user.id === +myId ? <span style={{ color: "#64748b", fontSize: "0.95rem", fontFamily: "var(--font-roboto), sans-serif" }}>You</span> : (
-                                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                                    <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
+                              <td style={{ padding: "0.85rem 1.25rem 0.85rem 0.5rem", textAlign: "right", whiteSpace: "nowrap" }}>
+                                {user.id === +myId ? <span style={{ color: "#64748b", fontSize: "0.9rem", fontFamily: "var(--font-roboto), sans-serif" }}>You</span> : (
+                                  <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "flex-end", gap: "0.4rem" }}>
+                                    <div style={{ position: "relative", display: "inline-flex", alignItems: "center", flexShrink: 0 }}>
                                       <select 
                                         style={{ 
-                                          height: "36px",
+                                          height: "32px",
                                           backgroundColor: "#e6effd",
                                           color: "#000c66",
                                           border: "1.5px solid rgba(0, 12, 102, 0.2)",
                                           borderRadius: "9999px",
-                                          padding: "0 2rem 0 1rem",
+                                          padding: "0 1.75rem 0 0.8rem",
                                           fontFamily: "var(--font-roboto), sans-serif",
                                           fontWeight: 500,
-                                          fontSize: "0.9rem",
+                                          fontSize: "0.85rem",
                                           cursor: "pointer",
                                           outline: "none",
                                           appearance: "none",
@@ -937,7 +935,7 @@ export default function AdminPage() {
                                         <option value="clubadmin">Club Admin</option>
                                         <option value="superadmin">Super Admin</option>
                                       </select>
-                                      <ChevronDown size={14} style={{ color: "#000c66", position: "absolute", right: "0.75rem", pointerEvents: "none" }} />
+                                      <ChevronDown size={13} style={{ color: "#000c66", position: "absolute", right: "0.6rem", pointerEvents: "none" }} />
                                     </div>
                                     <button 
                                       onClick={() => deleteUser(user.id)} 
@@ -947,8 +945,11 @@ export default function AdminPage() {
                                         color: "#ffffff", 
                                         border: "none", 
                                         borderRadius: "50%", 
-                                        width: "36px", 
-                                        height: "36px", 
+                                        width: "32px", 
+                                        height: "32px", 
+                                        minWidth: "32px",
+                                        minHeight: "32px",
+                                        flexShrink: 0,
                                         display: "inline-flex", 
                                         alignItems: "center", 
                                         justifyContent: "center",
@@ -958,7 +959,7 @@ export default function AdminPage() {
                                       onMouseEnter={e => e.currentTarget.style.transform = "scale(1.05)"}
                                       onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
                                     >
-                                      <Trash2 size={16} />
+                                      <Trash2 size={15} />
                                     </button>
                                   </div>
                                 )}
@@ -1061,7 +1062,7 @@ export default function AdminPage() {
                 color: "#64748b"
               }}>
                 <Calendar size={48} style={{ margin: "0 auto 1rem", opacity: 0.3 }} />
-                <p>No events found.</p>
+                <p style={{ fontFamily: "var(--font-roboto), sans-serif" }}>No events found.</p>
               </div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
@@ -2234,7 +2235,7 @@ export default function AdminPage() {
           backgroundColor: "rgba(0, 0, 0, 0.4)",
           backdropFilter: "blur(6px)",
           WebkitBackdropFilter: "blur(6px)",
-          zIndex: 200,
+          zIndex: 9999,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -2710,7 +2711,7 @@ function TicketFormModal({ myId, initialData, onClose, onSaved }: { myId: string
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
 
   return (
-    <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0, 0, 0, 0.4)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={onClose}>
+    <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0, 0, 0, 0.4)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={onClose}>
       <div style={{
         maxWidth: "600px",
         width: "100%",
@@ -3001,7 +3002,7 @@ function InfoHubFormModal({ myId, initialData, onClose, onSaved }: { myId: strin
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
 
   return (
-    <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0, 0, 0, 0.4)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={onClose}>
+    <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0, 0, 0, 0.4)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={onClose}>
       <div style={{
         maxWidth: "600px",
         width: "100%",
@@ -3489,7 +3490,7 @@ function GPAManagerTab({ myId, apiUrl }: { myId: string; apiUrl: string }) {
 
       {/* ── Edit Module Modal ── */}
       {editingMod && (
-        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)", zIndex: 300, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={() => setEditingMod(null)}>
+        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={() => setEditingMod(null)}>
           <div style={{ backgroundColor: "#ffffff", borderRadius: "1.5rem", padding: "2rem", maxWidth: "480px", width: "100%", boxShadow: "0 25px 50px rgba(0,0,0,0.15)" }} onClick={e => e.stopPropagation()}>
             <h3 style={{ fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "1.3rem", color: "#000c66", marginBottom: "1.5rem" }}>Edit Module</h3>
             <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
@@ -3519,7 +3520,7 @@ function GPAManagerTab({ myId, apiUrl }: { myId: string; apiUrl: string }) {
 
       {/* ── Add Module Modal ── */}
       {addingToGroup && (
-        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)", zIndex: 300, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={() => setAddingToGroup(null)}>
+        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={() => setAddingToGroup(null)}>
           <div style={{ backgroundColor: "#ffffff", borderRadius: "1.5rem", padding: "2rem", maxWidth: "500px", width: "100%", boxShadow: "0 25px 50px rgba(0,0,0,0.15)" }} onClick={e => e.stopPropagation()}>
             <h3 style={{ fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "1.3rem", color: "#000c66", marginBottom: "0.25rem" }}>Add New Module</h3>
             <p style={{ color: "#64748b", fontSize: "0.85rem", marginBottom: "1.5rem", fontFamily: "var(--font-roboto), sans-serif" }}>Adding to: <strong>{addingToGroup.group_name}</strong></p>
@@ -3552,7 +3553,7 @@ function GPAManagerTab({ myId, apiUrl }: { myId: string; apiUrl: string }) {
 
       {/* ── Edit Group Modal ── */}
       {editingGroup && (
-        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)", zIndex: 300, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={() => setEditingGroup(null)}>
+        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }} onClick={() => setEditingGroup(null)}>
           <div style={{ backgroundColor: "#ffffff", borderRadius: "1.5rem", padding: "2rem", maxWidth: "460px", width: "100%", boxShadow: "0 25px 50px rgba(0,0,0,0.15)" }} onClick={e => e.stopPropagation()}>
             <h3 style={{ fontFamily: "var(--font-syne), sans-serif", fontWeight: 700, fontSize: "1.3rem", color: "#000c66", marginBottom: "1.5rem" }}>Edit Group</h3>
             <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
