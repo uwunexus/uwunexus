@@ -1390,6 +1390,110 @@ html {
   color: #000000;
 }
 
+/* Marketplace Details Modal Responsive Styles */
+.marketplace-detail-modal-container {
+  display: flex;
+  flex-direction: row;
+  max-width: 1020px;
+  width: 100%;
+  background-color: #ffffff;
+  border: 1.5px solid #1e293b;
+  border-radius: 2.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+  position: relative;
+  overflow: hidden;
+  max-height: 92vh;
+}
+
+.marketplace-detail-modal-img-col {
+  flex: 0 0 46%;
+  position: relative;
+  background-color: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  min-height: 450px;
+}
+
+.marketplace-detail-modal-info-col {
+  flex: 1 1 54%;
+  padding: 2.5rem 2.2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow-y: auto;
+  background-color: #ffffff;
+}
+
+@media (max-width: 768px) {
+  .marketplace-modal-overlay {
+    padding: 0.75rem !important;
+  }
+
+  .marketplace-detail-modal-container {
+    flex-direction: column !important;
+    max-height: 90vh !important;
+    border-radius: 1.75rem !important;
+    max-width: 480px !important;
+  }
+
+  .marketplace-detail-modal-img-col {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    height: 230px !important;
+    min-height: 230px !important;
+  }
+
+  .marketplace-detail-modal-info-col {
+    flex: 1 1 auto !important;
+    padding: 1.25rem 1rem !important;
+    width: 100% !important;
+  }
+
+  .marketplace-detail-modal-title {
+    font-size: 1.4rem !important;
+    margin-bottom: 0.4rem !important;
+    padding-right: 0 !important;
+  }
+
+  .marketplace-detail-modal-price {
+    font-size: 1.3rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .marketplace-detail-modal-desc {
+    font-size: 0.88rem !important;
+    margin-bottom: 1rem !important;
+    max-height: 110px !important;
+  }
+
+  .marketplace-detail-modal-meta-box {
+    padding: 0.85rem 1rem !important;
+    border-radius: 1.2rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .marketplace-detail-modal-contact-row {
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+  }
+
+  .marketplace-detail-modal-contact-btn {
+    height: 42px !important;
+    padding: 0 1.25rem !important;
+    font-size: 0.9rem !important;
+    flex: 1 1 calc(50% - 0.5rem) !important;
+    min-width: 130px !important;
+  }
+
+  .marketplace-detail-modal-close-btn {
+    height: 40px !important;
+    padding: 0 2rem !important;
+    font-size: 0.9rem !important;
+  }
+}
+
 /* Side-by-Side Checkout Modal Popup Styles */
 .checkout-modal-container {
   display: flex;
