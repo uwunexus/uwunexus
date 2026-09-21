@@ -3565,3 +3565,110 @@ html {
     display: none !important;
   }
 }
+
+/* Admin Panel Mobile Responsiveness */
+.admin-table-wrapper {
+  overflow-x: auto;
+  width: 100%;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 1rem;
+}
+
+/* Hide scrollbar for cleaner look on tables */
+.admin-table-wrapper::-webkit-scrollbar {
+  height: 6px;
+}
+.admin-table-wrapper::-webkit-scrollbar-track {
+  background: rgba(0, 12, 102, 0.05);
+  border-radius: 4px;
+}
+.admin-table-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(0, 12, 102, 0.2);
+  border-radius: 4px;
+}
+.admin-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 12, 102, 0.4);
+}
+
+@media (max-width: 768px) {
+  .admin-modal-card {
+    padding: 1.5rem !important;
+    max-width: 95% !important;
+    border-radius: 1.2rem !important;
+  }
+  .admin-modal-overlay {
+    padding: 1rem !important;
+  }
+  .admin-header-container {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 1rem !important;
+  }
+  .admin-main-container {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  .admin-tab-switcher-wrapper {
+    flex-wrap: wrap !important;
+    height: auto !important;
+  }
+}
+
+.desktop-only-admin-tabs {
+  display: flex;
+}
+.mobile-only-admin-tabs {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .desktop-only-admin-tabs {
+    display: none !important;
+  }
+  .mobile-only-admin-tabs {
+    display: block !important;
+  }
+}
+
+/* Admin Panel - Mobile Header & Stats Fixes */
+@media (max-width: 768px) {
+  .admin-header-container > div:first-child h1 {
+    font-size: 1.8rem !important;
+    white-space: nowrap !important;
+    gap: 0.5rem !important;
+  }
+
+  .admin-header-container > div:first-child p {
+    font-size: 0.78rem !important;
+    line-height: 1.4 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 1 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  /* Stats - switch to 2x2 horizontal grid instead of tall single-column */
+  .admin-stats-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  .admin-stats-grid > div {
+    flex: unset !important;
+    min-width: unset !important;
+    padding: 0.9rem 0.75rem !important;
+    border-radius: 1rem !important;
+  }
+
+  .admin-stats-grid > div > div:first-child {
+    font-size: 0.72rem !important;
+    padding: 0.3rem 0.75rem !important;
+    margin-bottom: 0.4rem !important;
+  }
+
+  .admin-stats-grid > div > div:last-child {
+    font-size: 1.6rem !important;
+  }
+}

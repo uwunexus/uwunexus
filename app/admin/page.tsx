@@ -59,6 +59,9 @@ function formatTime(t: string) {
 /* ─── Main Component ────────────────────────────────────────── */
 export default function AdminPage() {
   const [tab, setTab] = useState<"users" | "events" | "tickets" | "marketplace" | "lost-found" | "info-hub" | "gpa-manager">("users");
+  const [isAdminNavOpen, setIsAdminNavOpen] = useState(false);
+  const [isTicketSubTabOpen, setIsTicketSubTabOpen] = useState(false);
+
 
   /* auth from cookie */
   const [myId, setMyId] = useState("");
@@ -403,9 +406,9 @@ export default function AdminPage() {
 
   /* ── Render ───────────────────────────────────────────────── */
   return (
-    <div className="container relative min-h-screen" style={{ maxWidth: '1210px', marginTop: '1.5rem', paddingLeft: '0', paddingRight: '0', paddingBottom: '4rem' }}>
+    <div className="container relative min-h-screen admin-main-container" style={{ maxWidth: '1210px', marginTop: '1.5rem', paddingLeft: '0', paddingRight: '0', paddingBottom: '4rem' }}>
       {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "2rem", flexWrap: "wrap", gap: "1.5rem" }}>
+      <div className="admin-header-container" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1.25rem", flexWrap: "wrap", gap: "1rem" }}>
         <div>
           <h1 style={{
             fontFamily: "var(--font-syne), sans-serif",
@@ -504,21 +507,23 @@ export default function AdminPage() {
         flexWrap: "wrap",
         marginBottom: "2rem"
       }}>
-        {/* Tab Switcher Capsule */}
-        <div style={{
-          display: "flex",
-          alignItems: "center",
-          height: "48px",
-          backgroundColor: "#e6effd",
-          borderRadius: "9999px",
-          padding: "4px",
-          gap: "4px",
-          boxSizing: "border-box",
-          border: "1.5px solid rgba(0, 12, 102, 0.2)",
-          overflowX: "auto",
-          whiteSpace: "nowrap",
-          WebkitOverflowScrolling: "touch"
-        }}>
+        {/* Tab Switcher */}
+        <div style={{ position: "relative", width: "100%" }}>
+          {/* Desktop Tab Switcher */}
+          <div className="desktop-only-admin-tabs" style={{
+            display: "flex",
+            alignItems: "center",
+            height: "48px",
+            backgroundColor: "#e6effd",
+            borderRadius: "9999px",
+            padding: "4px",
+            gap: "4px",
+            boxSizing: "border-box",
+            border: "1.5px solid rgba(0, 12, 102, 0.2)",
+            overflowX: "auto",
+            whiteSpace: "nowrap",
+            WebkitOverflowScrolling: "touch"
+          }}>
           {[
             { key: "users", label: "Users", icon: <Users size={16} />, adminOnly: true }, 
             { key: "events", label: "Events", icon: <Calendar size={16} /> },
@@ -556,6 +561,125 @@ export default function AdminPage() {
           ))}
         </div>
 
+          {/* Mobile Category Connected Navy Dropdown */}
+          <div className="mobile-only-admin-tabs" style={{ position: "relative", width: "100%" }}>
+            <button
+              type="button"
+              onClick={() => setIsAdminNavOpen(!isAdminNavOpen)}
+              style={{
+                height: "48px",
+                paddingLeft: "1.25rem",
+                paddingRight: "1rem",
+                borderRadius: isAdminNavOpen ? "1rem 1rem 0 0" : "9999px",
+                border: "1.5px solid #000c66",
+                backgroundColor: "#000c66",
+                color: "#ffffff",
+                fontSize: "1rem",
+                fontWeight: 600,
+                fontFamily: "var(--font-inter), sans-serif",
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                cursor: "pointer",
+                gap: "0.4rem",
+                transition: "border-radius 0.2s ease"
+              }}
+            >
+              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {[
+                  { key: "users", label: "Users" }, 
+                  { key: "events", label: "Events" },
+                  { key: "tickets", label: "Tickets" },
+                  { key: "marketplace", label: "Marketplace" },
+                  { key: "lost-found", label: "Lost & Found" },
+                  { key: "info-hub", label: "Info Hub" },
+                  { key: "gpa-manager", label: "GPA Manager" }
+                ].find(t => t.key === tab)?.label || "Select Category"}
+              </span>
+              <ChevronDown
+                size={18}
+                style={{
+                  color: "#ffffff",
+                  transition: "transform 0.2s ease",
+                  transform: isAdminNavOpen ? "rotate(180deg)" : "rotate(0deg)",
+                  flexShrink: 0
+                }}
+              />
+            </button>
+
+            {isAdminNavOpen && (
+              <>
+                <div
+                  style={{ position: "fixed", inset: 0, zIndex: 40 }}
+                  onClick={() => setIsAdminNavOpen(false)}
+                />
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "100%",
+                    left: 0,
+                    right: 0,
+                    backgroundColor: "#000c66",
+                    borderRadius: "0 0 1rem 1rem",
+                    padding: "0.4rem 0.5rem 0.5rem 0.5rem",
+                    boxShadow: "0 12px 25px rgba(0, 12, 102, 0.25)",
+                    border: "1.5px solid #000c66",
+                    borderTop: "none",
+                    zIndex: 50,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "2px"
+                  }}
+                >
+                  {[
+                    { key: "users", label: "Users", adminOnly: true }, 
+                    { key: "events", label: "Events" },
+                    { key: "tickets", label: "Tickets" },
+                    { key: "marketplace", label: "Marketplace", adminOnly: true },
+                    { key: "lost-found", label: "Lost & Found", adminOnly: true },
+                    { key: "info-hub", label: "Info Hub", adminOnly: true },
+                    { key: "gpa-manager", label: "GPA Manager", adminOnly: true }
+                  ].filter(t => myRole === "superadmin" || !t.adminOnly).map(t => {
+                    const isSelected = tab === t.key;
+                    return (
+                      <button
+                        key={t.key}
+                        onClick={() => {
+                          setTab(t.key as any);
+                          setIsAdminNavOpen(false);
+                        }}
+                        style={{
+                          width: "100%",
+                          padding: "0.75rem 1rem",
+                          borderRadius: "0.6rem",
+                          fontSize: "1rem",
+                          fontWeight: isSelected ? 700 : 500,
+                          fontFamily: "var(--font-inter), sans-serif",
+                          color: "#ffffff",
+                          backgroundColor: isSelected ? "rgba(255, 255, 255, 0.2)" : "transparent",
+                          textAlign: "left",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          transition: "all 0.15s ease",
+                          cursor: "pointer",
+                          whiteSpace: "nowrap"
+                        }}
+                      >
+                        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, marginRight: "0.25rem" }}>
+                          {t.label}
+                        </span>
+                        {isSelected && <span style={{ fontSize: "0.9rem", color: "#ffffff", flexShrink: 0 }}>✓</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
         {/* Refresh Button */}
         <button 
           onClick={tab === "users" ? fetchUsers : tab === "events" ? fetchEvents : fetchTickets}
@@ -590,7 +714,7 @@ export default function AdminPage() {
       {tab === "users" && (
         <>
           {/* Stats */}
-          <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap", marginBottom: "2rem" }}>
+          <div className="admin-stats-grid" style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap", marginBottom: "2rem" }}>
             {[
               { label: "Total users", value: userStats.total },
               { label: "Students", value: userStats.students },
@@ -719,7 +843,8 @@ export default function AdminPage() {
             {usersLoading ? <div className="p-12 text-center text-muted">Loading users...</div> :
               filteredUsers.length === 0 ? <div className="p-12 text-center text-muted">No users found.</div> : (
                 <div style={{ overflowX: "auto" }}>
-                  <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                  <div className="admin-table-wrapper" style={{ overflowX: "auto", width: "100%" }}>
+                    <table style={{ width: "100%", borderCollapse: "collapse" }}>
                     <thead style={{ backgroundColor: "#edf4fe", borderBottom: "1.5px solid rgba(0, 12, 102, 0.15)" }}>
                       <tr>
                         {["No", "Full Name", "Email", "Enrollment No.", "Batch", "Degree", "Role", "Verification Status", ...(myRole === "superadmin" ? ["Actions"] : [])].map(h => (
@@ -844,6 +969,7 @@ export default function AdminPage() {
                       })}
                     </tbody>
                   </table>
+                  </div>
                 </div>
               )}
           </div>
@@ -854,7 +980,7 @@ export default function AdminPage() {
       {tab === "events" && (
         <>
           {/* Stats */}
-          <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap", marginBottom: "2rem" }}>
+          <div className="admin-stats-grid" style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap", marginBottom: "2rem" }}>
             {[
               { label: "Total Events", value: eventStats.total },
               { label: "Approved", value: eventStats.approved },
@@ -1086,19 +1212,20 @@ export default function AdminPage() {
         <>
           {/* Sub Navigation */}
           {/* Sub Navigation Switcher */}
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            height: "40px",
-            backgroundColor: "#e6effd",
-            borderRadius: "9999px",
-            padding: "4px",
-            gap: "4px",
-            boxSizing: "border-box",
-            border: "1.5px solid rgba(0, 12, 102, 0.2)",
-            alignSelf: "flex-start",
-            marginBottom: "1.5rem"
-          }}>
+          {/* Sub-Tab Switcher */}
+          <div style={{ position: "relative", width: "100%", marginBottom: "1.5rem" }}>
+            <div className="desktop-only-admin-tabs" style={{
+              display: "flex",
+              alignItems: "center",
+              height: "40px",
+              backgroundColor: "#e6effd",
+              borderRadius: "9999px",
+              padding: "4px",
+              gap: "4px",
+              boxSizing: "border-box",
+              border: "1.5px solid rgba(0, 12, 102, 0.2)",
+              alignSelf: "flex-start"
+            }}>
             <button 
               onClick={() => setTicketSubTab("events")}
               style={{
@@ -1137,10 +1264,116 @@ export default function AdminPage() {
             </button>
           </div>
 
+          </div>
+
+          <div className="mobile-only-admin-tabs" style={{ position: "relative", width: "100%" }}>
+            <button
+              type="button"
+              onClick={() => setIsTicketSubTabOpen(!isTicketSubTabOpen)}
+              style={{
+                height: "40px",
+                paddingLeft: "1rem",
+                paddingRight: "0.75rem",
+                borderRadius: isTicketSubTabOpen ? "1rem 1rem 0 0" : "9999px",
+                border: "1.5px solid #000c66",
+                backgroundColor: "#000c66",
+                color: "#ffffff",
+                fontSize: "0.85rem",
+                fontWeight: 600,
+                fontFamily: "var(--font-inter), sans-serif",
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                cursor: "pointer",
+                gap: "0.4rem",
+                transition: "border-radius 0.2s ease"
+              }}
+            >
+              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {ticketSubTab === "events" ? "Manage Events" : "Purchased Tickets"}
+              </span>
+              <ChevronDown
+                size={16}
+                style={{
+                  color: "#ffffff",
+                  transition: "transform 0.2s ease",
+                  transform: isTicketSubTabOpen ? "rotate(180deg)" : "rotate(0deg)",
+                  flexShrink: 0
+                }}
+              />
+            </button>
+
+            {isTicketSubTabOpen && (
+              <>
+                <div
+                  style={{ position: "fixed", inset: 0, zIndex: 40 }}
+                  onClick={() => setIsTicketSubTabOpen(false)}
+                />
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "100%",
+                    left: 0,
+                    right: 0,
+                    backgroundColor: "#000c66",
+                    borderRadius: "0 0 1rem 1rem",
+                    padding: "0.4rem 0.5rem 0.5rem 0.5rem",
+                    boxShadow: "0 12px 25px rgba(0, 12, 102, 0.25)",
+                    border: "1.5px solid #000c66",
+                    borderTop: "none",
+                    zIndex: 50,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "2px"
+                  }}
+                >
+                  {[
+                    { key: "events", label: "Manage Events" },
+                    { key: "purchases", label: "Purchased Tickets" }
+                  ].map(t => {
+                    const isSelected = ticketSubTab === t.key;
+                    return (
+                      <button
+                        key={t.key}
+                        onClick={() => {
+                          setTicketSubTab(t.key as any);
+                          setIsTicketSubTabOpen(false);
+                        }}
+                        style={{
+                          width: "100%",
+                          padding: "0.5rem 0.75rem",
+                          borderRadius: "0.6rem",
+                          fontSize: "0.85rem",
+                          fontWeight: isSelected ? 700 : 500,
+                          fontFamily: "var(--font-inter), sans-serif",
+                          color: "#ffffff",
+                          backgroundColor: isSelected ? "rgba(255, 255, 255, 0.2)" : "transparent",
+                          textAlign: "left",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          transition: "all 0.15s ease",
+                          cursor: "pointer",
+                          whiteSpace: "nowrap"
+                        }}
+                      >
+                        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, marginRight: "0.25rem" }}>
+                          {t.label}
+                        </span>
+                        {isSelected && <span style={{ fontSize: "0.8rem", color: "#ffffff", flexShrink: 0 }}>✓</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+          </div>
+          
           {ticketSubTab === "events" && (
             <>
               {/* Stats */}
-              <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap", marginBottom: "2rem" }}>
+              <div className="admin-stats-grid" style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap", marginBottom: "2rem" }}>
                 {[
                   { label: "Total Event Tickets", value: ticketStats.total },
                   { label: "Active", value: ticketStats.active },
@@ -1376,7 +1609,8 @@ export default function AdminPage() {
                 <div style={{ padding: "3rem 1.5rem", textAlign: "center", color: "#64748b" }}>No purchases found.</div>
               ) : (
                 <div style={{ overflowX: "auto" }}>
-                  <table style={{ width: "100%", textAlign: "left", borderCollapse: "collapse" }}>
+                  <div className="admin-table-wrapper" style={{ overflowX: "auto", width: "100%" }}>
+                    <table style={{ width: "100%", textAlign: "left", borderCollapse: "collapse" }}>
                     <thead style={{ backgroundColor: "#edf4fe", borderBottom: "1.5px solid rgba(0, 12, 102, 0.15)" }}>
                       <tr>
                         {["Order ID", "Event", "Customer", "Contact", "Amount", "Status", "Date", "Actions"].map(h => (
@@ -1448,6 +1682,7 @@ export default function AdminPage() {
                       ))}
                     </tbody>
                   </table>
+                  </div>
                 </div>
               )}
             </div>
@@ -1485,7 +1720,8 @@ export default function AdminPage() {
               <div className="p-8 text-center text-muted">No items found.</div>
             ) : (
               <div style={{ overflowX: "auto" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
+                <div className="admin-table-wrapper" style={{ overflowX: "auto", width: "100%" }}>
+                    <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
                   <thead style={{ backgroundColor: "#edf4fe", borderBottom: "1.5px solid rgba(0, 12, 102, 0.15)" }}>
                     <tr>
                       {["Item", "Price", "Seller", "Status", "Actions"].map(h => (
@@ -1661,6 +1897,7 @@ export default function AdminPage() {
                     })}
                   </tbody>
                 </table>
+                  </div>
               </div>
             )}
           </div>
@@ -1697,7 +1934,8 @@ export default function AdminPage() {
               <div className="p-8 text-center text-muted">No reports found.</div>
             ) : (
               <div style={{ overflowX: "auto" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
+                <div className="admin-table-wrapper" style={{ overflowX: "auto", width: "100%" }}>
+                    <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
                   <thead style={{ backgroundColor: "#edf4fe", borderBottom: "1.5px solid rgba(0, 12, 102, 0.15)" }}>
                     <tr>
                       {["Title", "Type", "Status", "Reporter", "Status"].map((h, idx) => (
@@ -1789,6 +2027,7 @@ export default function AdminPage() {
                     })}
                   </tbody>
                 </table>
+                  </div>
               </div>
             )}
           </div>
@@ -1825,7 +2064,8 @@ export default function AdminPage() {
               <div className="p-8 text-center text-muted">No items found.</div>
             ) : (
               <div style={{ overflowX: "auto" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
+                <div className="admin-table-wrapper" style={{ overflowX: "auto", width: "100%" }}>
+                    <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
                   <thead style={{ backgroundColor: "#edf4fe", borderBottom: "1.5px solid rgba(0, 12, 102, 0.15)" }}>
                     <tr>
                       {["Title", "Category", "Details", "Actions"].map(h => (
@@ -1920,6 +2160,7 @@ export default function AdminPage() {
                     })}
                   </tbody>
                 </table>
+                  </div>
               </div>
             )}
           </div>
@@ -2150,7 +2391,7 @@ function EventFormModal({ myId, initialData, onClose, onSaved }: { myId: string;
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
 
   return (
-    <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0, 0, 0, 0.4)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}
+    <div className="admin-modal-overlay" style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0, 0, 0, 0.4)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}
       onClick={onClose}>
       <div style={{
         maxWidth: "600px",
@@ -3194,7 +3435,8 @@ function GPAManagerTab({ myId, apiUrl }: { myId: string; apiUrl: string }) {
                       {/* Expanded module list */}
                       {expandedGroup === grp.id && (
                         <div style={{ borderTop: "1px solid rgba(0,12,102,0.08)", overflowX: "auto" }}>
-                          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                          <div className="admin-table-wrapper" style={{ overflowX: "auto", width: "100%" }}>
+                    <table style={{ width: "100%", borderCollapse: "collapse" }}>
                             <thead style={{ backgroundColor: "#f8fafc" }}>
                               <tr>
                                 {["Module Code", "Module Name", "Credits", "GPA Type", "Mandatory", "Actions"].map(h => (
@@ -3233,6 +3475,7 @@ function GPAManagerTab({ myId, apiUrl }: { myId: string; apiUrl: string }) {
                               ))}
                             </tbody>
                           </table>
+                  </div>
                         </div>
                       )}
                     </div>
