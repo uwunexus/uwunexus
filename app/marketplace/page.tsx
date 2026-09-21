@@ -674,7 +674,7 @@ export default function MarketplacePage() {
             position: "fixed",
             inset: 0,
             backgroundColor: "rgba(0,0,0,0.65)",
-            zIndex: 9999,
+            zIndex: 100,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
