@@ -2,7 +2,11 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+<<<<<<< HEAD
 import { Search, Filter, Phone, X, Upload, Image as ImageIcon, Edit, Tag, Plus, Store, ChevronDown, Trash2, CheckCircle2 } from "lucide-react";
+=======
+import { Search, Filter, Phone, X, Upload, Image as ImageIcon, Edit, Tag, Plus, Store, ChevronDown, User, Sparkles } from "lucide-react";
+>>>>>>> 9112f155c9098a465f0f4b5e11002df0b3ceee6b
 import { uploadToCloudinary, validateImageFile } from "../lib/cloudinary";
 
 interface Category {
@@ -43,7 +47,6 @@ export default function MarketplacePage() {
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
   const [formLoading, setFormLoading] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState("");
   const [myId, setMyId] = useState("");
   const [contactProduct, setContactProduct] = useState<Item | null>(null);
   const [copiedEmail, setCopiedEmail] = useState(false);
@@ -91,7 +94,6 @@ export default function MarketplacePage() {
     setForm({ title: "", description: "", price: "", condition_state: "Used - Good", category_id: "", contact_number: "", contact_email: "" });
     setFiles([]);
     setUploadError(null);
-    setSubmitSuccess("");
     setShowModal(true);
   };
 
@@ -108,7 +110,6 @@ export default function MarketplacePage() {
     });
     setFiles([]);
     setUploadError(null);
-    setSubmitSuccess("");
     setShowModal(true);
   };
 
@@ -131,26 +132,6 @@ export default function MarketplacePage() {
       }
     } catch (e) {
       alert("Error updating status.");
-    }
-  };
-
-  const handleDelete = async (itemId: number) => {
-    if (!confirm("Are you sure you want to delete this item? This action cannot be undone.")) return;
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/delete_marketplace_item.php`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ item_id: itemId, user_id: myId })
-      });
-      const data = await res.json();
-      if (data.success) {
-        setMyItems(prev => prev.filter(i => i.id !== itemId));
-        setItems(prev => prev.filter(i => i.id !== itemId));
-      } else {
-        alert(data.message);
-      }
-    } catch (e) {
-      alert("Error deleting item.");
     }
   };
 
@@ -191,7 +172,8 @@ export default function MarketplacePage() {
 
       const data = await res.json();
       if (data.success) {
-        setSubmitSuccess(data.message || (editingItem ? "Listing updated successfully! It is pending approval." : "Listing created successfully! It is pending approval."));
+        alert(data.message || (editingItem ? "Listing updated successfully! It is pending approval." : "Listing created successfully! It is pending approval."));
+        setShowModal(false);
         // Refresh My Items
         const myRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/get_marketplace_items.php?seller_id=${myId}`).then(r => r.json());
         if (myRes.success) setMyItems(myRes.items);
@@ -539,7 +521,7 @@ export default function MarketplacePage() {
                 {/* Image visual wrapper with aspect ratio matching mockup */}
                 <div className="event-card-image-wrapper">
                   {product.images && product.images.length > 0 ? (
-                    <Image src={product.images[0]} alt={product.title} className="event-card-img" fill style={{ objectFit: 'cover' }} unoptimized />
+                    <img src={product.images[0]} alt={product.title} className="event-card-img" />
                   ) : (
                     <div className="event-card-no-img" style={{ background: "linear-gradient(135deg, #000c6622, #000c6611)" }}>
                       <ImageIcon size={40} style={{ color: "#000c66", opacity: 0.4 }} />
@@ -617,7 +599,7 @@ export default function MarketplacePage() {
                         <span>Contact Seller</span>
                       </button>
                     ) : (
-                      <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center", width: "100%", flexWrap: "wrap" }}>
+                      <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", width: "100%" }}>
                         <button
                           className="marketplace-item-btn marketplace-item-btn-secondary"
                           style={{
@@ -625,42 +607,20 @@ export default function MarketplacePage() {
                             color: "#0d0e4aff",
                             borderRadius: "9999px",
                             border: "1.5px solid #0d0e4aff",
-                            padding: "0.5rem 1rem",
+                            padding: "0.6rem 1.5rem",
                             fontFamily: "var(--font-syne), sans-serif",
                             fontWeight: 700,
-                            fontSize: "0.9rem",
+                            fontSize: "1rem",
                             display: "inline-flex",
                             alignItems: "center",
                             justifyContent: "center",
                             gap: "0.5rem",
                             cursor: "pointer"
                           }}
-                          onClick={(e) => { e.stopPropagation(); openEditModal(product); }}
+                          onClick={() => openEditModal(product)}
                         >
                           <Edit size={14} />
                           <span>Edit</span>
-                        </button>
-                        <button
-                          className="marketplace-item-btn marketplace-item-btn-danger"
-                          style={{
-                            backgroundColor: "rgba(239, 68, 68, 0.1)",
-                            color: "#ef4444",
-                            borderRadius: "9999px",
-                            border: "1.5px solid rgba(239, 68, 68, 0.2)",
-                            padding: "0.5rem 1rem",
-                            fontFamily: "var(--font-syne), sans-serif",
-                            fontWeight: 700,
-                            fontSize: "0.9rem",
-                            display: "inline-flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            gap: "0.5rem",
-                            cursor: "pointer"
-                          }}
-                          onClick={(e) => { e.stopPropagation(); handleDelete(product.id); }}
-                        >
-                          <Trash2 size={14} />
-                          <span>Delete</span>
                         </button>
                         {product.status !== 'sold' && (
                           <button
@@ -670,10 +630,10 @@ export default function MarketplacePage() {
                               color: "var(--success)",
                               borderRadius: "9999px",
                               border: "1.5px solid rgba(34,197,94,0.2)",
-                              padding: "0.5rem 1rem",
+                              padding: "0.6rem 1.5rem",
                               fontFamily: "var(--font-syne), sans-serif",
                               fontWeight: 700,
-                              fontSize: "0.9rem",
+                              fontSize: "1rem",
                               display: "inline-flex",
                               alignItems: "center",
                               justifyContent: "center",
@@ -721,7 +681,7 @@ export default function MarketplacePage() {
             padding: "1.5rem",
             backdropFilter: "blur(5px)"
           }}
-          onClick={() => { setShowModal(false); setSubmitSuccess(""); }}
+          onClick={() => setShowModal(false)}
         >
           <div
             className="marketplace-modal-card"
@@ -737,20 +697,6 @@ export default function MarketplacePage() {
             }}
             onClick={e => e.stopPropagation()}
           >
-            {submitSuccess ? (
-              <div style={{ padding: "3rem 1.5rem", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem" }}>
-                <CheckCircle2 size={64} style={{ color: "#22c55e" }} />
-                <h2 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.75rem", fontWeight: 800, color: "#000000" }}>Success!</h2>
-                <p style={{ fontFamily: "var(--font-roboto), sans-serif", color: "#64748b", fontSize: "1.1rem" }}>{submitSuccess}</p>
-                <button 
-                  onClick={() => { setShowModal(false); setSubmitSuccess(""); }} 
-                  style={{ marginTop: "1.5rem", borderRadius: "9999px", padding: "0.75rem 2.5rem", background: "linear-gradient(to right, #000c66, #0d0e4aff)", color: "white", border: "none", fontWeight: 700, fontSize: "0.9rem", cursor: "pointer", fontFamily: "var(--font-syne), sans-serif" }}
-                >
-                  OK
-                </button>
-              </div>
-            ) : (
-              <>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
               <h2 className="marketplace-modal-title" style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.75rem", fontWeight: 800, color: "#000000" }}>
                 {editingItem ? "Edit Listing" : "Create Listing"}
@@ -1010,8 +956,6 @@ export default function MarketplacePage() {
                 {formLoading ? "Saving..." : (editingItem ? "Update Listing" : "Publish Listing")}
               </button>
             </form>
-            </>
-            )}
           </div>
         </div>
       )}
@@ -1100,6 +1044,7 @@ export default function MarketplacePage() {
                   Seller: {contactProduct.seller_name || "Super Admin"}
                 </span>
               </div>
+<<<<<<< HEAD
 
               <div style={{ backgroundColor: "#f8fafc", padding: "1rem", borderRadius: "0.8rem", fontSize: "0.95rem", color: "#334155", lineHeight: 1.5, whiteSpace: "pre-wrap" }}>
                 {contactProduct.description}
@@ -1178,6 +1123,8 @@ export default function MarketplacePage() {
                   Email
                 </span>
               </button>
+=======
+>>>>>>> 9112f155c9098a465f0f4b5e11002df0b3ceee6b
             </div>
           </div>
         </div>
