@@ -18,7 +18,7 @@ interface Event {
   created_at: string;
 }
 
-const CATEGORIES = ["All", "Academics", "Cultural", "Sports", "Club Activity", "Career", "Other"];
+const CATEGORIES = ["All", "Academics", "Cultural", "Sports", "Club Activity", "Career"];
 
 const CATEGORY_COLORS: Record<string, string> = {
   Academic: "#000c66", // Navy Blue
