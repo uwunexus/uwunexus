@@ -77,6 +77,7 @@ export default function LostAndFoundPage() {
   const currentYear = now.getFullYear();
   const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
 
+  // [VALIDATION - FUTURE DATE BLOCK (UI Dropdown Level)]: Restrict selectable months/days to current date or past only
   // Only allow months up to the current month in current year
   const availableMonths = monthNames.slice(0, currentMonthIndex + 1);
 
@@ -133,7 +134,7 @@ export default function LostAndFoundPage() {
     // Check if user is logged in
     if (!myId) return alert("You must be logged in to create a report.");
 
-    // Validate that the selected date and time is not in the future
+    // [VALIDATION - FUTURE DATE BLOCK (Submit Logic Level)]: Stop submission if user picked a future date or time
     const [hoursStr, minutesStr] = (selectedTime || "00:00").split(":");
     const reportDateTime = new Date(
       currentYear,
