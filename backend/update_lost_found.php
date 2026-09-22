@@ -1,4 +1,12 @@
 <?php
+/**
+ * [REST API - POST Endpoint]
+ * Endpoint: /backend/update_lost_found.php
+ * Method: POST
+ * Description: Updates the status of a Lost & Found item (e.g., marks as 'resolved') with user ownership check.
+ * Payload (JSON): { id, user_id, status: 'resolved' }
+ * Frontend Usage: app/lost-and-found/page.tsx (handleMarkResolved)
+ */
 require 'db.php';
 header('Content-Type: application/json');
 
@@ -26,6 +34,8 @@ try {
     $stmt->execute([$id]);
     $item = $stmt->fetch();
 
+
+    // [FIX] IDOR Protection: Verify user ownership before allowing update
     if (!$item || $item['user_id'] !== $user_id) {
         http_response_code(403);
         echo json_encode(["success" => false, "message" => "Unauthorized to update this item"]);

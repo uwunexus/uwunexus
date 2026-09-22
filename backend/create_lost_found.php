@@ -1,4 +1,12 @@
 <?php
+/**
+ * [REST API - POST Endpoint]
+ * Endpoint: /backend/create_lost_found.php
+ * Method: POST
+ * Description: Creates a new Lost & Found report with optional Cloudinary image URLs.
+ * Payload (JSON): { title, description, location, time_date, type, user_id, contact_number, contact_email, images: [] }
+ * Frontend Usage: app/lost-and-found/page.tsx (handleCreateReport)
+ */
 require 'db.php';
 header('Content-Type: application/json');
 

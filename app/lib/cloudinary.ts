@@ -25,6 +25,7 @@ export async function compressImage(
     img.onload = () => {
       URL.revokeObjectURL(url);
       const ratio = Math.min(maxWidth / img.width, 1);
+      //make HTML 5 Canvas
       const canvas = document.createElement("canvas");
       canvas.width = img.width * ratio;
       canvas.height = img.height * ratio;
@@ -38,7 +39,7 @@ export async function compressImage(
           else reject(new Error("Canvas compression failed"));
         },
         "image/jpeg",
-        quality
+        quality // 0.8 (80% quality)
       );
     };
 
@@ -91,6 +92,7 @@ export async function uploadToCloudinary(
   formData.append("upload_preset", UPLOAD_PRESET);
   formData.append("folder", folder);
 
+  // [REST API - POST]: 3rd-Party External REST API - Upload compressed image to Cloudinary CDN
   const res = await fetch(
     `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
     { method: "POST", body: formData }

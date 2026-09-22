@@ -352,6 +352,7 @@ export default function AdminPage() {
   const deleteLostFoundItem = async (itemId: number) => {
     triggerConfirm("Delete Report", "Are you sure you want to permanently delete this report?", async () => {
       try {
+        // [REST API - POST]: Delete Lost & Found report (Body: { id, user_id })
         const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/delete_lost_found.php`, {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ id: itemId, user_id: +myId })

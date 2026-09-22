@@ -1,4 +1,12 @@
 <?php
+/**
+ * [REST API - POST Endpoint]
+ * Endpoint: /backend/save_grades.php
+ * Method: POST
+ * Description: Validates and saves/updates student module grades into user_grades table, recalculating live GPA.
+ * Payload (JSON): { user_id, grades: [ { module_id, academic_year, semester, grade, gpv } ] }
+ * Frontend Usage: app/gpa-calculator/page.tsx (handleSave)
+ */
 require 'db.php';
 header('Content-Type: application/json');
 

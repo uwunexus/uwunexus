@@ -27,18 +27,18 @@ const formatReportDateTime = (dateTimeStr: string) => {
     try {
       const date = new Date(dateTimeStr);
       if (isNaN(date.getTime())) return dateTimeStr;
-      
+
       const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
       const month = monthNames[date.getMonth()];
       const day = date.getDate();
-      
+
       let hours = date.getHours();
       const minutes = date.getMinutes();
       const ampm = hours >= 12 ? "pm" : "am";
       hours = hours % 12;
       hours = hours ? hours : 12;
       const minutesStr = minutes < 10 ? "0" + minutes : minutes;
-      
+
       return `${month} ${day} , ${hours}.${minutesStr}${ampm}`;
     } catch (e) {
       return dateTimeStr;
@@ -50,7 +50,7 @@ const formatReportDateTime = (dateTimeStr: string) => {
 export default function LostAndFoundPage() {
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   // Filter state
   const [filter, setFilter] = useState<"All" | "Lost" | "Found" | "Mine">("All");
 
@@ -76,7 +76,7 @@ export default function LostAndFoundPage() {
   const currentDay = now.getDate();
   const currentYear = now.getFullYear();
   const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
-  
+
   // Only allow months up to the current month in current year
   const availableMonths = monthNames.slice(0, currentMonthIndex + 1);
 
@@ -111,25 +111,29 @@ export default function LostAndFoundPage() {
     setSelectedTime(`${hr}:${min}`);
   }, []);
 
+  // Fetch all lost & found reports from PHP backend
   const fetchReports = async () => {
     try {
+      // [REST API - GET]: Fetch all Lost & Found items
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/get_lost_found.php`);
       const data = await res.json();
       if (data.success) {
-        setReports(data.items);
+        setReports(data.items); // Save items to state
       }
     } catch (e) {
       console.error(e);
     } finally {
-      setLoading(false);
+      setLoading(false); // Stop loading spinner
     }
   };
 
+  // Handle form submission to create a new Lost or Found report
   const handleCreateReport = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Check if user is logged in
     if (!myId) return alert("You must be logged in to create a report.");
 
-    // Validate that the date and time is not in the future
+    // Validate that the selected date and time is not in the future
     const [hoursStr, minutesStr] = (selectedTime || "00:00").split(":");
     const reportDateTime = new Date(
       currentYear,
@@ -139,19 +143,21 @@ export default function LostAndFoundPage() {
       parseInt(minutesStr || "0", 10)
     );
 
+    // Stop submission if user picked a future date or time
     if (reportDateTime.getTime() > Date.now()) {
       alert("Date and time cannot be in the future.");
       return;
     }
 
-    setFormLoading(true);
+    setFormLoading(true); // Start submit loading state
 
     try {
+      // Step 1: Upload all selected images concurrently to Cloudinary
       const imageUrls = await Promise.all(
         files.map(file => uploadToCloudinary(file, "uwunexus/lostandfound"))
       );
 
-      // Format selectedTime into AM/PM with dot syntax (e.g. 10.30pm)
+      // Step 2: Format time into 12-hour AM/PM with dot syntax (e.g. 10.30pm)
       let timeStr = "";
       if (selectedTime) {
         let hours = parseInt(hoursStr, 10);
@@ -162,8 +168,10 @@ export default function LostAndFoundPage() {
         const minStr = minutes < 10 ? "0" + minutes : minutes;
         timeStr = `${hours}.${minStr}${ampm}`;
       }
+      // Combine month, day, and time string (e.g. "sep 22 , 10.30am")
       const combinedDateTime = `${selectedMonth} ${selectedDay} , ${timeStr}`;
 
+      // [REST API - POST]: Create a new Lost & Found report (JSON payload)
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/create_lost_found.php`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -174,14 +182,14 @@ export default function LostAndFoundPage() {
           images: imageUrls
         })
       });
-      
+
       const data = await res.json();
       if (data.success) {
         alert("Report created successfully!");
         setShowModal(false);
         setForm({ title: "", description: "", location: "", time_date: "", type: "Lost", contact_number: "", contact_email: "" });
         setFiles([]);
-        
+
         // Reset date/time to current values
         const now = new Date();
         const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
@@ -205,6 +213,7 @@ export default function LostAndFoundPage() {
   const handleMarkResolved = async (id: number) => {
     if (!confirm("Are you sure you want to mark this as Found/Resolved?")) return;
     try {
+      // [REST API - POST]: Update report status (Mark as Resolved)
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/update_lost_found.php`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -240,16 +249,16 @@ export default function LostAndFoundPage() {
             Community portal to report and recover misplaced items.
           </p>
         </div>
-        <button 
+        <button
           className="lost-found-report-btn"
-          style={{ 
-            backgroundColor: '#000c66', 
-            color: '#ffffff', 
-            border: 'none', 
-            borderRadius: '9999px', 
-            padding: '0.6rem 2.2rem', 
-            fontFamily: 'var(--font-syne), sans-serif', 
-            fontWeight: 700, 
+          style={{
+            backgroundColor: '#000c66',
+            color: '#ffffff',
+            border: 'none',
+            borderRadius: '9999px',
+            padding: '0.6rem 2.2rem',
+            fontFamily: 'var(--font-syne), sans-serif',
+            fontWeight: 700,
             fontSize: '1rem',
             cursor: 'pointer',
             display: 'flex',
@@ -257,7 +266,7 @@ export default function LostAndFoundPage() {
             gap: '0.5rem',
             transition: 'background-color 0.2s',
             transform: 'translateY(-12px)'
-          }} 
+          }}
           onClick={() => setShowModal(true)}
         >
           <PlusCircle size={18} />
@@ -266,7 +275,7 @@ export default function LostAndFoundPage() {
       </div>
 
       {/* Mobile Floating Action Button */}
-      <button 
+      <button
         className="lost-found-fab"
         onClick={() => setShowModal(true)}
         suppressHydrationWarning
@@ -277,7 +286,7 @@ export default function LostAndFoundPage() {
 
       {/* Filter Buttons */}
       <div className="flex gap-2 flex-wrap mb-8 lost-found-filter-bar" style={{ marginTop: '2rem' }}>
-        <button 
+        <button
           className="lost-found-filter-btn"
           onClick={() => setFilter("All")}
           style={{
@@ -299,7 +308,7 @@ export default function LostAndFoundPage() {
         >
           <span>All<span className="lost-found-btn-suffix"> Reports</span></span>
         </button>
-        <button 
+        <button
           className="lost-found-filter-btn"
           onClick={() => setFilter("Lost")}
           style={{
@@ -321,7 +330,7 @@ export default function LostAndFoundPage() {
         >
           <span>Lost<span className="lost-found-btn-suffix"> Items</span></span>
         </button>
-        <button 
+        <button
           className="lost-found-filter-btn"
           onClick={() => setFilter("Found")}
           style={{
@@ -344,7 +353,7 @@ export default function LostAndFoundPage() {
           <span>Found<span className="lost-found-btn-suffix"> Items</span></span>
         </button>
         {myId && (
-          <button 
+          <button
             className="lost-found-filter-btn"
             onClick={() => setFilter("Mine")}
             style={{
@@ -411,9 +420,9 @@ export default function LostAndFoundPage() {
                     <h3 className="lost-found-item-title" style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.25rem", fontWeight: 700, color: "#000000", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
                       {report.title}
                     </h3>
-                    <span className="lost-found-item-type-badge" style={{ 
-                      backgroundColor: report.type === "Lost" ? "#a61c1c" : "#1b8a5a", 
-                      color: "#ffffff", 
+                    <span className="lost-found-item-type-badge" style={{
+                      backgroundColor: report.type === "Lost" ? "#a61c1c" : "#1b8a5a",
+                      color: "#ffffff",
                       borderRadius: "9999px",
                       padding: "0.25rem 0.9rem",
                       fontSize: "0.85rem",
@@ -425,11 +434,11 @@ export default function LostAndFoundPage() {
                   </div>
 
                   {/* Description Box Container */}
-                  <div className="lost-found-item-desc" style={{ 
-                    backgroundColor: "#d6d9de", 
-                    borderRadius: "1rem", 
-                    padding: "0.75rem 1rem", 
-                    marginTop: "0.75rem", 
+                  <div className="lost-found-item-desc" style={{
+                    backgroundColor: "#d6d9de",
+                    borderRadius: "1rem",
+                    padding: "0.75rem 1rem",
+                    marginTop: "0.75rem",
                     marginBottom: "1.25rem",
                     fontFamily: "var(--font-syne), sans-serif",
                     fontSize: "0.95rem",
@@ -469,21 +478,21 @@ export default function LostAndFoundPage() {
                   {/* Actions Buttons */}
                   <div className="lost-found-item-actions" style={{ display: "flex", flexDirection: "column", gap: "0.75rem", width: "100%", marginTop: "auto" }}>
                     {!isResolved && (
-                      <button 
+                      <button
                         className="lost-found-btn lost-found-contact-btn"
                         onClick={() => setContactReport(report)}
-                        style={{ 
-                          backgroundColor: "#0d0e4aff", 
-                          color: "#ffffff", 
-                          borderRadius: "9999px", 
-                          padding: "0.65rem 1.5rem", 
-                          fontFamily: "var(--font-syne), sans-serif", 
-                          fontWeight: 700, 
-                          fontSize: "0.95rem", 
-                          display: "inline-flex", 
-                          alignItems: "center", 
-                          justifyContent: "center", 
-                          gap: "0.5rem", 
+                        style={{
+                          backgroundColor: "#0d0e4aff",
+                          color: "#ffffff",
+                          borderRadius: "9999px",
+                          padding: "0.65rem 1.5rem",
+                          fontFamily: "var(--font-syne), sans-serif",
+                          fontWeight: 700,
+                          fontSize: "0.95rem",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "0.5rem",
                           border: "none",
                           cursor: "pointer",
                           transition: "opacity 0.2s",
@@ -495,23 +504,23 @@ export default function LostAndFoundPage() {
                         <span>Contact Reporter</span>
                       </button>
                     )}
-
+//mark as found button only shows to owner
                     {isMine && !isResolved && (
-                      <button 
+                      <button
                         className="lost-found-btn lost-found-resolve-btn"
                         onClick={() => handleMarkResolved(report.id)}
-                        style={{ 
-                          backgroundColor: "#115e3b", 
-                          color: "#ffffff", 
-                          borderRadius: "9999px", 
-                          padding: "0.65rem 1.5rem", 
-                          fontFamily: "var(--font-syne), sans-serif", 
-                          fontWeight: 700, 
-                          fontSize: "0.95rem", 
-                          display: "inline-flex", 
-                          alignItems: "center", 
-                          justifyContent: "center", 
-                          gap: "0.5rem", 
+                        style={{
+                          backgroundColor: "#115e3b",
+                          color: "#ffffff",
+                          borderRadius: "9999px",
+                          padding: "0.65rem 1.5rem",
+                          fontFamily: "var(--font-syne), sans-serif",
+                          fontWeight: 700,
+                          fontSize: "0.95rem",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "0.5rem",
                           border: "none",
                           cursor: "pointer",
                           transition: "opacity 0.2s",
@@ -533,33 +542,33 @@ export default function LostAndFoundPage() {
 
       {/* Create Modal */}
       {showModal && (
-        <div 
+        <div
           className="lost-found-modal-overlay"
-          style={{ 
-            position: "fixed", 
-            inset: 0, 
-            backgroundColor: "rgba(0,0,0,0.65)", 
-            zIndex: 9999, 
-            display: "flex", 
-            alignItems: "center", 
-            justifyContent: "center", 
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0,0,0,0.65)",
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             padding: "1.5rem",
             backdropFilter: "blur(5px)"
-          }} 
+          }}
           onClick={() => setShowModal(false)}
         >
-          <div 
+          <div
             className="lost-found-modal-card"
-            style={{ 
-              maxWidth: "600px", 
-              width: "100%", 
-              backgroundColor: "#ffffff", 
-              borderRadius: "2.2rem", 
-              padding: "2.5rem", 
+            style={{
+              maxWidth: "600px",
+              width: "100%",
+              backgroundColor: "#ffffff",
+              borderRadius: "2.2rem",
+              padding: "2.5rem",
               boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
               maxHeight: "90vh",
               overflowY: "auto"
-            }} 
+            }}
             onClick={e => e.stopPropagation()}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
@@ -571,10 +580,10 @@ export default function LostAndFoundPage() {
               <div className="responsive-form-grid">
                 <div>
                   <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Report Type *</label>
-                  <select 
+                  <select
                     className="lost-found-modal-input"
-                    value={form.type} 
-                    onChange={e => setForm({...form, type: e.target.value})}
+                    value={form.type}
+                    onChange={e => setForm({ ...form, type: e.target.value })}
                     style={{
                       height: "45px",
                       backgroundColor: "#f1f3f5",
@@ -595,13 +604,13 @@ export default function LostAndFoundPage() {
                 </div>
                 <div>
                   <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Item Title *</label>
-                  <input 
+                  <input
                     className="lost-found-modal-input"
-                    type="text" 
-                    required 
-                    value={form.title} 
-                    onChange={e => setForm({...form, title: e.target.value})} 
-                    placeholder="e.g., Black Wallet" 
+                    type="text"
+                    required
+                    value={form.title}
+                    onChange={e => setForm({ ...form, title: e.target.value })}
+                    placeholder="e.g., Black Wallet"
                     style={{
                       height: "45px",
                       backgroundColor: "#f1f3f5",
@@ -618,17 +627,17 @@ export default function LostAndFoundPage() {
                   />
                 </div>
               </div>
-              
+
               <div className="responsive-form-grid">
                 <div>
                   <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Location *</label>
-                  <input 
+                  <input
                     className="lost-found-modal-input"
-                    type="text" 
-                    required 
-                    value={form.location} 
-                    onChange={e => setForm({...form, location: e.target.value})} 
-                    placeholder="e.g., Library 2nd Floor" 
+                    type="text"
+                    required
+                    value={form.location}
+                    onChange={e => setForm({ ...form, location: e.target.value })}
+                    placeholder="e.g., Library 2nd Floor"
                     style={{
                       height: "45px",
                       backgroundColor: "#f1f3f5",
@@ -730,13 +739,13 @@ export default function LostAndFoundPage() {
               <div className="responsive-form-grid">
                 <div>
                   <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Contact Number *</label>
-                  <input 
+                  <input
                     className="lost-found-modal-input"
-                    type="text" 
-                    required 
-                    value={form.contact_number} 
-                    onChange={e => setForm({...form, contact_number: e.target.value})} 
-                    placeholder="e.g., 0712345678" 
+                    type="text"
+                    required
+                    value={form.contact_number}
+                    onChange={e => setForm({ ...form, contact_number: e.target.value })}
+                    placeholder="e.g., 0712345678"
                     style={{
                       height: "45px",
                       backgroundColor: "#f1f3f5",
@@ -754,12 +763,12 @@ export default function LostAndFoundPage() {
                 </div>
                 <div>
                   <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Contact Email</label>
-                  <input 
+                  <input
                     className="lost-found-modal-input"
-                    type="email" 
-                    value={form.contact_email} 
-                    onChange={e => setForm({...form, contact_email: e.target.value})} 
-                    placeholder="Optional" 
+                    type="email"
+                    value={form.contact_email}
+                    onChange={e => setForm({ ...form, contact_email: e.target.value })}
+                    placeholder="Optional"
                     style={{
                       height: "45px",
                       backgroundColor: "#f1f3f5",
@@ -779,12 +788,12 @@ export default function LostAndFoundPage() {
 
               <div>
                 <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.35rem", color: "#000000" }}>Description *</label>
-                <textarea 
+                <textarea
                   className="lost-found-modal-textarea"
-                  rows={4} 
-                  required 
-                  value={form.description} 
-                  onChange={e => setForm({...form, description: e.target.value})} 
+                  rows={4}
+                  required
+                  value={form.description}
+                  onChange={e => setForm({ ...form, description: e.target.value })}
                   placeholder="Provide detailed description, identifying marks, etc."
                   style={{
                     backgroundColor: "#f1f3f5",
@@ -807,11 +816,11 @@ export default function LostAndFoundPage() {
                 <div className="border-2 border-dashed border-border rounded-lg p-6 text-center text-muted flex flex-col items-center justify-center cursor-pointer relative hover:border-primary transition-colors lost-found-modal-upload-box" style={{ backgroundColor: "#f1f3f5", borderRadius: "1rem", border: "2px dashed rgba(0,0,0,0.15)" }}>
                   <Upload size={24} className="mb-2" />
                   <span style={{ fontWeight: 700, fontSize: "0.9rem" }}>Click to select images</span>
-                  <input 
-                    type="file" 
-                    accept="image/jpeg, image/png, image/webp" 
-                    multiple 
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                  <input
+                    type="file"
+                    accept="image/jpeg, image/png, image/webp"
+                    multiple
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     onChange={e => {
                       setUploadError(null);
                       if (e.target.files && e.target.files.length > 0) {
@@ -842,20 +851,20 @@ export default function LostAndFoundPage() {
                 )}
               </div>
 
-              <button 
+              <button
                 className="lost-found-modal-submit-btn"
-                type="submit" 
-                disabled={formLoading} 
-                style={{ 
-                  width: "100%", 
-                  backgroundColor: "#000c66", 
-                  color: "#ffffff", 
-                  border: "none", 
-                  borderRadius: "9999px", 
-                  padding: "0.8rem", 
-                  fontSize: "1.1rem", 
-                  fontWeight: 700, 
-                  fontFamily: "var(--font-syne), sans-serif", 
+                type="submit"
+                disabled={formLoading}
+                style={{
+                  width: "100%",
+                  backgroundColor: "#000c66",
+                  color: "#ffffff",
+                  border: "none",
+                  borderRadius: "9999px",
+                  padding: "0.8rem",
+                  fontSize: "1.1rem",
+                  fontWeight: 700,
+                  fontFamily: "var(--font-syne), sans-serif",
                   cursor: "pointer",
                   transition: "opacity 0.2s",
                   opacity: formLoading ? 0.7 : 1,
@@ -887,18 +896,18 @@ export default function LostAndFoundPage() {
                   </div>
                 )}
               </div>
-              
+
               {/* Thumbnail Gallery */}
               {detailReport.images && detailReport.images.length > 1 && (
                 <div style={{ display: "flex", gap: "0.75rem", height: "80px" }}>
                   {detailReport.images.map((img, idx) => (
-                    <div 
+                    <div
                       key={idx}
                       onClick={() => setActiveImageIndex(idx)}
-                      style={{ 
-                        flex: 1, 
-                        borderRadius: "0.75rem", 
-                        overflow: "hidden", 
+                      style={{
+                        flex: 1,
+                        borderRadius: "0.75rem",
+                        overflow: "hidden",
                         cursor: "pointer",
                         border: activeImageIndex === idx ? "3px solid #000c66" : "3px solid transparent",
                         opacity: activeImageIndex === idx ? 1 : 0.6,
@@ -918,9 +927,9 @@ export default function LostAndFoundPage() {
                 <h2 style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "2.2rem", fontWeight: 800, color: "#000000", lineHeight: 1.2, margin: 0 }}>
                   {detailReport.title}
                 </h2>
-                <span style={{ 
-                  backgroundColor: detailReport.type === "Lost" ? "#a61c1c" : "#1b8a5a", 
-                  color: "#ffffff", 
+                <span style={{
+                  backgroundColor: detailReport.type === "Lost" ? "#a61c1c" : "#1b8a5a",
+                  color: "#ffffff",
                   borderRadius: "9999px",
                   padding: "0.4rem 1.2rem",
                   fontSize: "1rem",
@@ -931,12 +940,12 @@ export default function LostAndFoundPage() {
                   {detailReport.type}
                 </span>
               </div>
-              
-              <div style={{ 
-                backgroundColor: "#d6d9de", 
-                borderRadius: "1rem", 
-                padding: "1.25rem", 
-                marginTop: "1.5rem", 
+
+              <div style={{
+                backgroundColor: "#d6d9de",
+                borderRadius: "1rem",
+                padding: "1.25rem",
+                marginTop: "1.5rem",
                 marginBottom: "1.5rem",
                 fontFamily: "var(--font-syne), sans-serif",
                 fontSize: "1.05rem",
@@ -947,7 +956,7 @@ export default function LostAndFoundPage() {
               }}>
                 {detailReport.description}
               </div>
-              
+
               <div style={{ backgroundColor: "#e6e9ec", borderRadius: "1.5rem", padding: "1.25rem 1.5rem", border: "1px solid rgba(0,0,0,0.03)", marginBottom: "1.25rem" }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", fontFamily: "var(--font-syne), sans-serif", fontSize: "1rem", fontWeight: 700, color: "#000000" }}>
                   <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}><MapPin size={18} style={{ color: "#000000", flexShrink: 0, marginTop: "2px" }} /><span>Location: {detailReport.location}</span></div>
@@ -971,11 +980,11 @@ export default function LostAndFoundPage() {
                   Close
                 </button>
                 {myId !== detailReport.user_id?.toString() && detailReport.status !== 'resolved' && (
-                  <button 
-                    onClick={() => { 
-                      setContactReport(detailReport); 
-                      setDetailReport(null); 
-                    }} 
+                  <button
+                    onClick={() => {
+                      setContactReport(detailReport);
+                      setDetailReport(null);
+                    }}
                     style={{ backgroundColor: "#0d0e4aff", color: "#ffffff", border: "none", borderRadius: "9999px", padding: "0.6rem 2.5rem", fontSize: "1rem", fontWeight: 700, fontFamily: "var(--font-syne), sans-serif", cursor: "pointer", transition: "background-color 0.2s", display: "flex", alignItems: "center", gap: "0.5rem" }}
                   >
                     <Phone size={18} style={{ display: "inline-block" }} />
@@ -988,55 +997,55 @@ export default function LostAndFoundPage() {
         </div>
       )}
 
-      
+
       {/* Contact Via Modal */}
       {contactReport && (
-        <div 
+        <div
           className="lost-found-modal-overlay"
-          style={{ 
-            position: "fixed", 
-            inset: 0, 
-            backgroundColor: "rgba(0,0,0,0.65)", 
-            zIndex: 9999, 
-            display: "flex", 
-            alignItems: "center", 
-            justifyContent: "center", 
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0,0,0,0.65)",
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             padding: "1.5rem",
             backdropFilter: "blur(5px)"
-          }} 
+          }}
           onClick={() => setContactReport(null)}
         >
-          <div 
+          <div
             className="lost-found-contact-modal-card"
-            style={{ 
-              maxWidth: "400px", 
-              width: "100%", 
-              backgroundColor: "#ffffff", 
-              borderRadius: "2.2rem", 
-              padding: "3rem 2.5rem", 
+            style={{
+              maxWidth: "400px",
+              width: "100%",
+              backgroundColor: "#ffffff",
+              borderRadius: "2.2rem",
+              padding: "3rem 2.5rem",
               boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
               position: "relative",
               textAlign: "center"
-            }} 
+            }}
             onClick={e => e.stopPropagation()}
           >
             {/* Close Button */}
-            <button 
+            <button
               className="lost-found-contact-close-btn"
-              onClick={() => setContactReport(null)} 
-              style={{ 
+              onClick={() => setContactReport(null)}
+              style={{
                 position: "absolute",
                 top: "1.5rem",
                 right: "1.5rem",
-                background: "#ffffff", 
-                border: "1.5px solid #e2e8f0", 
+                background: "#ffffff",
+                border: "1.5px solid #e2e8f0",
                 borderRadius: "50%",
                 width: "36px",
                 height: "36px",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                cursor: "pointer", 
+                cursor: "pointer",
                 color: "#000000",
                 boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.08)"
               }}
@@ -1077,8 +1086,8 @@ export default function LostAndFoundPage() {
                 }}
               >
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12.004 2C6.48 2 2 6.48 2 12.004c0 1.764.46 3.42 1.268 4.876L2 22l5.284-1.388c1.392.76 2.972 1.196 4.72 1.196 5.524 0 10.004-4.48 10.004-10.004C22.008 6.48 17.528 2 12.004 2z" fill="#25D366"/>
-                  <path d="M17.508 14.304c-.304-.152-1.8-.888-2.076-.988-.276-.1-.476-.152-.676.152-.2.304-.776.988-.952 1.188-.176.2-.352.224-.656.072-1.14-.572-1.9-1.02-2.652-2.312-.2-.344.2-.32.572-1.064.092-.184.048-.344-.024-.496-.072-.152-.676-1.632-.928-2.236-.244-.588-.492-.508-.676-.516-.176-.008-.376-.008-.576-.008s-.524.076-.8.376c-.276.3-1.052 1.028-1.052 2.508s1.076 2.904 1.224 3.104c.148.2 2.116 3.232 5.128 4.532.716.308 1.276.492 1.712.632.72.228 1.376.196 1.896.116.58-.088 1.8-.736 2.052-1.44.252-.704.252-1.308.176-1.44-.076-.132-.276-.232-.58-.384z" fill="#FFF"/>
+                  <path d="M12.004 2C6.48 2 2 6.48 2 12.004c0 1.764.46 3.42 1.268 4.876L2 22l5.284-1.388c1.392.76 2.972 1.196 4.72 1.196 5.524 0 10.004-4.48 10.004-10.004C22.008 6.48 17.528 2 12.004 2z" fill="#25D366" />
+                  <path d="M17.508 14.304c-.304-.152-1.8-.888-2.076-.988-.276-.1-.476-.152-.676.152-.2.304-.776.988-.952 1.188-.176.2-.352.224-.656.072-1.14-.572-1.9-1.02-2.652-2.312-.2-.344.2-.32.572-1.064.092-.184.048-.344-.024-.496-.072-.152-.676-1.632-.928-2.236-.244-.588-.492-.508-.676-.516-.176-.008-.376-.008-.576-.008s-.524.076-.8.376c-.276.3-1.052 1.028-1.052 2.508s1.076 2.904 1.224 3.104c.148.2 2.116 3.232 5.128 4.532.716.308 1.276.492 1.712.632.72.228 1.376.196 1.896.116.58-.088 1.8-.736 2.052-1.44.252-.704.252-1.308.176-1.44-.076-.132-.276-.232-.58-.384z" fill="#FFF" />
                 </svg>
                 <span style={{ fontFamily: "var(--font-syne), sans-serif", fontSize: "1.3rem", fontWeight: 700, color: "#000000" }}>
                   Whatsapp

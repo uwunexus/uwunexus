@@ -1,4 +1,12 @@
 <?php
+/**
+ * [REST API - POST Endpoint]
+ * Endpoint: /backend/delete_lost_found.php
+ * Method: POST
+ * Description: Deletes a Lost & Found report by item ID (Admin / authorized action).
+ * Payload (JSON): { id, user_id }
+ * Frontend Usage: app/admin/page.tsx (deleteLostFoundItem)
+ */
 require 'db.php';
 header('Content-Type: application/json');
 

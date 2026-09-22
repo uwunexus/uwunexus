@@ -1,4 +1,12 @@
 <?php
+/**
+ * [REST API - GET Endpoint]
+ * Endpoint: /backend/get_lost_found.php
+ * Method: GET
+ * Description: Fetches all Lost & Found reports with joined user details and images.
+ * Query Params (Optional): user_id, type ('Lost' | 'Found')
+ * Frontend Usage: app/lost-and-found/page.tsx (fetchReports), app/admin/page.tsx
+ */
 require 'db.php';
 header('Content-Type: application/json');
 

@@ -1,4 +1,12 @@
 <?php
+/**
+ * [REST API - POST Endpoint]
+ * Endpoint: /backend/set_specialization.php
+ * Method: POST
+ * Description: Sets student specialization for bifurcated degree programs (MRT -> MPT/WST, SCT -> FEB/MST/MEC).
+ * Payload (JSON): { user_id, specialization }
+ * Frontend Usage: app/gpa-calculator/page.tsx (handleSelectSpec)
+ */
 require 'db.php';
 header('Content-Type: application/json');
 

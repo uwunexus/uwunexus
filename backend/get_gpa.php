@@ -1,4 +1,15 @@
 <?php
+/**
+ * [REST API - GET Endpoint]
+ * Endpoint: /backend/get_gpa.php
+ * Method: GET
+ * Description: Fetches student degree curriculum, module list, saved grades, and live GPA summary.
+ * Query Params:
+ *   - user_id (Required): Student user ID
+ *   - degree_override (Optional): For superadmin preview of different degrees
+ *   - list_degrees=1 (Optional): For superadmin to fetch all available degree programs
+ * Frontend Usage: app/gpa-calculator/page.tsx (loadCurriculum), app/admin/page.tsx
+ */
 require 'db.php';
 header('Content-Type: application/json');
 
